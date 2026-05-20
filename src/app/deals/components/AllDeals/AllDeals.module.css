@@ -1,0 +1,656 @@
+.DealsTalkMainContainer {
+    /* height: 100% !important; */
+    width: 100%;
+    max-width: 1440px;
+    margin: auto;
+    padding: 60px 60px;
+}
+
+.cardLink {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+    height: 423px;
+    cursor: pointer;
+}
+
+.cardLink:hover {
+    transform: scale3d(1.02, 1.02, 1);
+    transition: all 0.3s ease-in-out;
+}
+
+
+/* Private Deal Theme - Overrides global container styles dynamically */
+.privateDealTheme {
+    background-color: #000000 !important;
+    color: white !important;
+}
+
+.privateDealTheme::after {
+    content: url('/blackBgEllipse.png');
+}
+
+.privateDealTheme .DealsTalkHeading {
+    color: white !important;
+}
+
+.privateDealTheme .SpanDealsTalkHeading {
+    color: #B59131 !important;
+}
+
+/* dealCardCol - resets layout values. !important is used here to override third-party or global row grid spacing rules */
+.dealCardCol {
+    flex: 0 0 auto;
+    width: 25%;
+    padding: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* List view column layout - cascades naturally through class specificity (no !important needed) */
+.listView .dealCardCol {
+    width: 100%;
+}
+
+
+
+@media (max-width: 1290px) {
+
+    /* Responsive column width - Cascades naturally from source order overrides */
+    .dealCardCol {
+        width: 50%;
+    }
+
+    /* .DealsTalkMainContainer{
+        max-width: 1000px;
+    } */
+}
+
+@media (max-width: 1024px) {
+    .DealsTalkMainContainer {
+        padding: 40px 40px;
+    }
+}
+
+@media (max-width: 900px) {
+    .DealsTalkMainContainer {
+        padding: 30px 20px;
+    }
+}
+
+/* @media (max-width: 1200px) {
+    .DealsTalkMainContainer {
+        max-width: 950px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .DealsTalkMainContainer {
+        max-width: 900px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .DealsTalkMainContainer {
+        max-width: 850px;
+    }   
+}
+    
+@media (max-width: 920px) {
+    .DealsTalkMainContainer {
+        max-width: 820px;
+    }
+}
+@media (max-width: 850px) {
+    .DealsTalkMainContainer {
+        max-width: 760px;
+    }
+} */
+
+@media (max-width: 768px) {
+
+    /* Mobile column width - Cascades naturally from source order overrides */
+    .dealCardCol {
+        width: 100%;
+    }
+}
+
+@media(max-width:768px) {
+    .DealsTalkMainContainer {
+        padding: 15px 16px;
+        /* max-width: 500px; */
+    }
+
+    .cardLink {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+        min-height: 423px;
+        cursor: pointer;
+    }
+
+}
+
+.allDealsHeaderRow {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.backButtonHeader {
+    display: none;
+}
+
+.desktopTitle {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 12px;
+}
+
+.desktopSubtitle {
+    font-size: 20px;
+    font-weight: 300;
+    color: #6B7280;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.filterBarRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Active Filters Header Row spacing - cascades naturally through class composition */
+.allDealsHeaderRow.filtersActive {
+    margin-bottom: 0px;
+}
+
+.DealsTalkMainContainer.filtersActive {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.allDealsFilterActions {
+    display: flex;
+    gap: 12px;
+}
+
+.dropdownContainer {
+    position: relative;
+}
+
+.dropdownWrapper {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 100px;
+    padding: 8.5px 26px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 80px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #1E293B;
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.08);
+    z-index: 100;
+    overflow: hidden;
+    padding: 0;
+}
+
+.dropdownItem {
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dropdownItem:hover {
+    background: #F8FAFC;
+}
+
+/* selectedItem overrides dropdownItem styles naturally due to source declaration order */
+.selectedItem {
+    background: #FFF8E1;
+    color: #B59131;
+}
+
+.selectedItem:hover {
+    background: #FFF8E1;
+}
+
+.tickIcon {
+    width: 14px;
+    height: 14px;
+}
+
+/* New Pill Tabs UI */
+.dealTypeTabs {
+    display: flex;
+    background: #FAFAFA;
+    border: 1px solid #F4F4F5;
+    border-radius: 12px;
+    padding: 6px;
+    gap: 8px;
+    box-shadow: 0px 1px 2px -1px #0000001A, 0px 1px 3px 0px #0000001A;
+}
+
+.tabItem {
+    padding: 10px 28px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748B;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* activeTab overrides tabItem styles naturally due to source declaration order */
+.activeTab {
+    background: #121212;
+    color: #FFFFFF;
+}
+
+.viewToggle {
+    display: flex;
+    align-items: center;
+    background: #F7F5ED;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 0;
+    position: relative;
+    width: 80px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.toggleSlider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 32px;
+    height: 32px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0px 1.16px 3.47px 0px #0000001A;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.slideRight {
+    transform: translateX(40px);
+}
+
+.toggleIcon {
+    flex: 1;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: all 0.2s ease;
+}
+
+.toggleIcon img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.3;
+    transition: all 0.2s ease;
+}
+
+.toggleIcon.active img {
+    opacity: 1;
+}
+
+.toggleDivider {
+    display: none;
+}
+
+.filterBtn {
+    background: linear-gradient(140.86deg, #D2C299 17.96%, #8E6B0F 82.04%);
+    border-radius: 100px;
+    padding: 8.5px 26px;
+    color: #FFFFFF;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.filterBtn img {
+    width: 16px;
+    height: 16px;
+}
+
+.dealTypeDropdownContainer {
+    display: none;
+}
+
+.mobileRightActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+@media (max-width: 900px) {
+    .allDealsHeaderRow {
+        /* flex-direction: column; */
+        gap: 20px;
+    }
+
+    .dropdownWrapper {
+        /* font-size: 13px; */
+        padding: 7px 20px;
+    }
+
+    .filterBtn {
+        /* font-size: 13px; */
+        padding: 7px 20px;
+    }
+
+    .dropdownItem {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
+
+.appliedFiltersRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+
+    .desktopTitle,
+    .desktopSubtitle {
+        display: none;
+    }
+
+    .backButtonHeader {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 0px;
+        margin-bottom: 0px;
+    }
+
+    .backArrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #1A1A1A;
+        transition: transform 0.2s ease;
+    }
+
+    .backButtonHeader:hover .backArrow {
+        transform: translateX(0px);
+    }
+
+    .mobileDealsTitle {
+        font-size: 22px;
+        font-weight: 400;
+        color: #1F2937;
+        margin: 0;
+        padding-top: 5px;
+        line-height: normal;
+    }
+
+    .pageHeader {
+        margin-bottom: 10px;
+    }
+
+    .appliedFiltersRow {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding-bottom: 4px;
+        margin-bottom: 16px;
+    }
+
+    .appliedFiltersRow::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filterTag {
+        flex-shrink: 0;
+    }
+}
+
+.filterTag {
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 100px;
+    padding: 6px 6px 6px 16px;
+    gap: 8px;
+    font-size: 14px;
+    color: #1E293B;
+    transition: all 0.2s ease;
+}
+
+.removeFilterBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #F1F5F9;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #64748B;
+    transition: all 0.2s ease;
+}
+
+.removeFilterBtn:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+.noDealsFound {
+    width: 100%;
+    padding: 80px 20px;
+    text-align: center;
+    color: #64748B;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+
+
+.teaserNoMargin {
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    padding: 64px 32px 55px 32px !important;
+    border-radius: 32px !important;
+}
+
+
+@media (max-width: 1024px) {
+    .dealTypeTabs {
+        gap: 4px;
+    }
+
+    .tabItem {
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .dealTypeTabs {
+        display: none;
+    }
+
+    .allDealsHeaderRow {
+        margin-top: 16px;
+    }
+
+    .filterBarRow {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .headerActions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-left: 0;
+        gap: 0;
+    }
+
+    .mobileRightActions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .dealTypeDropdownContainer {
+        display: block;
+        position: relative;
+    }
+
+    .dealTypeDropdownBtn {
+        background: #FFFFFF;
+        border: 1px solid #E6DFD3;
+        color: #374151;
+        border-radius: 16px;
+        padding: 8px 20px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        height: 40px;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+
+    .chevronIcon {
+        color: #374151;
+        margin-left: 4px;
+        display: flex;
+        align-items: center;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chevronIconActive {
+        transform: rotate(180deg);
+    }
+
+    .dealTypeDropdownMenu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 8px;
+        background: #FFFFFF;
+        border: 1px solid #E6DFD3;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        width: 170px;
+        overflow: hidden;
+
+        /* Smooth Slide & Fade transition */
+        opacity: 0;
+        transform: translateY(-12px) scale(0.95);
+        pointer-events: none;
+        transform-origin: top right;
+        transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropdownOpen {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+
+    .dropdownItem {
+        padding: 12px 18px;
+        font-size: 14px;
+        color: #374151;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-align: left;
+        background: none;
+        border: none;
+        width: 100%;
+    }
+
+    .dropdownItem:hover,
+    .dropdownItemActive {
+        background: #FAF8F5;
+        color: #8E6B0F;
+        font-weight: 600;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .dropdownWrapper {
+        font-size: 13px;
+        padding: 6px 15px;
+        height: 35px;
+    }
+
+    .dealTypeDropdownBtn {
+        padding: 6px 15px;
+        font-size: 12px;
+        height: 35px;
+    }
+
+    .filterBtn {
+        font-size: 13px;
+        padding: 6px 15px;
+        height: 35px;
+    }
+
+    .dropdownItem {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+
+    .mobileRightActions {
+        gap: 8px;
+    }
+}

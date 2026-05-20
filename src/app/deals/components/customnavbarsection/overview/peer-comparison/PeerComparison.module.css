@@ -1,0 +1,241 @@
+/* PeerComparison.module.css */
+
+.container {
+  background: #27272A;
+  border-radius: 20px;
+  padding: 24px 24px;
+  color: #ffffff;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 300;
+  margin: 0 0 0.75rem 0;
+  color: #ffffff;
+}
+
+
+
+.tableWrapper {
+  border-radius: 12px;
+  overflow-x: auto;
+  border: 1px solid;
+}
+
+.peerTable {
+  width: 100%;
+  border-radius: 12px;
+  border-collapse: collapse;
+  white-space: nowrap;
+  table-layout: fixed;
+}
+
+.dark .tableWrapper {
+border: 1px solid transparent;
+  border-radius: 12px;
+  overflow-x: auto;
+
+  background: 
+    /* linear-gradient(#000, #000) padding-box, */
+    linear-gradient(180deg, #09090B 0%, #27272A 100%) padding-box,
+    linear-gradient(180deg, #B59131, #4B5563) border-box;
+}
+
+.peerTable th, 
+.peerTable td {
+  border: 1px solid #4B5563;
+  padding: 10px ;
+  text-align: left;
+}
+
+
+
+/* Remove outer borders from inner cells to prevent double width borders */
+.peerTable tr:first-child th {
+  border-top: none;
+}
+.peerTable tr:last-child td {
+  border-bottom: none;
+}
+.peerTable th:first-child,
+.peerTable td:first-child {
+  border-left: none;
+}
+.peerTable th:last-child,
+.peerTable td:last-child {
+  border-right: none;
+}
+
+.metricHeader {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background-color: #18181b; /* Solid dark background to hide scrolled content under */
+  font-weight: 300;
+  color: #e2e8f0;
+  width: 120px;
+  min-width: 120px;
+  padding: 12px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.companyHeader {
+  font-weight: 400;
+  padding: 10px 10px;
+}
+
+.companyInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.companyName {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e2e8f0;
+}
+
+.dummyLogo {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.logoTextWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: scale(0.65);
+}
+
+.logoTextBlue {
+  color: #1a428a;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.logoTextRed {
+  color: #d12229;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.metricCell {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: #18181b;
+  color: #a0a0a0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dataCell {
+  color: #d1d1d1;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+/* Light Theme Overrides */
+.light {
+  background: linear-gradient(180deg, #f3f4f6, #ffffff);
+  color: #1F2937;
+}
+
+.light .metricHeader, 
+.light .metricCell {
+  background-color: #ffffff;
+}
+
+.light .title {
+  color: #4B5563;
+}
+
+.light .tableWrapper {
+  border: 1px solid #E5E7EB;
+  border-image-source: none;
+  background: #FFFFFF;
+}
+
+.light .peerTable th, 
+.light .peerTable td {
+  border: 1px solid #F3F4F6;
+}
+
+.light .metricHeader {
+  color: #6B7280;
+}
+
+.light .companyName {
+  color: #374151;
+}
+
+.light .metricCell {
+  color: #4B5563;
+}
+
+.light .dataCell {
+  color: #374151;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  .peerTable th, 
+  .peerTable td {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* 2-Column Layout Adjustments */
+.twoColumns .metricHeader,
+.twoColumns .metricCell {
+    width: 200px;
+    min-width: 200px;
+}
+
+.twoColumns th,
+.twoColumns td {
+    text-align: center;
+}
+
+.twoColumns .companyInfo {
+    justify-content: center;
+}
+
+.twoColumns .companyName {
+    text-align: center;
+}
+@media (max-width: 550px) {
+  .title {
+    text-align: center;
+  }
+  .peerTable th, 
+  .peerTable td {
+    text-align: center;
+  }
+  .companyInfo {
+    justify-content: center;
+  }
+  .companyName {
+    text-align: center;
+  }
+  .metricHeader,
+  .metricCell {
+    text-align: center;
+  }
+}

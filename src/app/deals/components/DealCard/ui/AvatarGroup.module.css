@@ -1,0 +1,25 @@
+.avatarStack {
+    display: flex;
+    flex-direction: row-reverse; /* For overlap effect */
+    justify-content: flex-end;
+}
+
+.avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #F3F4F6;
+    color: #4B5563;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #FFFFFF;
+    margin-right: -8px;
+    position: relative;
+}
+
+.avatar:last-child {
+    margin-right: 0;
+}

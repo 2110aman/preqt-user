@@ -1,0 +1,380 @@
+.ipo-review-container {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #E5E7EB;
+  padding: 16px;
+  /* margin-top: 24px; */
+  font-family: var(--font-inter), sans-serif;
+  color: #1F2937;
+  max-width: 100%;
+}
+
+.ipo-review-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ipo-review-title {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 300;
+  color: #4B5563;
+  margin: 0;
+}
+
+.ipo-review-badge-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.ipo-review-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #FDE68A;
+  background: linear-gradient(90deg, #FEF9EF 0%, #FEFAF1 33.33%, #FFFAF3 66.67%, #FFFBF5 100%);
+  color: #92400E;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.ipo-review-badge-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #B59131;
+  border-radius: 50%;
+}
+
+.ipo-review-badge-caption {
+  font-size: 10px;
+  line-height: 14px;
+  color: #64748B;
+}
+
+.ipo-review-summaryBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.ipo-circular-rating {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+}
+
+.ipo-progress-circle {
+  transition: stroke-dashoffset 0.3s ease;
+  animation: fillCircular 1.5s ease-out forwards;
+}
+
+@keyframes fillCircular {
+  from {
+    stroke-dashoffset: var(--circumference);
+  }
+  to {
+    stroke-dashoffset: var(--target-offset);
+  }
+}
+
+.ipo-circular-rating-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ipo-rating-num {
+  font-size: 22px;
+  font-weight: 500;
+  color: #1F2937;
+  line-height: 1.2;
+}
+
+.ipo-rating-sub {
+  font-size: 10px;
+  color: #9CA3AF;
+}
+
+.ipo-review-summary-text h4 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 4px 0;
+  color: #111827;
+}
+
+.ipo-review-summary-text p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+  margin: 0;
+}
+
+.ipo-review-accordion-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #B59131;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ipo-review-breakdown-wrapper {
+  margin-top: 24px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ipo-review-table-header {
+  display: flex;
+  background-color: #F8FAFC;
+  padding: 12px;
+  align-items: center;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.ipo-col {
+  font-size: 14px;
+  color: #6B7280;
+  text-transform: uppercase;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+.param-col { width: 20%; }
+.weight-col { width: 18%; text-align: center; }
+.score-col { width: 25%; text-align: center; }
+.factors-col { width: 37%; }
+
+.ipo-review-row-group {
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.ipo-review-row {
+  display: flex;
+  padding: 12px;
+  background-color: #FFFFFF;
+  align-items: center;
+}
+
+.ipo-review-row-group:nth-child(even) .ipo-review-row {
+  background-color: #FAFBFC;
+}
+
+/* .total-row {
+  background-color: #FAFAFA;
+  border-bottom: none;
+} */
+
+.strong-col {
+  color: #1E293B;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+  text-transform: none;
+}
+
+.ipo-review-row .weight-col {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.ipo-score-pill {
+  /* display: inline-block; */
+  font-family: var(--font-inter);
+  background: linear-gradient(113.27deg, #D2C299 15.04%, #8E6B0F 84.96%);
+  color: #FFFFFF;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.5;
+  align-items: center;
+  text-align: center;
+}
+
+
+
+.key-factor-col {
+  text-transform: none;
+  font-size: 12px;
+  color: #1F2937;
+  line-height: 1.5;
+}
+
+.italic-col {
+  text-transform: none;
+  font-style: italic;
+  font-size: 14px;
+  color: #475569;
+}
+
+.ipo-show-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #B59131;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+  user-select: none;
+}
+
+.ipo-review-nested-details {
+  background-color: #FFFFFF;
+  padding: 16px 24px 24px 16px;
+  border-top: 1px solid #E5E7EB;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.ipo-nested-block {
+  margin-bottom: 16px;
+}
+
+.ipo-nested-block:last-child {
+  margin-bottom: 0;
+}
+
+.ipo-nested-block h5 {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1F2937;
+  margin: 0 0 7px 0;
+}
+
+.ipo-nested-block p {
+  font-family: var(--font-inter);
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: #1F2937; 
+  font-weight: 400;
+}
+
+.ipo-nested-block ul {
+  margin: 0;
+  padding-left: 20px;
+  font-family: var(--font-inter);
+  font-size: 12px;
+  font-weight: 400;
+  color: #1F2937;
+  list-style-type: disc;
+}
+
+
+.ipo-nested-block ul li {
+  /* margin-bottom: 6px; */
+  padding-left: 4px;
+}
+
+@media (max-width: 768px) {
+  .ipo-review-header-flex {
+    /* flex-direction: column; */
+    gap: 12px;
+  }
+
+  .ipo-review-badge{
+    padding: 6px 23px;
+    margin: auto;
+    border-radius: 35px;
+  }
+  
+  .ipo-review-badge-col {
+    align-items: flex-start;
+  }
+  
+  .ipo-review-summaryBox {
+    /* flex-direction: column; */
+  }
+}
+
+@media (max-width: 600px) {
+  .ipo-review-breakdown-wrapper {
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .ipo-review-table-header,
+  .ipo-review-row {
+    min-width: 600px; /* Ensure content is wider than container to trigger scroll */
+    flex-wrap: nowrap;
+  }
+
+  .ipo-review-table-header {
+    display: flex !important;
+  }
+
+  .ipo-review-row {
+    flex-direction: row !important;
+    align-items: stretch !important;
+    margin: auto;
+  }
+
+  .param-col {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    width: 120px !important;
+    min-width: 120px !important;
+    background-color: #F8FAFC; /* Match header background */
+    /* border-right: 1px solid #E5E7EB; */
+    padding-left: 12px !important;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+  }
+
+  .ipo-review-row .weight-col, .score-col{
+    margin: auto;
+  }
+
+  .ipo-review-row .param-col {
+    background-color: #FFFFFF; /* Default row background */
+    min-height: 30px;
+  }
+
+  .ipo-review-row-group:nth-child(even) .ipo-review-row .param-col {
+    background-color: #FAFBFC; /* Striped row background */
+    min-height: 33px;
+  }
+
+  .weight-col { width: 15% !important; text-align: center; }
+  .score-col { width: 25% !important; text-align: center; }
+  .factors-col { width: 40% !important; }
+
+  /* Revert mobile-only stacked styling */
+  .ipo-review-table-body .weight-col::before {
+    content: none !important;
+  }
+}
+
+
+@media (max-width: 480px) {
+      .ipo-review-badge{
+        font-size: 12px;
+        padding: 3px 16px;
+        border-radius: 35px;
+      }
+
+    
+}

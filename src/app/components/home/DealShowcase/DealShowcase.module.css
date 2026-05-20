@@ -1,0 +1,193 @@
+.showcaseContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 90px;
+    padding: 40px 0px 0px 0px;
+    width: 100%;
+    max-width: 938px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.title {
+    font-size: 26px;
+    font-weight: 500;
+    color: #1E293B;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #7A7A7A;
+    text-transform: uppercase;
+    /* font-weight: 500; */
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.cardRowWrapper {
+    position: relative;
+    width: 100%;
+    /* Overflow hidden allows us to cut off the third card neatly */
+    overflow: hidden;
+}
+
+/* Gradient fade out effect on the right side */
+.cardRowWrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 180px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), #FFFFFF);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.cardRow {
+    width: 100%;
+    /* Swiper handles the flex and overflow internally */
+    padding-bottom: 8px;
+    /* Slight padding for shadows if needed */
+}
+
+.cardWrapper {
+    width: 340px !important;
+    /* Force SwiperSlide to have exact width so slidesPerView="auto" calculates correctly */
+}
+
+@media (max-width: 1250px) {
+    .showcaseContainer {
+        gap: 50px;
+    }
+}
+
+
+@media (max-width: 1024px) {
+    .cardRowWrapper::after {
+        width: 100px;
+    }
+}
+
+@media (max-width: 992px) {
+    .showcaseContainer {
+        padding-top: 5px;
+        gap: 30px;
+    }
+
+    .section {
+        gap: 18px;
+    }
+
+    .title {
+        font-size: 22px;
+    }
+
+    .subtitle {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .cardRowWrapper {
+        /* Swiper handles overflow internally */
+        padding-bottom: 20px;
+    }
+
+    .cardRowWrapper::after {
+        display: none;
+    }
+}
+
+@media (max-width: 550px) {
+    .showcaseContainer {
+        gap: 0px;
+        padding-bottom: 0px;
+    }
+}
+
+/* Premium Filter Buttons */
+.filterContainer {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filterButton {
+    border-radius: 9999px;
+    padding: 8px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    border: 1px solid #3A3222;
+    color: #A87E3B;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    height: 38px;
+}
+
+.filterButton:hover {
+    border-color: #E6C875;
+    color: #E6C875;
+    transform: translateY(-1px);
+}
+
+.filterButtonActive {
+    background: linear-gradient(90deg, #A87E3B 0%, #E6C875 50%, #A87E3B 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(230, 200, 117, 0.2) !important;
+}
+
+.filterButtonActive:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(230, 200, 117, 0.3) !important;
+}
+
+/* Gold Title & Animating Arrow Link */
+.goldTitle {
+    color: #E6C875 !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.titleArrow {
+    color: #E6C875;
+    font-size: 24px;
+    font-weight: 500;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-block;
+    cursor: pointer;
+}
+
+.title:hover .titleArrow {
+    transform: translate(3px, -3px);
+}
