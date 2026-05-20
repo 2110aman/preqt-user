@@ -109,11 +109,14 @@ export default function NavBar({ onSigninClick, hasToken }) {
   const [unreadCount, setUnreadCount] = useState(0)
 
   const fetchNotifications = async () => {
+    const token = Cookies.get('accessToken');
+    if (!token) return;
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}admin/api/notifications/investor`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${Cookies.get('accessToken')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       })
@@ -130,8 +133,13 @@ export default function NavBar({ onSigninClick, hasToken }) {
   }
 
   useEffect(() => {
-    fetchNotifications()
-  }, [])
+    if (accessToken) {
+      fetchNotifications();
+    } else {
+      setAllNotificaitons([]);
+      setUnreadCount(0);
+    }
+  }, [accessToken]);
 
 
   useEffect(() => {
