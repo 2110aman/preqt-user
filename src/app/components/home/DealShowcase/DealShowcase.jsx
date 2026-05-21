@@ -1,13 +1,14 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
+import Cookies from 'js-cookie';
 import styles from './DealShowcase.module.css';
 import DealCard from '@/app/deals/components/DealCard';
 
 export default function DealShowcase() {
     // Dummy Data for Featured Deals (using featured_deal layout)
-    const featuredDeals = [
+    const [featuredDeals, setFeaturedDeals] = useState([
         {
             id: "featured-1",
             deal_type: "Featured",
@@ -78,10 +79,10 @@ export default function DealShowcase() {
             is_featured: true,
             sector_industry: "Energy"
         }
-    ];
+    ]);
 
-    // Dummy Data for Upcoming IPOs
-    const upcomingDeals = [
+    // Dummy Data for Upcoming IPOs (used as high-quality initial/fallback state)
+    const [upcomingDeals, setUpcomingDeals] = useState([
         {
             id: "upcoming-1",
             deal_type: "Public",
@@ -178,10 +179,10 @@ export default function DealShowcase() {
             is_featured: true,
             sector_industry: "Retail"
         }
-    ];
+    ]);
 
-    // Dummy Data for Unlisted Shares
-    const unlistedDeals = [
+    // Dummy Data for Unlisted Shares (used as high-quality initial/fallback state)
+    const [unlistedDeals, setUnlistedDeals] = useState([
         {
             id: "unlisted-1",
             deal_type: "Unlisted", // uses unlisted_nse layout by default
@@ -277,7 +278,93 @@ export default function DealShowcase() {
             is_featured: true,
             sector_industry: "Agriculture"
         }
-    ];
+    ]);
+
+    useEffect(() => {
+        const fetchShowcaseDeals = async () => {
+            try {
+                const token = Cookies.get('accessToken');
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=50&page=1`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            ...(token && { "Authorization": `Bearer ${token}` }),
+                        },
+                    }
+                );
+
+                if (res.ok) {
+                    const responseData = await res.json();
+                    const deals = responseData.data || [];
+
+                    // =========================================================================
+                    // FILTER CRITERIA FOR FEATURED DEALS:
+                    // 1. check "deal_type" matches "public", "unlisted", or "ofs"
+                    // 2. check "deal_sub_type" matches "featured"
+                    //
+                    // Developer Comment: These checks are made to retrieve and display 
+                    // deals inside the Featured Deals section of the DealShowcase page component.
+                    // If database schema, fields, or specific keys change in the future, 
+                    // modify this filtering block accordingly.
+                    // =========================================================================
+                    const filteredFeatured = deals.filter(deal => 
+                        (deal.deal_type?.toLowerCase() === 'public' || 
+                         deal.deal_type?.toLowerCase() === 'unlisted' || 
+                         deal.deal_type?.toLowerCase() === 'ofs') && 
+                        deal.deal_sub_type?.toLowerCase() === 'featured'
+                    );
+
+                    if (filteredFeatured.length > 0) {
+                        setFeaturedDeals(filteredFeatured);
+                    }
+
+                    // =========================================================================
+                    // FILTER CRITERIA FOR UPCOMING IPOs:
+                    // 1. check "deal_type" matches "public"
+                    // 2. check "deal_sub_type" is null (or undefined)
+                    //
+                    // Developer Comment: These two checks are made to retrieve and display 
+                    // deals inside the Upcoming IPOs section of the DealShowcase page component.
+                    // If database schema, fields, or specific keys change in the future, 
+                    // modify this filtering block accordingly.
+                    // =========================================================================
+                    const filteredUpcoming = deals.filter(deal => 
+                        deal.deal_type?.toLowerCase() === 'public' && 
+                        (deal.deal_sub_type === null || deal.deal_sub_type === undefined)
+                    );
+
+                    if (filteredUpcoming.length > 0) {
+                        setUpcomingDeals(filteredUpcoming);
+                    }
+
+                    // =========================================================================
+                    // FILTER CRITERIA FOR UNLISTED SHARES:
+                    // 1. check "deal_type" matches "ofs"
+                    // 2. check "deal_sub_type" is null (or undefined)
+                    //
+                    // Developer Comment: These two checks are made to retrieve and display 
+                    // deals inside the Unlisted Shares section of the DealShowcase page component.
+                    // If database schema, fields, or specific keys change in the future, 
+                    // modify this filtering block accordingly.
+                    // =========================================================================
+                    const filteredUnlisted = deals.filter(deal => 
+                        deal.deal_type?.toLowerCase() === 'ofs' && 
+                        (deal.deal_sub_type === null || deal.deal_sub_type === undefined)
+                    );
+
+                    if (filteredUnlisted.length > 0) {
+                        setUnlistedDeals(filteredUnlisted);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching deals for landing showcase:", error);
+            }
+        };
+
+        fetchShowcaseDeals();
+    }, []);
 
     return (
         <div className={styles.showcaseContainer}>
@@ -285,6 +372,7 @@ export default function DealShowcase() {
                 title="Featured Deals"
                 subtitle="HIGHEST CONVICTION OPPORTUNITY"
                 deals={featuredDeals}
+                variantOverride="featured_deal"
             />
 
             <DealSection
@@ -302,7 +390,7 @@ export default function DealShowcase() {
     );
 }
 
-function DealSection({ title, subtitle, deals, children, showArrow, titleColorClass }) {
+function DealSection({ title, subtitle, deals, children, showArrow, titleColorClass, variantOverride }) {
     return (
         <div className={styles.section}>
             <div className={styles.header}>
@@ -330,7 +418,7 @@ function DealSection({ title, subtitle, deals, children, showArrow, titleColorCl
                 >
                     {deals.map(deal => (
                         <SwiperSlide key={deal.id} className={styles.cardWrapper}>
-                            <DealCard deal={deal} isAuthenticated={true} isListView={false} />
+                            <DealCard deal={deal} isAuthenticated={true} isListView={false} variantOverride={variantOverride} />
                         </SwiperSlide>
                     ))}
                 </Swiper>

@@ -18,7 +18,8 @@
     transition: all 0.3s ease;
     position: relative;
     height: 100%;
-    width: 340px;
+    width: 100%;
+    max-width: 340px;
     margin: 0 auto;
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
 }
@@ -147,7 +148,7 @@
 .headerGroup {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0px;
     z-index: 1;
 }
 
@@ -156,14 +157,15 @@
     justify-content: space-between;
     align-items: center;
     z-index: 1;
-    margin-top: 4px;
+    /* margin-top: 4px; */
     margin-bottom: auto;
 }
 
 .leftBadges {
     display: flex;
     gap: 4px;
-    margin-bottom: auto;
+    margin-top: 0 !important;
+    margin-bottom: auto !important;
     flex-wrap: wrap;
 }
 
@@ -279,7 +281,7 @@
     border-radius: 12px;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 3px;
     text-align: center;
 }
 
@@ -293,12 +295,12 @@
 }
 
 .metricLabel {
-    font-size: 12px;
+    font-size: 13px;
     line-height: 16px;
     color: #A8893D;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: none;
+    letter-spacing: 0.02em;
 }
 
 .dark .metricLabel {
@@ -461,6 +463,11 @@
 .dark .tagChip {
     background: rgba(255, 255, 255, 0.1);
     color: #FFFFFF;
+}
+
+.cardContainer:not(.listView) .tagChips {
+    justify-content: flex-start !important;
+    align-self: flex-start !important;
 }
 
 /* Footer */

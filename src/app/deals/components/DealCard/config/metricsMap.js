@@ -2,8 +2,8 @@ export const METRICS_CONFIG = {
     featured_deal: {
         hero: [
             { label: "Issue Size", keys: ["issue_size_overall", "issue_size_amount", "target_funding_in_cr"], format: "currency", suffix: "Cr" },
-            { label: "GMP", key: "gmp", format: "percent_gain" },
-            { label: "Open Date", key: "listing_timeline", format: "text" }
+            { label: "GMP", key: "estimated_gain_loss", format: "percent_gain" },
+            { label: "Open Date", key: "listing_timeline", format: "date" }
         ],
         grid: []
     },
@@ -13,14 +13,15 @@ export const METRICS_CONFIG = {
             { label: "GMP", key: "gmp", format: "currency", showGainLoss: true }
         ],
         grid: [
-            { label: "Expected Market Cap", key: "expected_valuation", format: "currency", suffix: "Cr" },
+            { label: "Expected Val.", key: "expected_valuation", format: "currency", suffix: "Cr" },
             { label: "Revenue (FY'25)", key: "revenue_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "P/E Multiple", key: "pe_multiple", format: "multiplier" },
-            { label: "Listing Date", key: "listing_date", format: "date" },
+            { label: "Open Date", key: "listing_timeline", format: "date_short" },
             { label: "CAGR 3Y", key: "cagr_growth_3y_percent", format: "percent" }
         ]
     },
+
     ofs: {
         hero: [
             { label: "Valuation", key: "valuation_in_cr", format: "currency", suffix: "Cr" },

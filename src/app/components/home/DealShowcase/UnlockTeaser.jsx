@@ -113,7 +113,7 @@ const techMahindraTeaserMock = {
     sector_industry: "IT Services"
 };
 
-export default function UnlockTeaser({ className = "", isAllDeals = false, isListView = false }) {
+export default function UnlockTeaser({ className = "", isAllDeals = false, isListView = false, isGridCard = false }) {
     const handleGooglePlayClick = () => {
         window.open("https://play.google.com/store/apps/details?id=com.preqt.app", "_blank");
     };
@@ -121,6 +121,67 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
     const handleAppStoreClick = () => {
         window.open("https://apps.apple.com/in/app/preqt/id6751903472", "_blank");
     };
+
+    if (isGridCard) {
+        return (
+            <div className={`${styles.teaserContainer} ${styles.gridCardTeaser} ${className}`}>
+                {/* Background Layer - CricStudio Private Card */}
+                <div className={styles.gridSingleCardBackdrop}>
+                    <DealCard deal={privateDealMock1} isAuthenticated={true} isListView={false} />
+                </div>
+
+                {/* Frosted Glass Overlay */}
+                <div className={styles.gridFrostedOverlay}></div>
+
+                {/* Foreground Content */}
+                <div className={styles.gridForeground}>
+                    {/* Glowing Phone Outline with Logo */}
+                    <div className={styles.gridPhoneWrapper}>
+                        <img
+                            src="/downloadPreqt.png"
+                            className={styles.gridPhoneGraphic}
+                            alt="Download PreQT App"
+                            draggable={false}
+                        />
+                        <img
+                            src="/preqtylogo.png"
+                            className={styles.gridPhoneLogo}
+                            alt="PreQT Logo"
+                            draggable={false}
+                        />
+                    </div>
+
+                    {/* Text Details */}
+                    <div className={styles.gridTextSection}>
+                        <h3 className={styles.gridActionTitle}>
+                            Unlock Exclusive<br />Private Deals
+                        </h3>
+                        <p className={styles.gridActionDesc}>
+                            Download the mobile app to unlock verified private market opportunities, startup deals, and exclusive IPO access.
+                        </p>
+                    </div>
+
+                    {/* App Badges */}
+                    <div className={styles.gridBadgeContainer}>
+                        <img
+                            src="/downloadapplePreqt.png"
+                            className={styles.gridStoreBadge}
+                            onClick={handleAppStoreClick}
+                            alt="Download on the App Store"
+                            draggable={false}
+                        />
+                        <img
+                            src="/androiddownloadpreqt.png"
+                            className={styles.gridStoreBadge}
+                            onClick={handleGooglePlayClick}
+                            alt="Get it on Google Play"
+                            draggable={false}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`${styles.teaserContainer} ${isListView ? styles.allDealsTeaser : ''} ${className}`}>

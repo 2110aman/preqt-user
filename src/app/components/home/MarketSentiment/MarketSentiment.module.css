@@ -982,3 +982,46 @@
         gap: 6px;
     }
 }
+
+.exploreCommunityContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.exploreCommunityBtn {
+    background-color: #2D2C2A !important;
+    /* Premium dark charcoal pill matching screenshots */
+    color: #FFFFFF !important;
+    font-family: "Helvetica Neue", sans-serif;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    padding: 10px 24px !important;
+    border-radius: 20px !important;
+    border: none !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+    line-height: 20px !important;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.exploreCommunityBtn:hover {
+    background-color: #3E3D3A !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.exploreCommunityBtn:active {
+    transform: translateY(0) !important;
+}
+
+.exploreCommunityBtn svg {
+    margin-bottom: 1px;
+}

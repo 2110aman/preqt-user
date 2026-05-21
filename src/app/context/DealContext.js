@@ -41,7 +41,7 @@ export const DealsProvider = ({ children }) => {
 
         setHasMore(
           pagination.totalRecords >
-            (currPage - 1) * 50 + deals.length
+          (currPage - 1) * 50 + deals.length
         );
       } catch (err) {
         console.error("Fetch error:", err);

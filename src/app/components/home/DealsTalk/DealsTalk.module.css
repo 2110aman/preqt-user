@@ -31,7 +31,7 @@
 .dealsSwiper .swiper-slide {
     height: auto;
     display: flex;
-    width: 950;
+    width: 100%;
     justify-content: center;
 }
 
@@ -914,7 +914,7 @@
     }
 
     .DealsTalkMainContainer {
-        max-width: 870px;
+        max-width: 950px;
     }
 
     .DealsTalkHeading {

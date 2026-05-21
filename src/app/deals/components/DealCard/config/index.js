@@ -11,9 +11,12 @@ export function determineVariant(deal) {
         return 'featured_deal';
     }
 
-    if (type === 'public' || type === 'unlisted') {
-        // We might need a flag for deep_dive, assuming standard for now
+    if (type === 'public') {
         if (deal.is_deep_dive) return 'public_deep_dive';
+        return 'public_standard';
+    }
+
+    if (type === 'unlisted' || (type === 'ofs' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined))) {
         return 'unlisted_nse';
     }
     

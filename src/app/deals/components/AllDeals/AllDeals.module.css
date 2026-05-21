@@ -1,7 +1,7 @@
 .DealsTalkMainContainer {
     /* height: 100% !important; */
     width: 100%;
-    max-width: 1440px;
+    max-width: 1500px;
     margin: auto;
     padding: 60px 60px;
 }
@@ -43,13 +43,14 @@
 .dealCardCol {
     flex: 0 0 auto;
     width: 25%;
-    padding: 0 !important;
+    padding: 0 16px 32px 16px !important;
     margin-top: 0 !important;
 }
 
 /* List view column layout - cascades naturally through class specificity (no !important needed) */
 .listView .dealCardCol {
     width: 100%;
+    padding: 0 0 20px 0 !important;
 }
 
 
@@ -58,7 +59,7 @@
 
     /* Responsive column width - Cascades naturally from source order overrides */
     .dealCardCol {
-        width: 50%;
+        width: 33.33%;
     }
 
     /* .DealsTalkMainContainer{
@@ -111,7 +112,7 @@
 
     /* Mobile column width - Cascades naturally from source order overrides */
     .dealCardCol {
-        width: 100%;
+        width: 50%;
     }
 }
 

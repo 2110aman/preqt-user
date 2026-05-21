@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../DealCard.module.css';
+import { formatDateMonthDay } from '@/app/utils/FormatDate';
 
 const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || num === "TBD") return "TBD";
@@ -19,6 +20,14 @@ export default function CardHeroMetrics({ deal, config, style }) {
         return deal[metric.key] || "TBD";
     };
 
+    const formatMetricValue = (value, metric) => {
+        if (value === "TBD") return "TBD";
+        if (metric.format === 'date') {
+            return formatDateMonthDay(value);
+        }
+        return formatNumberWithCommas(value);
+    };
+
     if (style === 'boxes') {
         return (
             <div className={styles.heroBoxes}>
@@ -29,9 +38,14 @@ export default function CardHeroMetrics({ deal, config, style }) {
                             <span className={styles.metricLabel}>{metric.label}</span>
                             <span className={styles.metricValue}>
                                 {value !== "TBD" && metric.format === "currency" ? "₹" : ""}
-                                {formatNumberWithCommas(value)}
+                                {formatMetricValue(value, metric)}
                                 {value !== "TBD" && metric.suffix ? ` ${metric.suffix}` : ""}
                                 {metric.perShare && value !== "TBD" ? <span className={styles.subValue}>/ share</span> : ""}
+                                {metric.showGainLoss && deal.estimated_gain_loss && (
+                                    <span className={`${styles.gainLoss} ${Number(deal.estimated_gain_loss) < 0 ? styles.loss : styles.gain}`}>
+                                        ({Number(deal.estimated_gain_loss) > 0 ? '+' : ''}{deal.estimated_gain_loss}%)
+                                    </span>
+                                )}
                             </span>
                         </div>
                     );
@@ -50,7 +64,7 @@ export default function CardHeroMetrics({ deal, config, style }) {
                             <span className={styles.metricLabel}>{metric.label}</span>
                             <span className={styles.metricValue}>
                                 {value !== "TBD" && metric.format === "currency" ? "₹" : ""}
-                                {formatNumberWithCommas(value)}
+                                {formatMetricValue(value, metric)}
                                 {value !== "TBD" && metric.suffix ? ` ${metric.suffix}` : ""}
                                 {metric.showGainLoss && deal.estimated_gain_loss && (
                                     <span className={`${styles.gainLoss} ${Number(deal.estimated_gain_loss) < 0 ? styles.loss : styles.gain}`}>
@@ -77,7 +91,7 @@ export default function CardHeroMetrics({ deal, config, style }) {
                                 <span className={`${styles.metricValue} ${metric.format === 'percent_gain' ? (Number(value) >= 0 ? styles.gain : styles.loss) : ''}`}>
                                     {value !== "TBD" && metric.format === "currency" ? "₹" : ""}
                                     {metric.format === 'percent_gain' && value !== "TBD" && Number(value) > 0 ? '+' : ''}
-                                    {formatNumberWithCommas(value)}
+                                    {formatMetricValue(value, metric)}
                                     {value !== "TBD" && metric.suffix ? ` ${metric.suffix}` : ""}
                                     {metric.format === 'percent_gain' && value !== "TBD" ? '%' : ''}
                                     

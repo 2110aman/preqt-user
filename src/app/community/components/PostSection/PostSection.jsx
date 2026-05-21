@@ -27,7 +27,7 @@ const PostSection = ({
   initialNoPosts = false
 }) => {
   const hasInitialPayload = Array.isArray(initialPosts);
-  const pageSize = limit ? 1 : 10;
+  const pageSize = limit ? 7 : 10;
 
   const [selectedOption, setSelectedOption] = useState(null)
   const [hasVoted, setHasVoted] = useState(false)
@@ -170,7 +170,7 @@ const PostSection = ({
       }
       let api = `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts?page=${pageParam}`;
       if (limit) {
-        api += "&limit=1";
+        api += "&limit=3";
       } else {
         api += "&limit=10";
       }
@@ -185,7 +185,7 @@ const PostSection = ({
       })
       const data = await response.json()
       console.log('PostSection getAllPosts response:', data);
-      
+
       const rawPosts = Array.isArray(data?.data) ? data.data : [];
       const normalizedPosts = rawPosts.map(post => ({
         ...post,
@@ -204,8 +204,8 @@ const PostSection = ({
         const postsToSet = append ? [...prev, ...normalizedPosts] : normalizedPosts;
         // console.log('PostSection Posts Update:', { limit, pageSize, postsCount: postsToSet.length });
         // Strictly enforce limit on frontend if needed, though API should handle it
-        if (limit && postsToSet.length > 1) {
-             return postsToSet.slice(0, 1);
+        if (limit && postsToSet.length > pageSize) {
+          return postsToSet.slice(0, pageSize);
         }
         return postsToSet;
       })
@@ -418,7 +418,7 @@ const PostSection = ({
     // Optimistic Update
     setSelectedOption(id);
     setHasVoted(true);
-    
+
     setPosts(prevPosts => {
       return prevPosts.map(post => {
         if (post.id === postId) {
@@ -519,11 +519,11 @@ const PostSection = ({
             setPage(parsedState.page || 1);
             setHasMore(parsedState.hasMore !== undefined ? parsedState.hasMore : true);
             setIsLoading(false);
-            
+
             setTimeout(() => {
               window.scrollTo(0, parsedState.scrollY || 0);
             }, 100);
-            
+
             sessionStorage.removeItem('communityFeedState');
             return;
           }

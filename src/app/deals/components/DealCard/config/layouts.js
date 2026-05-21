@@ -11,7 +11,7 @@ export const CARD_LAYOUTS = {
     },
     public_standard: {
         sections: ['header', 'companyInfo', 'tagline', 'heroMetrics', 'metricsGrid', 'tags', 'footer'],
-        heroStyle: 'inline',
+        heroStyle: 'boxes',
         ratingStyle: 'pill',
     },
     unlisted_nse: {

@@ -33,3 +33,25 @@ export function formatDateForTime(isoString) {
 
     return `${day} ${month} ${Year} at ${time}`;
 }
+
+export function formatDateMonthDay(dateString) {
+    if (!dateString || dateString === "TBD") {
+        return "TBD";
+    }
+    // Match YYYY-MM-DD pattern to format timezone-safely
+    const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+        const [_, year, month, day] = match;
+        const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+        const monthName = date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+        return `${monthName} ${parseInt(day)}`;
+    }
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        return dateString;
+    }
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const day = date.getDate();
+    return `${month} ${day}`;
+}

@@ -84,7 +84,8 @@ function AllDealsContent() {
 
     const dealTypeTabs = [
         { label: "ALL", value: "All" },
-        { label: "Unlisted Shares", value: "Public" },
+        { label: "Upcoming IPO", value: "Public" },
+        { label: "Unlisted Shares", value: "Unlisted" },
         { label: "Private Deals", value: "Private" },
         { label: "Startup Deals", value: "Startup" }
     ];
@@ -144,15 +145,18 @@ function AllDealsContent() {
     }, [allDeals]);
 
     const filteredDeals = useMemo(() => {
-        let deals = allDeals;
+        // Restrict rendered opportunities to strictly public and unlisted/ofs types (case-insensitive)
+        let deals = allDeals.filter(deal => {
+            const type = (deal.deal_type || '').toLowerCase();
+            return type === 'public' || (type === 'ofs' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined));
+        });
 
         // 1. Deal Type (Tabs)
         if (selectedDealType !== "All") {
-            if (selectedDealType === "Featured") {
-                deals = deals.filter(deal =>
-                    (parseFloat(deal.ipo_review_rating?.weighted_composite_score) >= 4) ||
-                    deal.is_featured ||
-                    deal.deal_type === 'OFS'
+            if (selectedDealType === "Unlisted") {
+                deals = deals.filter(deal => 
+                    (deal.deal_type || '').toLowerCase() === 'ofs' && 
+                    (deal.deal_sub_type === null || deal.deal_sub_type === undefined)
                 );
             } else {
                 deals = deals.filter(deal => (deal.deal_type || '').toLowerCase() === selectedDealType.toLowerCase());
@@ -256,23 +260,20 @@ function AllDealsContent() {
                 });
             }
         }
-        // return deals;    (this will return all deals)
 
-        // this will inspect deal_type and sort based on that only (filtered + public comes first then other deals )
+        // Sort: public deals first
         return deals.sort((a, b) => {
-            if (a.deal_type === 'public' && b.deal_type !== 'public') return -1;
-            if (a.deal_type !== 'public' && b.deal_type === 'public') return 1;
+            const aType = (a.deal_type || '').toLowerCase();
+            const bType = (b.deal_type || '').toLowerCase();
+            if (aType === 'public' && bType !== 'public') return -1;
+            if (aType !== 'public' && bType === 'public') return 1;
             return 0;
         });
     }, [allDeals, selectedDealType, appliedFilters]);
 
     const dealsToRender = useMemo(() => {
-        if (viewType === 'list') {
-            // Only show public / IPO deals in list view, since other private/startup deals will be styled under the single-card backdrop overlay!
-            return filteredDeals.filter(deal => (deal.deal_type || '').toLowerCase() === 'public');
-        }
         return filteredDeals;
-    }, [filteredDeals, viewType]);
+    }, [filteredDeals]);
 
     const formatDealType = (type) => {
         if (type === "All") return "All Deals";
@@ -328,7 +329,7 @@ function AllDealsContent() {
             const token = isPrivateDeal ? Cookies.get("token") : null;
 
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/dashboard/replies-count/${dealId}`,
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/dashboard/replies-count/${dealId}`,
                 {
                     method: "GET",
                     headers: {
@@ -498,76 +499,51 @@ function AllDealsContent() {
 
 
 
-    useEffect(() => {
-        const dummyDeals = [
-            {
-                id: "dummy-1",
-                deal_type: "Public",
-                hidden_status: "live",
-                tags: ["MARKET LEADER", "HIGH GROWTH", "LOSS MAKING"],
-                ipo_review_rating: { status: true, weighted_composite_score: 4.5 },
-                company_name: "National Stock Exchange (NSE)",
-                tag_line: "India’s leading EV two-wheeler manufacturer with strong vertical integration",
-                valuation_in_cr: 380000.0,
-                per_share_price: 3400,
-                min_investment_amount_in_inr: 50000.0,
-                revenue_fy25_in_cr: 12500.0,
-                pat_fy25_in_cr: 7800.0,
-                pe_multiple: 12.0,
-                listing_timeline: "2027-09-01",
-                cagr_growth_3y_percent: 62.5,
-                is_featured: true,
-                company_stage: "Late Stage",
-                sector_industry: "Financial Services"
-            },
-            {
-                id: "dummy-2",
-                deal_type: "Private",
-                hidden_status: "upcoming",
-                tags: ["EXCLUSIVE", "TECH", "SERIES C"],
-                ipo_review_rating: { status: true, weighted_composite_score: 4.2 },
-                company_name: "Tech Mahindra",
-                short_description: "Global digital transformation and consulting services provider.",
-                round_size_in_cr: 500.0,
-                stage: "Series C",
-                valuation_in_cr: 25000.0,
-                rev_arr_in_cr: 4500.0,
-                gross_margin_percent: 38.5,
-                growth_yoy: 1.2,
-                min_ticket_in_inr: 100000.0,
-                target_funding_in_cr: 500.0,
-                raised_amount: 150.0,
-                is_featured: true,
-                company_stage: "Series C",
-                sector_industry: "IT Services"
-            },
-            {
-                id: "dummy-3",
-                deal_type: "Startup",
-                hidden_status: "closed",
-                tags: ["AI", "SEED", "INNOVATIVE"],
-                ipo_review_rating: { status: true, weighted_composite_score: 3.8 },
-                company_name: "AI Vision Labs",
-                short_description: "Building next-gen computer vision models for retail.",
-                round_size_in_cr: 10.0,
-                stage: "Seed",
-                valuation_in_cr: 50.0,
-                rev_arr_in_cr: 0.5,
-                gross_margin_percent: 75.0,
-                growth_yoy: 2.5,
-                min_ticket_in_inr: 5000.0,
-                target_funding_in_cr: 10.0,
-                raised_amount: 10.0,
-                is_featured: false,
-                company_stage: "Seed",
-                sector_industry: "Artificial Intelligence"
+    const fetchDeals = async (page) => {
+        try {
+            if (page === 1) {
+                setLoading(true);
             }
-        ];
+            const token = Cookies.get('accessToken');
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=50&page=${page}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` }),
+                    },
+                }
+            );
 
-        setAllDeals(dummyDeals);
-        setLoading(false);
-        setHasMore(false);
-    }, []);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const responseData = await res.json();
+            const deals = responseData.data || [];
+            const pagination = responseData.pagination || {};
+
+            if (page === 1) {
+                setAllDeals(deals);
+            } else {
+                setAllDeals((prev) => [...prev, ...deals]);
+            }
+
+            const loadedCount = (page - 1) * 50 + deals.length;
+            setHasMore((pagination.totalRecords || 0) > loadedCount);
+        } catch (err) {
+            console.error("Fetch error in AllDeals:", err);
+            setError(err.message || "Failed to fetch deals");
+        } finally {
+            setLoading(false);
+            setLoadMore(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDeals(currPage);
+    }, [currPage]);
 
 
     useEffect(() => {
@@ -751,6 +727,11 @@ function AllDealsContent() {
                                                     />
                                                 </div>
                                             ))}
+                                            {viewType === 'grid' && selectedDealType === "All" && (
+                                                <div className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
+                                                    <UnlockTeaser isGridCard={true} isAllDeals={true} />
+                                                </div>
+                                            )}
                                             {viewType === 'list' && (
                                                 <div className="col-lg-12 col-md-12 col-sm-12" style={{ width: "100%", marginTop: "10px" }}>
                                                     <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} />

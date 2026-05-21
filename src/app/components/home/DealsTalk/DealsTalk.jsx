@@ -95,24 +95,6 @@ function DealsTalkContent() {
 
     const dealsData = [
         {
-            id: 1,
-            type: "SME-IPO",
-            category: "Logistics",
-            companyLogo: "/assets/pictures/acmpl.svg",
-            companyName: "Ashwini Container Movers Limited ",
-            description: "Ashwini Container Movers Limited is a commercial/container transport & logistics company headquartered in Navi Mumbai.",
-            stats: {
-                revenue: "₹94.1Cr",
-                pat: "₹11.5 Cr",
-                patMultiple: "₹11.5 Cr",
-                cagrGrowth: "17% ( FY'22-FY'25)",
-                roe: "75.9%(FY'25)",
-                issueDate: "21-05-2026"
-            },
-            merchantBanker: "Corporate Professionals",
-            deal: "public"
-        },
-        {
             id: 2,
             type: "Pre IPO- SME",
             category: "Solar Energy",
@@ -140,6 +122,8 @@ function DealsTalkContent() {
 
     const handleFetchTopDeals = async () => {
         try {
+            // IMPORTANT: The commented out API block below is the old API. Do not delete it, as it can be used in the future.
+            /*
             const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/deals/all-deals?limit=20`, {
                 method: 'GET',
                 headers: {
@@ -151,6 +135,29 @@ function DealsTalkContent() {
             if (response.ok) {
                 const data = await response.json();
                 setAllTopDeals(data.data || []);
+            } else {
+                console.log("Failed to fetch top deals");
+            }
+            */
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=50&page=1`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                const filteredDeals = (data.data || []).filter(deal => {
+                    const type = (deal.deal_type || '').toLowerCase();
+                    return type === 'public' || 
+                           type === 'unlisted' || 
+                           (type === 'ofs' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined));
+                });
+                setAllTopDeals(filteredDeals);
             } else {
                 console.log("Failed to fetch top deals");
             }
@@ -168,7 +175,7 @@ function DealsTalkContent() {
         if (allTopDeals.length === 0) return;
 
         allTopDeals.forEach((deal) => {
-            fetchRepliesCount(deal.id, deal.deal_type === "private" || deal.deal_type === "ccps");
+            fetchRepliesCount(deal.id, deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "ofs");
         });
 
         // Check if there are more slides after deals are loaded
@@ -451,7 +458,7 @@ function DealsTalkContent() {
                     {/* Stats Grid 3x2 */}
                     <div className={styles.statsGrid6}>
                         <div className={styles.gridItem}>
-                            <span className={styles.gridLabel}>Expected Market Cap</span>
+                            <span className={styles.gridLabel}>Expected Val.</span>
                             <span className={styles.gridValue}>₹{formatNumberWithCommas(deal?.expected_valuation) || "0"} Cr</span>
                         </div>
                         <div className={styles.gridItem}>
@@ -799,7 +806,7 @@ function DealsTalkContent() {
                 >
                     {allTopDeals.map((deal, index) => (
                         <SwiperSlide key={deal.id}>
-                            {deal.deal_type === "public" ? renderPublicCard(deal) : renderPrivateCard(deal)}
+                            {(deal.deal_type === "public" || deal.deal_type === "unlisted") ? renderPublicCard(deal) : renderPrivateCard(deal)}
                         </SwiperSlide>
                     ))}
                 </Swiper>

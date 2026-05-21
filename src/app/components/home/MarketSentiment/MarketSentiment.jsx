@@ -2,6 +2,7 @@ import Link from "next/link"
 import styles from "./MarketSentiment.module.css"
 import PostSection from "@/app/community/components/PostSection/PostSection"
 import ViewAllAnimation from "../ViewAllAnimation"
+import { ArrowUpRight } from "lucide-react"
 
 export default function MarketSentiment() {
     console.log("MarketSentiment rendered");
@@ -128,6 +129,13 @@ export default function MarketSentiment() {
                 </div>}
                 <div style={{ background: 'white', borderRadius: '20px' }}>
                     <PostSection limit={true} resetSpace={false} />
+                </div>
+                <div className={styles.exploreCommunityContainer}>
+                    <Link href="/community" style={{ textDecoration: 'none' }}>
+                        <button className={styles.exploreCommunityBtn}>
+                            Explore Community <ArrowUpRight size={16} className={styles.actionIcon} />
+                        </button>
+                    </Link>
                 </div>
 
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../DealCard.module.css';
-import { formatDate } from '@/app/utils/FormatDate';
+import { formatDate, formatDateMonthDay } from '@/app/utils/FormatDate';
 
 const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || num === "TBD") return "TBD";
@@ -21,7 +21,7 @@ export default function CardMetricsGrid({ deal, config }) {
             case 'percent':
                 return `${formatNumberWithCommas(value)}%`;
             case 'date':
-                return formatDate(value);
+                return formatDateMonthDay(value);
             case 'date_short':
                 if (!value) return "TBD";
                 const d = new Date(value);
