@@ -1,11 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Barchart from "../charts/barchart/barchart";
 import PurpleBarchart from "../charts/barchartpurple/barchartpurple";
 import { Collapse, Tabs, Tab, Fade } from "react-bootstrap";
 import "./keyfinancials.css";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import DebtBarChart from "../charts/DebtBarchart";
+import InterestCoverageBarchart from "../charts/InterestCoverageBarchart";
+import CurrentRatioBarchart from "../charts/CurrentRatioBarchart";
+import ROABarchart from "../charts/ROABarchart";
+import ROEBarchart from "../charts/ROEBarchart";
+import ROCEBarchart from "../charts/ROCEBarchart";
 import { useDealStore } from "@/store/dealStore";
 // import { useSearchParams } from "next/navigation";
 
@@ -36,6 +41,669 @@ const dummyPerfData = [
   // { label: "Current Ratio", values: ["1.2x", "1.2x", { val: "1.2x", color: "#16A34A" }] },
   // { label: "COGS (% Of Revenue)", values: ["+28.5%", "+31.0%", { val: "+33.0%", color: "#16A34A" }] }
 ];
+
+const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
+  const defaultTrendsData = [
+    {
+      year: "2023",
+      revenue: 120.0,
+      growth: 28.0,
+      ebitda: 12.6,
+      ebitdaMargin: 10.5,
+      pat: 5.8,
+      patMargin: 4.8
+    },
+    {
+      year: "2024",
+      revenue: 157.0,
+      growth: 31.0,
+      ebitda: 17.0,
+      ebitdaMargin: 10.8,
+      pat: 7.7,
+      patMargin: 4.9
+    },
+    {
+      year: "2025",
+      revenue: 209.0,
+      growth: 33.0,
+      ebitda: 23.0,
+      ebitdaMargin: 11.0,
+      pat: 10.5,
+      patMargin: 5.0
+    }
+  ];
+
+  const defaultObservations = [
+    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
+    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
+    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
+  ];
+
+  const rawApiData = data || [];
+  const yearsToUse = rawApiData.length > 0
+    ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
+    : ["2023", "2024", "2025"];
+
+  const trendsData = yearsToUse.map((yearStr) => {
+    const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
+    const defaultItem = defaultTrendsData.find(d => d.year === yearStr) || {
+      year: yearStr,
+      revenue: null,
+      growth: null,
+      ebitda: null,
+      ebitdaMargin: null,
+      pat: null,
+      patMargin: null
+    };
+
+    return {
+      year: yearStr,
+      revenue: apiItem?.revenue_in_cr ?? apiItem?.revenue ?? defaultItem.revenue,
+      growth: apiItem?.topline_growth_percent ?? apiItem?.growth ?? defaultItem.growth,
+      ebitda: apiItem?.ebitda_in_cr ?? apiItem?.ebitda ?? defaultItem.ebitda,
+      ebitdaMargin: apiItem?.ebitda_percent ?? apiItem?.ebitdaMargin ?? defaultItem.ebitdaMargin,
+      pat: apiItem?.pat_in_cr ?? apiItem?.pat ?? defaultItem.pat,
+      patMargin: apiItem?.pat_percent ?? apiItem?.patMargin ?? defaultItem.patMargin,
+    };
+  });
+
+  const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
+  const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
+
+  const rows = [
+    { label: "Revenue (₹ Cr)", key: "revenue", format: "currency" },
+    { label: "Growth (%)", key: "growth", format: "percentage" },
+    { label: "EBITDA (₹ Cr)", key: "ebitda", format: "currency" },
+    { label: "EBITDA Margin (%)", key: "ebitdaMargin", format: "percentage" },
+    { label: "PAT (₹ Cr)", key: "pat", format: "currency" },
+    { label: "PAT Margin (%)", key: "patMargin", format: "percentage" }
+  ];
+
+  return (
+    <div>
+      <div className="incomeStatementTableWrapper">
+        <table className="incomeStatementTable">
+          <thead>
+            <tr>
+              <th className="th-metric">Financial Metric</th>
+              {trendsData.map((col, idx) => {
+                const isLatest = idx === trendsData.length - 1;
+                const displayYear = `FY ${col.year}`;
+                return (
+                  <th
+                    key={col.year}
+                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
+                  >
+                    {displayYear}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.key} className="tr-row">
+                <td className="td-label">{row.label}</td>
+                {trendsData.map((col, idx) => {
+                  const isLatest = idx === trendsData.length - 1;
+                  const value = col[row.key];
+
+                  let displayVal = "-";
+                  if (value !== null && value !== undefined) {
+                    if (row.format === "percentage") {
+                      displayVal = `${Number(value).toFixed(1)}%`;
+                    } else if (row.format === "currency") {
+                      if (row.key === "revenue") {
+                        displayVal = Number(value) % 1 === 0
+                          ? Number(value).toFixed(0)
+                          : Number(value).toFixed(1);
+                      } else {
+                        displayVal = Number(value).toFixed(1);
+                      }
+                    } else {
+                      displayVal = value.toString();
+                    }
+                  }
+
+                  return (
+                    <td
+                      key={col.year}
+                      className={isLatest ? "td-value-highlight" : "td-value-dim"}
+                    >
+                      {displayVal}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="observations-container">
+        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+        <ul className="observations-list">
+          {observationsList.map((bullet, idx) => (
+            <li key={idx}>{bullet}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+const BalanceSheetSection = ({ isPrivateDeal, data }) => {
+  const balanceSheetRows = [
+    {
+      label: "EQUITY & LIABILITIES",
+      type: "category-header",
+      tooltip: "Total of Net Worth and Total Liabilities. Represents what the company owes to owners and third parties.",
+      key: "total_equity_and_liabilities",
+      values: { "2023": 255, "2024": 330, "2025": 420 }
+    },
+    {
+      label: "Net Worth",
+      type: "sub-header",
+      tooltip: "The total equity/book value of the company (Share Capital + Reserves & Surplus).",
+      key: "net_worth",
+      values: { "2023": 110, "2024": 140, "2025": 180 }
+    },
+    {
+      label: "Share Capital",
+      type: "indented",
+      tooltip: "The portion of equity that has been raised through issuing shares.",
+      key: "share_capital",
+      values: { "2023": 15, "2024": 20, "2025": 25 }
+    },
+    {
+      label: "Reserves & Surplus",
+      type: "indented",
+      tooltip: "Accumulated profits and capital gains retained in the business rather than distributed.",
+      key: "reserves_and_surplus",
+      values: { "2023": 95, "2024": 120, "2025": 155 }
+    },
+    {
+      label: "Total Liabilities",
+      type: "sub-header",
+      tooltip: "Total debt and other obligations owed to external parties.",
+      key: "total_liabilities",
+      values: { "2023": 145, "2024": 190, "2025": 240 }
+    },
+    {
+      label: "Current Liabilities",
+      type: "indented",
+      isBold: true,
+      tooltip: "Short-term financial obligations that are due within one year.",
+      key: "current_liabilities",
+      values: { "2023": 145, "2024": 190, "2025": 240 }
+    },
+    {
+      label: "Borrowings",
+      type: "indented",
+      tooltip: "Short-term interest-bearing loans and credit lines.",
+      key: "current_borrowings",
+      values: { "2023": 42, "2024": 55, "2025": 70 }
+    },
+    {
+      label: "Trade Payables",
+      type: "indented",
+      tooltip: "Amount owed to suppliers for goods or services received on credit.",
+      key: "trade_payables",
+      values: { "2023": 30, "2024": 40, "2025": 50 }
+    },
+    {
+      label: "Other Current Liabilities",
+      type: "indented",
+      tooltip: "Miscellaneous short-term debts not classified under borrowings or payables.",
+      key: "other_current_liabilities",
+      values: { "2023": 30, "2024": 40, "2025": 50 }
+    },
+    {
+      label: "Non-Current Liabilities",
+      type: "indented",
+      isBold: true,
+      tooltip: "Long-term financial obligations that are due after one year.",
+      key: "non_current_liabilities",
+      values: { "2023": 43, "2024": 55, "2025": 70 }
+    },
+    {
+      label: "Borrowings",
+      type: "indented",
+      tooltip: "Long-term loans and bonds.",
+      key: "non_current_borrowings",
+      values: { "2023": 25, "2024": 30, "2025": 40 }
+    },
+    {
+      label: "Other Non-Current Liabilities",
+      type: "indented",
+      tooltip: "Miscellaneous long-term obligations.",
+      key: "other_non_current_liabilities",
+      values: { "2023": 18, "2024": 25, "2025": 30 }
+    },
+    {
+      label: "ASSETS",
+      type: "category-header",
+      tooltip: "Total economic resources owned by the company (Current + Non-Current Assets).",
+      key: "total_assets",
+      values: { "2023": 255, "2024": 330, "2025": 420 }
+    },
+    {
+      label: "Current Assets",
+      type: "sub-header",
+      tooltip: "Resources that are expected to be converted to cash or consumed within one year.",
+      key: "current_assets",
+      values: { "2023": 110, "2024": 140, "2025": 180 }
+    },
+    {
+      label: "Trade Receivables",
+      type: "indented",
+      tooltip: "Money owed to the company by customers for goods/services delivered.",
+      key: "trade_receivables",
+      values: { "2023": 95, "2024": 120, "2025": 155 }
+    },
+    {
+      label: "Inventory",
+      type: "indented",
+      tooltip: "Value of raw materials, work-in-progress, and finished goods ready for sale.",
+      key: "inventory",
+      values: { "2023": 15, "2024": 20, "2025": 25 }
+    },
+    {
+      label: "Cash & Cash Equivalents",
+      type: "indented",
+      tooltip: "Highly liquid assets including physical currency and bank balances.",
+      key: "cash_and_equivalents",
+      values: { "2023": 95, "2024": 120, "2025": 155 }
+    },
+    {
+      label: "Other Current Assets",
+      type: "indented",
+      tooltip: "Miscellaneous short-term assets not categorized above.",
+      key: "other_current_assets",
+      values: { "2023": 95, "2024": 120, "2025": 155 }
+    },
+    {
+      label: "Non-Current Assets",
+      type: "sub-header",
+      tooltip: "Long-term resources such as property, plant, and equipment.",
+      key: "non_current_assets",
+      values: { "2023": 110, "2024": 140, "2025": 180 }
+    },
+    {
+      label: "Fixed Assets",
+      type: "indented",
+      tooltip: "Tangible physical assets (PP&E) used in operating the business.",
+      key: "fixed_assets",
+      values: { "2023": 15, "2024": 20, "2025": 25 }
+    },
+    {
+      label: "Other Non-Current Assets",
+      type: "indented",
+      tooltip: "Long-term investments and intangible assets.",
+      key: "other_non_current_assets",
+      values: { "2023": 15, "2024": 20, "2025": 25 }
+    }
+  ];
+
+  const defaultObservations = [
+    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
+    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
+    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
+  ];
+
+  const rawApiData = data || [];
+  const yearsToUse = rawApiData.length > 0
+    ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
+    : ["2023", "2024", "2025"];
+
+  const trendsData = yearsToUse.map((yearStr) => {
+    const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
+    return {
+      year: yearStr,
+      apiItem
+    };
+  });
+
+  const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
+  const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
+
+  return (
+    <div>
+      <div className="balanceSheetTableWrapper">
+        <table className="balanceSheetTable">
+          <thead>
+            <tr>
+              <th className="th-metric">Financial Metric</th>
+              {trendsData.map((col, idx) => {
+                const isLatest = idx === trendsData.length - 1;
+                const displayYear = `FY ${col.year}`;
+                return (
+                  <th
+                    key={col.year}
+                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
+                  >
+                    {displayYear}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {balanceSheetRows.map((row, rowIdx) => {
+              let trClass = "tr-row";
+              if (row.type === "category-header") {
+                trClass = "tr-category-header";
+              } else if (row.type === "sub-header") {
+                trClass = "tr-sub-header";
+              } else if (row.type === "indented") {
+                trClass = row.isBold ? "tr-indented tr-indented-bold" : "tr-indented";
+              }
+
+              return (
+                <tr key={rowIdx} className={trClass}>
+                  <td className="td-label">
+                    {row.label}
+                    <span className="bs-tooltip-container">
+                      <img src="/toolTippublic.svg" alt="info" className="bs-tooltip-icon" />
+                      <span className="bs-tooltip-text">{row.tooltip}</span>
+                    </span>
+                  </td>
+                  {trendsData.map((col, idx) => {
+                    const isLatest = idx === trendsData.length - 1;
+                    const apiItem = col.apiItem;
+                    const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+
+                    let displayVal = "-";
+                    if (value !== null && value !== undefined) {
+                      const numVal = Number(value);
+                      const formattedNum = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(1);
+                      displayVal = `₹ ${formattedNum} Cr`;
+                    }
+
+                    return (
+                      <td
+                        key={col.year}
+                        className={isLatest ? "td-value-highlight" : "td-value-dim"}
+                      >
+                        {displayVal}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="observations-container">
+        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+        <ul className="observations-list">
+          {observationsList.map((bullet, idx) => (
+            <li key={idx}>{bullet}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+const CashFlowSection = ({ isPrivateDeal, data }) => {
+  const cashFlowRows = [
+    {
+      label: "CFO (₹ Cr)",
+      description: "Cash generated from core business operations.",
+      key: "cfo",
+      values: { "2023": 45, "2024": 62, "2025": 88 }
+    },
+    {
+      label: "CFI (₹ Cr)",
+      description: "Cash used for investments and long-term assets.",
+      key: "cfi",
+      values: { "2023": -30, "2024": -45, "2025": -55 }
+    },
+    {
+      label: "CFF (₹ Cr)",
+      description: "Cash flow related to funding and borrowings.",
+      key: "cff",
+      values: { "2023": -10, "2024": 15, "2025": -20 }
+    }
+  ];
+
+  const defaultObservations = [
+    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
+    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
+    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
+  ];
+
+  const rawApiData = data || [];
+  const yearsToUse = rawApiData.length > 0
+    ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
+    : ["2023", "2024", "2025"];
+
+  const trendsData = yearsToUse.map((yearStr) => {
+    const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
+    return {
+      year: yearStr,
+      apiItem
+    };
+  });
+
+  const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
+  const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
+
+  const formatCashFlowValue = (val) => {
+    if (val === null || val === undefined) return "-";
+    const num = Number(val);
+    const sign = num >= 0 ? "+" : ""; // Negative numbers already include "-"
+    return `${sign}${num.toFixed(0)} Cr`;
+  };
+
+  const getCashFlowColorClass = (val) => {
+    if (val === null || val === undefined) return "";
+    return Number(val) >= 0 ? "cf-positive" : "cf-negative";
+  };
+
+  return (
+    <div>
+      <div className="cashFlowTableWrapper">
+        <table className="cashFlowTable">
+          <thead>
+            <tr>
+              <th className="th-metric">Financial Metric</th>
+              {trendsData.map((col, idx) => {
+                const isLatest = idx === trendsData.length - 1;
+                const displayYear = `FY ${col.year}`;
+                return (
+                  <th
+                    key={col.year}
+                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
+                  >
+                    {displayYear}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {cashFlowRows.map((row, rowIdx) => {
+              return (
+                <tr key={rowIdx} className="tr-row">
+                  <td className="td-label">
+                    <div className="cf-metric-title">{row.label}</div>
+                    <div className="cf-metric-desc">{row.description}</div>
+                  </td>
+                  {trendsData.map((col, idx) => {
+                    const isLatest = idx === trendsData.length - 1;
+                    const apiItem = col.apiItem;
+                    const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+
+                    const displayVal = formatCashFlowValue(value);
+                    const colorClass = getCashFlowColorClass(value);
+
+                    return (
+                      <td
+                        key={col.year}
+                        className={`${isLatest ? "td-value-highlight" : "td-value-dim"} ${colorClass}`}
+                      >
+                        {displayVal}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="observations-container">
+        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+        <ul className="observations-list">
+          {observationsList.map((bullet, idx) => (
+            <li key={idx}>{bullet}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
+  const workingCapitalRows = [
+    {
+      label: "Debtor Days",
+      description: "Average number of days taken to collect customer payments.",
+      key: "debtor_days",
+      values: { "2023": 42, "2024": 38, "2025": 34 }
+    },
+    {
+      label: "Creditor Days",
+      description: "Average time taken to pay suppliers and vendors.",
+      key: "creditor_days",
+      values: { "2023": 55, "2024": 60, "2025": 65 }
+    },
+    {
+      label: "Inventory Days",
+      description: "Average number of days inventory remains unsold.",
+      key: "inventory_days",
+      values: { "2023": 42, "2024": 30, "2025": 32 }
+    },
+    {
+      label: "CCC (Cash Conversion Cycle)",
+      description: "(Debtor Days + Inventory Days - Creditor Days)",
+      key: "ccc",
+      isCCC: true,
+      values: { "2023": 15, "2024": 8, "2025": 1 }
+    }
+  ];
+
+  const defaultObservations = [
+    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
+    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
+    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
+  ];
+
+  const rawApiData = data || [];
+  const yearsToUse = rawApiData.length > 0
+    ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
+    : ["2023", "2024", "2025"];
+
+  const trendsData = yearsToUse.map((yearStr) => {
+    const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
+    return {
+      year: yearStr,
+      apiItem
+    };
+  });
+
+  const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
+  const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
+
+  const formatDaysValue = (val) => {
+    if (val === null || val === undefined) return "-";
+    const num = Number(val);
+    return `${num.toFixed(0)} Days`;
+  };
+
+  return (
+    <div>
+      <div className="workingCapitalTableWrapper">
+        <table className="workingCapitalTable">
+          <thead>
+            <tr>
+              <th className="th-metric">Efficiency Metric</th>
+              {trendsData.map((col, idx) => {
+                const isLatest = idx === trendsData.length - 1;
+                const displayYear = `FY ${col.year}`;
+                return (
+                  <th
+                    key={col.year}
+                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
+                  >
+                    {displayYear}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {workingCapitalRows.map((row, rowIdx) => {
+              const trClass = row.isCCC ? "tr-row tr-ccc" : "tr-row";
+              return (
+                <tr key={rowIdx} className={trClass}>
+                  <td className="td-label">
+                    <div className="wc-metric-title">{row.label}</div>
+                    <div className="wc-metric-desc">{row.description}</div>
+                  </td>
+                  {trendsData.map((col, idx) => {
+                    const isLatest = idx === trendsData.length - 1;
+                    const apiItem = col.apiItem;
+
+                    let value;
+                    if (row.isCCC) {
+                      const debtorVal = apiItem?.debtor_days ?? apiItem?.data?.debtor_days;
+                      const creditorVal = apiItem?.creditor_days ?? apiItem?.data?.creditor_days;
+                      const inventoryVal = apiItem?.inventory_days ?? apiItem?.data?.inventory_days;
+
+                      if (debtorVal !== undefined && creditorVal !== undefined && inventoryVal !== undefined) {
+                        value = Number(debtorVal) + Number(inventoryVal) - Number(creditorVal);
+                      } else {
+                        value = row.values[col.year];
+                      }
+                    } else {
+                      value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+                    }
+
+                    const displayVal = formatDaysValue(value);
+
+                    return (
+                      <td
+                        key={col.year}
+                        className={isLatest ? "td-value-highlight" : "td-value-dim"}
+                      >
+                        {displayVal}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="observations-container">
+        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+        <ul className="observations-list">
+          {observationsList.map((bullet, idx) => (
+            <li key={idx}>{bullet}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
 
 const Keyfinancials = ({ isPrivateDeal = false }) => {
 
@@ -191,12 +859,50 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
   const showData = dealDetails?.data?.financial_highlights?.financial_performance?.data?.data?.revenue_in_cr?.status;
   console.log('Showing the data for Revenue', showData);
 
-  const [activeTab, setActiveTab] = useState("ROE");
+  const [activeTab, setActiveTab] = useState("Debt to Equity (x)");
+  const [activeStyle, setActiveStyle] = useState({ left: 0, width: 0 });
+  const tabsContainerRef = useRef(null);
+
+  useEffect(() => {
+    const updateActiveIndicator = () => {
+      if (tabsContainerRef.current) {
+        const activeTabElement = tabsContainerRef.current.querySelector(".customTab.active");
+        if (activeTabElement) {
+          setActiveStyle({
+            left: activeTabElement.offsetLeft,
+            width: activeTabElement.offsetWidth,
+          });
+        }
+      }
+    };
+
+    updateActiveIndicator();
+    const timer = setTimeout(updateActiveIndicator, 50);
+
+    window.addEventListener("resize", updateActiveIndicator);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateActiveIndicator);
+    };
+  }, [activeTab]);
 
   const tabs = [
-    { key: "ROE", label: "Return on Equity (ROE)" },
-    { key: "DEBT", label: "Debt to Equity" },
+    { key: "Debt to Equity (x)", label: "Debt to Equity (x)" },
+    { key: "Interest Coverage Ratio (x)", label: "Interest Coverage Ratio (x)" },
+    { key: "Current Ratio (x)", label: "Current Ratio (x)" },
+    { key: "ROA (%)", label: "ROA (%)" },
+    { key: "ROE (%)", label: "ROE (%)" },
+    { key: "ROCE (%)", label: "ROCE (%)" },
   ];
+
+  const tabDescriptions = {
+    "Debt to Equity (x)": "Measures the company’s leverage relative to shareholder equity.",
+    "Interest Coverage Ratio (x)": "Shows the company’s ability to meet interest obligations.",
+    "Current Ratio (x)": "Evaluates short-term liquidity and financial stability.",
+    "ROA (%)": "Measures profitability generated from total assets.",
+    "ROE (%)": "Measures how efficiently the company generates profits from shareholder equity.",
+    "ROCE (%)": "Evaluates efficiency in utilizing capital employed.",
+  };
 
   const formattedData = data.map((item) => ({
     ...item,
@@ -226,7 +932,9 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
   // Track open/close state for each main section
   const [openStates, setOpenStates] = useState({
     financialTrends: true,
-    financialPerformance: true,
+    balanceSheet: true,
+    cashFlow: true,
+    workingCapital: true,
     financialRatios: true,
     documents: true,
   });
@@ -268,17 +976,21 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
             className="section-header"
             onClick={() => toggleSection("financialTrends")}
           >
-            <h3>Financial Trends</h3>
+            <h3>Income Statement</h3>
             <span>
               {openStates.financialTrends ? <ChevronUp /> : <ChevronDown />}
             </span>
           </div>
           <Collapse in={openStates.financialTrends}>
             <div className="section-body">
-              <h2 style={{ marginBottom: "20px" }}>
+              <p className="section-sub-header">
                 Revenue growth with EBITDA and PAT margins
-              </h2>
+              </p>
               <Barchart
+                isPrivateDeal={isPrivateDeal}
+                data={dealDetails?.data?.financial_highlights?.financial_trends?.data || []}
+              />
+              <IncomeStatementTrends
                 isPrivateDeal={isPrivateDeal}
                 data={dealDetails?.data?.financial_highlights?.financial_trends?.data || []}
               />
@@ -287,117 +999,73 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
         </div>
       )}
 
-      {/* Financial Performance */}
-      {dealDetails?.data?.financial_highlights?.financial_performance?.status && (
+      {/* Balance Sheet */}
+      {(dealDetails?.data?.financial_highlights?.balance_sheet?.status || dealDetails?.data?.financial_highlights?.financial_performance?.status) && (
         <div className="section">
           <div
             className="section-header"
-            onClick={() => toggleSection("financialPerformance")}
+            onClick={() => toggleSection("balanceSheet")}
           >
-            <h3>Financial Performance</h3>
+            <h3>Balance Sheet</h3>
             <span>
-              {openStates.financialPerformance ? <ChevronUp /> : <ChevronDown />}
+              {openStates.balanceSheet ? <ChevronUp /> : <ChevronDown />}
             </span>
           </div>
 
-          <Collapse in={openStates.financialPerformance}>
+          <Collapse in={openStates.balanceSheet}>
             <div className="section-body financial-performance-ui">
-              <div className="financialTableWrapper">
-                <table className="financialTable">
-                  <thead>
-                    <tr>
-                      <th className="th-metric">METRIC</th>
-                      {[...formattedData].sort((a, b) => Number(a.year) - Number(b.year)).map((d, i, arr) => (
-                        <th key={i} className={i === arr.length - 1 ? "th-current" : "th-year"}>
-                          FY&apos;{Math.floor(Number(d.year)).toString().slice(-2)}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { isCategory: true, label: "Revenue & Growth" },
-                      { label: "Revenue (₹Cr)", key: "revenue" },
-                      { label: "Growth (%)", key: "growth" },
-                      { isCategory: true, label: "Earnings (Margins %)" },
-                      { label: "EBITDA (Cr %)", key: "ebitda" },
-                      { label: "PAT (Cr %)", key: "pat" },
-                      { isCategory: true, label: "Valuation" },
-                      { label: "P/E Ratio", key: "peratio" },
-                      { isCategory: true, label: "Profitability Metrics" },
-                      { label: "ROE (%)", key: "roe" },
-                      { label: "ROCE (%)", key: "roce" },
-                      { label: "ROA (%)", key: "roa" },
-                      { isCategory: true, label: "Leverage & Coverage" },
-                      { label: "Debt-To-Equity Ratio (x)", key: "debttoequity" },
-                      { label: "Interest Coverage Ratio (x)", key: "interestcoverage" },
-                      { isCategory: true, label: "Working Capital" },
-                      { label: "Debtor Days", key: "debtordays" },
-                      { label: "Creditor Days", key: "creditordays" },
-                      { label: "Inventory Days", key: "inventorydays" },
-                      { isCategory: true, label: "Asset Efficiency" },
-                      { label: "Long-Term Funds To Fixed Assets", key: "longtermfundstofixed" },
-                      { isCategory: true, label: "Liquidity & Cost Structure" },
-                      { label: "Current Ratio (x)", key: "currentratio" },
-                      { label: "COGS (% Of Revenue)", key: "cogs" }
-                    ].map((row, idx) => {
-                      if (row.isCategory) {
-                        return (
-                          <tr key={idx} className="tr-category">
-                            <td className="td-category-label">{row.label}</td>
-                            <td colSpan={formattedData.length}></td>
-                          </tr>
-                        );
-                      }
+              <BalanceSheetSection
+                isPrivateDeal={isPrivateDeal}
+                data={dealDetails?.data?.financial_highlights?.balance_sheet?.data || []}
+              />
+            </div>
+          </Collapse>
+        </div>
+      )}
 
-                      const sortedFilteredData = [...formattedData].sort((a, b) => Number(a.year) - Number(b.year));
+      {/* Cash Flow */}
+      {(dealDetails?.data?.financial_highlights?.cash_flow?.status || dealDetails?.data?.financial_highlights?.financial_performance?.status || dealDetails?.data?.financial_highlights?.balance_sheet?.status) && (
+        <div className="section">
+          <div
+            className="section-header"
+            onClick={() => toggleSection("cashFlow")}
+          >
+            <h3>Cash Flow</h3>
+            <span>
+              {openStates.cashFlow ? <ChevronUp /> : <ChevronDown />}
+            </span>
+          </div>
 
-                      return (
-                        <tr key={idx} className="tr-data">
-                          <td className="td-label">{row.label}</td>
-                          {sortedFilteredData.map((yearData, colIdx) => {
-                            const field = yearData[row.key];
-                            const rawValue = field?.status ? field.value : "-";
-                            const isLastCol = colIdx === sortedFilteredData.length - 1;
+          <Collapse in={openStates.cashFlow}>
+            <div className="section-body financial-performance-ui">
+              <CashFlowSection
+                isPrivateDeal={isPrivateDeal}
+                data={dealDetails?.data?.financial_highlights?.cash_flow?.data || []}
+              />
+            </div>
+          </Collapse>
+        </div>
+      )}
 
-                            // Formatter
-                            let displayVal = rawValue;
-                            let cellColor = "inherit";
+      {/* Working Capital */}
+      {(dealDetails?.data?.financial_highlights?.working_capital?.status || dealDetails?.data?.financial_highlights?.financial_performance?.status || dealDetails?.data?.financial_highlights?.balance_sheet?.status) && (
+        <div className="section">
+          <div
+            className="section-header"
+            onClick={() => toggleSection("workingCapital")}
+          >
+            <h3>Working Capital</h3>
+            <span>
+              {openStates.workingCapital ? <ChevronUp /> : <ChevronDown />}
+            </span>
+          </div>
 
-                            if (rawValue !== "-" && rawValue !== null && rawValue !== undefined) {
-                              const numString = Number(rawValue).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-                              if (["growth"].includes(row.key)) displayVal = `${Number(rawValue) > 0 ? '+' : ''}${numString}%`;
-                              else if (["roe", "roce", "roa", "cogs", "ebitda", "pat"].includes(row.key)) displayVal = `${numString}%`;
-                              else if (["peratio", "debttoequity", "interestcoverage", "longtermfundstofixed", "currentratio"].includes(row.key)) displayVal = `${numString}x`;
-                              else displayVal = numString;
-
-                              if (isLastCol) {
-                                if (["growth", "roe", "roce", "roa", "ebitda", "pat"].includes(row.key)) {
-                                  cellColor = Number(rawValue) < 0 ? "#DC2626" : "#16A34A";
-                                } else {
-                                  cellColor = "#16A34A";
-                                }
-                              }
-                            } else {
-                              displayVal = "-";
-                            }
-
-                            return (
-                              <td
-                                key={colIdx}
-                                className={`td-value ${isLastCol ? "td-current" : ""}`}
-                                style={{ color: isLastCol ? cellColor : "inherit" }}
-                              >
-                                {displayVal}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+          <Collapse in={openStates.workingCapital}>
+            <div className="section-body financial-performance-ui">
+              <WorkingCapitalSection
+                isPrivateDeal={isPrivateDeal}
+                data={dealDetails?.data?.financial_highlights?.working_capital?.data || []}
+              />
             </div>
           </Collapse>
         </div>
@@ -419,28 +1087,67 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
             <div className="section-body">
               <div>
                 {/* Tabs Header */}
-                <div className="customTabs">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.key}
-                      className={`customTab ${activeTab === tab.key ? "active" : ""
-                        }`}
-                      onClick={() => setActiveTab(tab.key)}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
+                <div className="customTabsWrapper">
+                  <div className="customTabs" ref={tabsContainerRef} style={{ position: "relative" }}>
+                    <div
+                      className="customTabIndicator"
+                      style={{
+                        left: `${activeStyle.left}px`,
+                        width: `${activeStyle.width}px`,
+                      }}
+                    />
+                    {tabs.map((tab) => (
+                      <button
+                        key={tab.key}
+                        className={`customTab ${activeTab === tab.key ? "active" : ""
+                          }`}
+                        onClick={() => setActiveTab(tab.key)}
+                        style={{ position: "relative", zIndex: 1 }}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tab Description */}
+                <div className="ratioTabDescription">
+                  {tabDescriptions[activeTab]}
                 </div>
 
                 {/* Tabs Content */}
                 <div className="tabContent">
-                  {activeTab === "ROE" && (
-                    <PurpleBarchart
+                  {activeTab === "ROCE (%)" && (
+                    <ROCEBarchart
                       isPrivate={isPrivateDeal}
                       data={dealDetails?.data?.financial_highlights?.financial_ratio?.data || []}
                     />
                   )}
-                  {activeTab === "DEBT" && (
+                  {activeTab === "ROE (%)" && (
+                    <ROEBarchart
+                      isPrivate={isPrivateDeal}
+                      data={dealDetails?.data?.financial_highlights?.financial_ratio?.data || []}
+                    />
+                  )}
+                  {activeTab === "ROA (%)" && (
+                    <ROABarchart
+                      isPrivate={isPrivateDeal}
+                      data={dealDetails?.data?.financial_highlights?.financial_ratio?.data || []}
+                    />
+                  )}
+                  {activeTab === "Current Ratio (x)" && (
+                    <CurrentRatioBarchart
+                      isPrivate={isPrivateDeal}
+                      data={dealDetails?.data?.financial_highlights?.financial_ratio?.data || []}
+                    />
+                  )}
+                  {activeTab === "Interest Coverage Ratio (x)" && (
+                    <InterestCoverageBarchart
+                      isPrivate={isPrivateDeal}
+                      data={dealDetails?.data?.financial_highlights?.financial_ratio?.data || []}
+                    />
+                  )}
+                  {activeTab === "Debt to Equity (x)" && (
                     <DebtBarChart
                       isPrivate={isPrivateDeal}
                       data={dealDetails?.data?.financial_highlights?.financial_ratio?.data || []}

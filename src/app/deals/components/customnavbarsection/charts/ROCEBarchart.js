@@ -12,31 +12,30 @@ import {
     LabelList,
 } from "recharts";
 
-const DebtBarChart = ({ isPrivate, data: apiData }) => {
+const ROCEBarchart = ({ isPrivate, data: apiData }) => {
     // Transform API data to chart format with error handling
     const transformData = (data) => {
         try {
             if (!data || !Array.isArray(data) || data.length === 0) {
-                console.warn('DebtBarChart: No valid data provided, using fallback');
+                console.warn('ROCEBarchart: No valid data provided, using fallback');
                 return [];
             }
 
             return data
                 .map(item => {
                     if (!item || typeof item !== 'object') {
-                        console.warn('DebtBarChart: Invalid item in data array', item);
+                        console.warn('ROCEBarchart: Invalid item in data array', item);
                         return null;
                     }
 
                     return {
                         year: item.year ? Math.floor(Number(item.year)).toString() : "0000",
-                        // FIX: convert string/number to number
-                        value: Number(item.debt_to_equity) || 0
+                        value: Number(item.roce) || Number(item.roce_percent) || 0
                     };
                 })
-                .filter(item => item !== null);
+                .filter(item => item !== null && item.value > 0);
         } catch (error) {
-            console.error('DebtBarChart: Error transforming data', error);
+            console.error('ROCEBarchart: Error transforming data', error);
             return [];
         }
     };
@@ -47,43 +46,42 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
             if (apiData) {
                 const transformed = transformData(apiData);
                 return transformed.length > 0 ? transformed : [
-                    { year: "2022", value: 1.28 },
-                    { year: "2023", value: 0.88 },
-                    { year: "2024", value: 1.09 }
+                    { year: "2022", value: 18.5 },
+                    { year: "2023", value: 21.5 },
+                    { year: "2024", value: 31.6 }
                 ];
             }
             return [
-                { year: "2022", value: 1.28 },
-                { year: "2023", value: 0.88 },
-                { year: "2024", value: 1.09 }
+                { year: "2022", value: 18.5 },
+                { year: "2023", value: 21.5 },
+                { year: "2024", value: 31.6 }
             ];
         } catch (error) {
-            console.error('DebtBarChart: Error selecting chart data', error);
+            console.error('ROCEBarchart: Error selecting chart data', error);
             return [
-                { year: "2022", value: 1.28 },
-                { year: "2023", value: 0.88 },
-                { year: "2024", value: 1.09 }
+                { year: "2022", value: 18.5 },
+                { year: "2023", value: 21.5 },
+                { year: "2024", value: 31.6 }
             ];
         }
     })();
 
     const { ticks, domain } = React.useMemo(() => {
-        const maxVal = Math.max(...chartData.map(d => d.value), 0) || 1.28;
+        const maxVal = Math.max(...chartData.map(d => d.value), 0) || 31.6;
         
-        // For small ratio values, use exact screenshot ticks
-        if (maxVal <= 1.5) {
+        // For standard screenshot range, use exact ticks matching [0.00, 10.0%, 20.0%, 30.0%, 40.0%]
+        if (maxVal <= 40.0) {
             return {
-                ticks: [0.00, 0.35, 0.70, 1.05, 1.40],
-                domain: [0, 1.40]
+                ticks: [0, 10, 20, 30, 40],
+                domain: [0, 40]
             };
         }
         
-        // We want 4 intervals. Let's find an interval such that 4 * interval is just above maxVal.
+        // Calculate nice intervals dynamically for larger values
         const rawInterval = maxVal / 3.5;
         const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
         const normalized = rawInterval / magnitude;
         
-        // Finer nice steps for beautiful numbers
         const niceSteps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
         const step = niceSteps.find(s => s >= normalized) || 10;
         
@@ -98,9 +96,9 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
 
     return (
         <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={chartData} barSize={60} margin={{ top: 25, right: 10, left: -20, bottom: 5 }}>
+            <BarChart data={chartData} barSize={60} margin={{ top: 25, right: 10, left: -20, bottom: 20 }}>
                 <defs>
-                    <linearGradient id="debtLatestBarGradient" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id="roceLatestBarGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#E4C575" />
                         <stop offset="100%" stopColor="#B57D23" />
                     </linearGradient>
@@ -132,7 +130,7 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
                     }}
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={(value) => value.toFixed(2)}
+                    tickFormatter={(value) => value === 0 ? "0.00" : `${value.toFixed(1)}%`}
                 />
                 <Tooltip
                     cursor={{ fill: "transparent" }}
@@ -151,7 +149,7 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
                                 >
                                     <p style={{ margin: 0, fontWeight: "600", fontSize: 13 }}>{label}</p>
                                     <p style={{ margin: 0, color: "#B57D23", fontSize: 13, fontWeight: "500" }}>
-                                        D/E: {Number(payload[0].value).toFixed(2)} x
+                                        ROCE: {Number(payload[0].value).toFixed(1)}%
                                     </p>
                                 </div>
                             );
@@ -165,17 +163,19 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
                 >
                     {chartData.map((entry, index) => {
                         const isLatest = index === chartData.length - 1;
+                        // Earlier bars -> Solid pale gold (#F5E3B2)
+                        // Latest bar -> Gold gradient
                         return (
                             <Cell
                                 key={`cell-${index}`}
-                                fill={isLatest ? "url(#debtLatestBarGradient)" : "#F5E3B2"}
+                                fill={isLatest ? "url(#roceLatestBarGradient)" : "#F5E3B2"}
                             />
                         );
                     })}
                     <LabelList
                         dataKey="value"
                         position="top"
-                        formatter={(val) => `${Number(val).toFixed(2)} x`}
+                        formatter={(val) => `${Number(val).toFixed(1)}%`}
                         style={{
                             fill: "var(--Gray-500, #4B5563)",
                             fontSize: "13px",
@@ -190,4 +190,4 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
     );
 };
 
-export default DebtBarChart;
+export default ROCEBarchart;

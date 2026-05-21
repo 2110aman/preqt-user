@@ -5,6 +5,7 @@ import { useMediaQuery } from "react-responsive";
 import {
   ComposedChart,
   Bar,
+  Cell,
   Line,
   XAxis,
   YAxis,
@@ -91,6 +92,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
         <YAxis
           yAxisId="left"
           orientation="left"
+          domain={[0, (dataMax) => Math.ceil(dataMax * 1.15)]}
           label={{
             value: "Revenue (₹ Cr)",
             angle: -90,
@@ -281,13 +283,22 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
           yAxisId="left"
           dataKey="revenue"
           barSize={isMobile ? 30 : 60} // 👈 smaller bar on mobile
-          fill="url(#goldGradient)"
           radius={[6, 6, 0, 0]}
         >
+          {chartData.map((entry, index) => {
+            const isLatestYear = index === chartData.length - 1;
+            return (
+              <Cell
+                key={`cell-${index}`}
+                fill={isLatestYear ? "url(#latestYearGradient)" : "#F5E3B2"}
+              />
+            );
+          })}
           <LabelList
             dataKey="revenue"
             position="top"
             formatter={(val) => Number(val).toFixed(1)}
+            fill="#9CA3AF"
           />
         </Bar>
 
@@ -313,6 +324,10 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
 
         {/* Gradient for Bar */}
         <defs>
+          <linearGradient id="latestYearGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#E4C575" />
+            <stop offset="100%" stopColor="#B57D23" />
+          </linearGradient>
           <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgba(181, 145, 49, 1)" />
             <stop offset="100%" stopColor="rgba(230, 207, 147, 1)" />

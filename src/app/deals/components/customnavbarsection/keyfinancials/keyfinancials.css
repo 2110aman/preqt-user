@@ -5,7 +5,8 @@
   gap: 10px;
   align-self: stretch;
   cursor: pointer;
-  padding: 12px 0;  
+  margin-top: 24px;
+  padding: 12px 0;
   /* margin-bottom: 12px; */
 }
 
@@ -18,9 +19,10 @@
   /* 140% */
 }
 
-.section-body h2 {
-  color: var(--Slate-800, #1E293B);
+.section-body p {
+  color: var(--Slate-800, #64748B);
   font-size: 14px;
+  margin-bottom: 20px;
   font-style: normal;
   font-weight: 500;
   line-height: 150%;
@@ -44,7 +46,7 @@
   padding-bottom: 10px;
 }
 
-.key-financials-container{
+.key-financials-container {
   border-radius: 32px;
 }
 
@@ -54,7 +56,7 @@
   font-weight: 300;
   color: #1f2937;
   padding-bottom: 10px;
- 
+
 }
 
 .section {
@@ -145,16 +147,17 @@
 
 
 .s22 {
-    display: flex;
-    gap: 16px;
+  display: flex;
+  gap: 16px;
 
-   color: var(--Gray-500, #6B7280);
-font-size: 14px;
-font-style: normal;
-font-weight: 400;
-line-height: 24px; /* 133.333% */
-    align-items: center;
-    /* font-family: Helvetica; */
+  color: var(--Gray-500, #6B7280);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px;
+  /* 133.333% */
+  align-items: center;
+  /* font-family: Helvetica; */
 }
 
 .s22 strong {
@@ -171,7 +174,8 @@ line-height: 24px; /* 133.333% */
   display: flex;
   margin-bottom: 16px;
 }
-.private-deal .financial-tabs{
+
+.private-deal .financial-tabs {
   background-color: #3F3F46;
   border: none;
 }
@@ -183,7 +187,8 @@ line-height: 24px; /* 133.333% */
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
-  line-height: 16px; /* 114.286% */
+  line-height: 16px;
+  /* 114.286% */
 }
 
 .financial-tabs button {
@@ -193,7 +198,7 @@ line-height: 24px; /* 133.333% */
   line-height: 16px;
   padding: 5px 10px 5px 10px !important;
   border: none !important;
- 
+
 }
 
 
@@ -213,26 +218,29 @@ line-height: 24px; /* 133.333% */
 
 .financial-tabs .nav-link.active {
   color: var(--Black, #000);
-text-align: center;
-font-family: "Helvetica Neue";
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 16px; /* 114.286% */
+  text-align: center;
+  font-family: "Helvetica Neue";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+  /* 114.286% */
   background-color: white;
   border-radius: 8px !important;
 
   border: none !important;
 }
-.private-deal .financial-tabs .nav-link.active{
-background: var(--Zinc-500, #71717A);
-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-color: var(--White-White, #FFF);
-text-align: center;
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 16px; /* 114.286% */
+
+.private-deal .financial-tabs .nav-link.active {
+  background: var(--Zinc-500, #71717A);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  color: var(--White-White, #FFF);
+  text-align: center;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+  /* 114.286% */
 }
 
 .financial-tabs .nav-item button:active {
@@ -250,16 +258,18 @@ line-height: 16px; /* 114.286% */
   padding: 24px;
 }
 
-.accordion-item:not(:first-child){
+.accordion-item:not(:first-child) {
   border-top: 1px solid var(--Slate-200, #E2E8F0);
 }
-.accordion-item:first-of-type{
-  border-top-left-radius:16px;
-  border-top-right-radius:16px
+
+.accordion-item:first-of-type {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px
 }
-.accordion-item:last-of-type{
-  border-bottom-right-radius:16px;
-  border-bottom-left-radius:16px;
+
+.accordion-item:last-of-type {
+  border-bottom-right-radius: 16px;
+  border-bottom-left-radius: 16px;
 }
 
 .accordion-header {
@@ -268,11 +278,13 @@ line-height: 16px; /* 114.286% */
   font-weight: 500;
   cursor: pointer;
 }
-.accordion-header span{
+
+.accordion-header span {
   font-size: 14px;
 }
 
-.accordion-body {border-radius: 16px;
+.accordion-body {
+  border-radius: 16px;
   /* padding: 24px 32px; */
 
   margin-top: 14px;
@@ -280,11 +292,13 @@ line-height: 16px; /* 114.286% */
   flex-direction: column;
   /* gap: 16px; */
 }
-.revenue-count{
+
+.revenue-count {
   display: flex;
   align-items: center;
   gap: 24px;
 }
+
 .metric-block {
   border-top: 1px solid #e5ebf0;
   padding-top: 12px;
@@ -326,12 +340,13 @@ line-height: 16px; /* 114.286% */
 
 .positive {
   color: var(--Green-600, #16A34A);
-font-family: "Helvetica Neue";
-font-size: 16px;
-font-style: normal;
-font-weight: 500;
-line-height: 24px; /* 150% */
-text-transform: capitalize;
+  font-family: "Helvetica Neue";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  /* 150% */
+  text-transform: capitalize;
 }
 
 .negative {
@@ -343,7 +358,8 @@ text-transform: capitalize;
 .private-deal .key-financials-container .Accordion.Header,
 .private-deal .metric-block h4,
 .private-deal .accordion-item button {
-  color: #9CA3AF !important; /* Heading gray */
+  color: #9CA3AF !important;
+  /* Heading gray */
 }
 
 /* Value color */
@@ -353,21 +369,49 @@ text-transform: capitalize;
 .private-deal .financial-performance .accordion-body h2,
 .private-deal .financial-performance .accordion-body section p,
 .private-deal .s22 strong,
-.private-deal .metric-block p{
-  color: white !important; /* Value text white */
-  
+.private-deal .metric-block p {
+  color: white !important;
+  /* Value text white */
+
 }
 
-.private-deal .s22{
-color: #9CA3AF;
+.private-deal .s22 {
+  color: #9CA3AF;
 }
 
 /* Graph / Border color */
 .private-deal .accordion-item,
 .private-deal .metric-block,
 .private-deal .section {
-  border-color: #3F3F46 !important; /* Dark Slate border */
+  border-color: #3F3F46 !important;
+  /* Dark Slate border */
 
+}
+
+.customTabsWrapper {
+  width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.customTabsWrapper::-webkit-scrollbar {
+  height: 4px;
+}
+
+.customTabsWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customTabsWrapper::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 10px;
+}
+
+.private-deal .customTabsWrapper::-webkit-scrollbar-thumb {
+  background: #4B5563;
 }
 
 .customTabs {
@@ -381,13 +425,14 @@ color: #9CA3AF;
   padding: 8px 12px !important;
   border-radius: 10px !important;
   background: transparent !important;
- color: var(--Slate-500, #64748B);
-text-align: center;
-font-family: "Helvetica Neue";
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 16px; /* 114.286% */
+  color: var(--Slate-500, #64748B);
+  text-align: center;
+  font-family: "Helvetica Neue";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+  /* 114.286% */
   border: none !important;
   cursor: pointer !important;
   transition: all 0.3s ease !important;
@@ -395,17 +440,33 @@ line-height: 16px; /* 114.286% */
 
 
 
-.customTab.active {
-  background: rgba(255, 255, 255, 1) !important;
+.customTabIndicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  background: #FFFFFF !important;
   border-radius: 6px !important;
-  box-shadow: 0px 2px 6px rgba(0,0,0,0.1) !important;
-  color: var(--Black, #000);
-text-align: center;
-font-family: "Helvetica Neue";
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 16px; /* 114.286% */
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  z-index: 0 !important;
+}
+
+.private-deal .customTabIndicator {
+  background: var(--Zinc-500, #71717A) !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.customTab.active {
+  background: transparent !important;
+  color: var(--Black, #000) !important;
+  box-shadow: none !important;
+  text-align: center;
+  font-family: "Helvetica Neue";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 16px;
+  /* 114.286% */
   transform: translateY(0px) !important;
 }
 
@@ -413,50 +474,53 @@ line-height: 16px; /* 114.286% */
   margin-top: 1rem !important;
 }
 
-.private-deal .customTabs{
+.private-deal .customTabs {
   background-color: #3F3F46 !important;
 }
-.private-deal .customTab{
+
+.private-deal .customTab {
   color: #D4D4D8 !important;
 }
- 
-.private-deal .customTab.active{
-background: var(--Zinc-500, #71717A) !important;
-color: #FFF !important;
-/* shadows/shadow-sm */
-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+
+.private-deal .customTab.active {
+  background: transparent !important;
+  color: #FFF !important;
+  box-shadow: none !important;
 }
 
 @media(max-width:920px) {
-   .key-financials-container{
+  .key-financials-container {
     padding-top: 0;
   }
 
 }
 
 @media(max-width:768px) {
-   .metric-block p {
-  display: flex;
-  justify-content: space-between;
+  .metric-block p {
+    display: flex;
+    justify-content: space-between;
   }
+
   .metric-block p span {
-  flex: unset;
-}
-.metric-block h4 {
-  /* commet */
-font-size: 20px;
-}
-  
+    flex: unset;
+  }
+
+  .metric-block h4 {
+    /* commet */
+    font-size: 20px;
+  }
+
 
 }
 
 
 @media(max-width:480px) {
-  .key-financials-container{
+  .key-financials-container {
     padding: 12px;
     padding-top: 0;
     padding-bottom: 15px;
   }
+
   /* .metric-block p {
   display: flex;
   justify-content: space-between;
@@ -466,23 +530,28 @@ font-size: 20px;
 } */
 
 
-  .section-header{
+  .section-header {
     margin-bottom: 0;
     padding-bottom: 8px;
   }
-  .section-header h3{
+
+  .section-header h3 {
     margin-bottom: 0;
   }
-  .section-body h2{
+
+  .section-body h2 {
     margin-bottom: 15px !important;
   }
-  .revenue-count{
-   gap: 0px;
-  }   
-  .s22{
+
+  .revenue-count {
+    gap: 0px;
+  }
+
+  .s22 {
     gap: 5px;
   }
-  .s22 span svg{
+
+  .s22 span svg {
     display: none;
   }
 }
@@ -493,7 +562,7 @@ font-size: 20px;
 
 /* CSS for new Financial Performance Table */
 .financial-performance-ui {
-  padding: 0; 
+  padding: 0;
   /* margin-top: 16px; */
 }
 
@@ -510,10 +579,12 @@ font-size: 20px;
 .financialTableWrapper::-webkit-scrollbar {
   width: 6px;
 }
+
 .financialTableWrapper::-webkit-scrollbar-thumb {
   background: #D1D5DB;
   border-radius: 3px;
 }
+
 .private-deal .financialTableWrapper::-webkit-scrollbar-thumb {
   background: #3f3f46;
 }
@@ -525,7 +596,8 @@ font-size: 20px;
   min-width: 600px;
 }
 
-.financialTable th, .financialTable td {
+.financialTable th,
+.financialTable td {
   padding: 12px 16px;
   font-size: 14px;
   white-space: nowrap;
@@ -552,7 +624,7 @@ font-size: 20px;
 /* Add a pseudo-element or adjust the FY2024 header background */
 .financialTable thead th.th-current {
   color: #B59131;
-  background-color: #FDF9EE; 
+  background-color: #FDF9EE;
 }
 
 .financialTable .th-metric {
@@ -600,12 +672,13 @@ font-size: 20px;
 }
 
 .financialTable .td-label {
-  text-align: left;
+  text-align: right;
   color: #4B5563;
   font-weight: 300;
   position: sticky;
   left: 0;
   z-index: 15;
+
   background-color: #FFFFFF;
   border-right: 1px solid #E5E7EB;
   width: 200px;
@@ -620,7 +693,7 @@ font-size: 20px;
 }
 
 .financialTable .td-current {
-  background-color: #FCF9ED; 
+  background-color: #FCF9ED;
   font-weight: 500;
 }
 
@@ -643,7 +716,7 @@ font-size: 20px;
 
 .private-deal .financialTable thead th.th-current {
   color: #D4AF37;
-  background-color: #1a1a1c; 
+  background-color: #1a1a1c;
 }
 
 .private-deal .financialTable .tr-category td {
@@ -660,6 +733,7 @@ font-size: 20px;
 .private-deal .financialTable .td-label {
   color: #E5E7EB;
   background-color: #27272a;
+  font-size: 16px;
   border-right: 1px solid #3F3F46;
 }
 
@@ -684,9 +758,791 @@ font-size: 20px;
 }
 
 .private-deal .financialTable .td-current {
-  background-color: #1a1a1c; 
+  background-color: #1a1a1c;
 }
 
 .private-deal .financialTable thead th::after {
   background: #3F3F46;
+}
+
+/* Income Statement Table Styles */
+.incomeStatementTableWrapper {
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  padding: 0;
+  overflow-x: auto;
+  position: relative;
+  margin-top: 24px;
+}
+
+.private-deal .incomeStatementTableWrapper {
+  border-color: #3F3F46 !important;
+  background-color: #18181B !important;
+}
+
+.incomeStatementTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  min-width: 500px;
+}
+
+.incomeStatementTable th,
+.incomeStatementTable td {
+  padding: 14px 16px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.incomeStatementTable thead th {
+  font-weight: 400;
+  font-size: 14px;
+  border-bottom: 1px solid #E5E7EB;
+  text-transform: capitalize;
+}
+
+.private-deal .incomeStatementTable thead th {
+  border-bottom-color: #3F3F46 !important;
+}
+
+.incomeStatementTable .th-metric {
+  text-align: left;
+  font-weight: 500;
+  color: #9CA3AF;
+  width: 200px;
+  min-width: 200px;
+}
+
+
+
+.incomeStatementTable .th-year-dim {
+  color: #9CA3AF;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.incomeStatementTable .th-year-highlight {
+  color: #B59131;
+  background-color: #FDF9EE;
+  font-weight: 600;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.private-deal .incomeStatementTable .th-year-highlight {
+  color: #D4AF37;
+  background-color: #1a1a1c;
+}
+
+.incomeStatementTable .tr-row {
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.private-deal .incomeStatementTable .tr-row {
+  border-bottom-color: #3F3F46 !important;
+}
+
+.incomeStatementTable .tr-row:last-child {
+  border-bottom: none;
+}
+
+.incomeStatementTable .td-label {
+  text-align: left;
+  color: #4B5563;
+  font-weight: 400;
+}
+
+.private-deal .incomeStatementTable .td-label {
+  color: #D1D5DB;
+}
+
+.incomeStatementTable .td-value-dim {
+  color: #4B5563;
+  font-weight: 400;
+}
+
+.private-deal .incomeStatementTable .td-value-dim {
+  color: #E5E7EB;
+}
+
+.incomeStatementTable .td-value-highlight {
+  background-color: #FDF9EE;
+  color: #16A34A;
+  /* Green from the screenshot */
+  font-weight: 400;
+}
+
+.private-deal .incomeStatementTable .td-value-highlight {
+  background-color: #1a1a1c;
+  color: #10B981;
+  /* beautiful green in dark mode */
+}
+
+/* Observations and Insights Styles */
+.observations-container {
+  background: #B591310D;
+  border: 1px solid #B5913126;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.observations-title {
+  color: var(--Gray-800, #1F2937);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.private-deal .observations-title {
+  color: #FFFFFF !important;
+}
+
+.observations-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.observations-list li {
+  color: var(--Slate-600, #334155);
+  font-size: 14px;
+  line-height: 160%;
+  font-weight: 300;
+  /* margin-bottom: 8px; */
+}
+
+.observations-list li::marker {
+  color: #334155;
+}
+
+.observations-list li:last-child {
+  margin-bottom: 0;
+}
+
+.private-deal .observations-list li {
+  color: #D1D5DB !important;
+}
+
+/* Balance Sheet Accordion Styles */
+.balanceSheetTableWrapper {
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  padding: 0;
+  overflow-x: auto;
+  position: relative;
+  margin-top: 16px;
+}
+
+.private-deal .balanceSheetTableWrapper {
+  border-color: #3F3F46 !important;
+  background-color: #18181B !important;
+}
+
+.balanceSheetTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  min-width: 600px;
+}
+
+.balanceSheetTable th,
+.balanceSheetTable td {
+  padding: 12px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.balanceSheetTable thead th {
+  font-weight: 500;
+  font-size: 14px;
+  color: #9CA3AF;
+  border-bottom: 1px solid #E5E7EB;
+  text-transform: capitalize;
+}
+
+.balanceSheetTable .th-metric {
+  text-align: left;
+  font-weight: 500;
+  color: #9CA3AF;
+  width: 250px;
+  min-width: 250px;
+}
+
+.balanceSheetTable .th-year-dim {
+  color: #9CA3AF;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.balanceSheetTable .th-year-highlight {
+  color: #B59131;
+  background-color: #FDF9EE;
+  font-weight: 500;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.private-deal .balanceSheetTable .th-year-highlight {
+  color: #D4AF37;
+  background-color: #1a1a1c;
+}
+
+/* Category header (e.g. EQUITY & LIABILITIES, ASSETS) */
+.balanceSheetTable .tr-category-header {
+  background-color: #F1F5F9;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.private-deal .balanceSheetTable .tr-category-header {
+  background-color: #27272A;
+  border-bottom-color: #3F3F46 !important;
+}
+
+.balanceSheetTable .tr-category-header td.td-label {
+  font-weight: 500;
+  color: #1F2937;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-left: 12px;
+}
+
+.private-deal .balanceSheetTable .tr-category-header td.td-label {
+  color: #FFFFFF;
+}
+
+.balanceSheetTable .tr-category-header td.td-value-dim {
+  font-weight: 500;
+  text-align: center;
+  color: #B59131;
+}
+
+.tr-sub-header td {
+  background-color: #F8FAFC;
+}
+
+.private-deal .balanceSheetTable .tr-category-header td.td-value-dim {
+  color: #D4AF37;
+  text-align: center;
+}
+
+.balanceSheetTable .tr-category-header td.td-value-highlight {
+  font-weight: 500;
+  text-align: center;
+  color: #B59131;
+  background-color: #FDF9EE;
+}
+
+.private-deal .balanceSheetTable .tr-category-header td.td-value-highlight {
+  color: #D4AF37;
+  background-color: #1a1a1c;
+  text-align: center;
+}
+
+/* Row borders */
+.balanceSheetTable .tr-row {
+  border-bottom: 1px solid #F3F4F6;
+  text-align: center;
+}
+
+.private-deal .balanceSheetTable .tr-row {
+  border-bottom-color: #3F3F46 !important;
+}
+
+.balanceSheetTable .tr-row:last-child {
+  border-bottom: none;
+}
+
+/* Bold / subheader rows (Net Worth, Total Liabilities, etc) */
+.balanceSheetTable .tr-sub-header td.td-label {
+  font-weight: 500;
+  text-align: left;
+  color: #1F2937;
+  padding-left: 16px;
+}
+
+.private-deal .balanceSheetTable .tr-sub-header td.td-label {
+  color: #E5E7EB;
+}
+
+.balanceSheetTable .tr-sub-header td.td-value-dim {
+  font-weight: 5next 00;
+  text-align: center;
+  color: #1F2937;
+}
+
+.private-deal .balanceSheetTable .tr-sub-header td.td-value-dim {
+  color: #E5E7EB;
+  text-align: center;
+}
+
+.balanceSheetTable .tr-sub-header td.td-value-highlight {
+  font-weight: 500;
+  color: #1F2937;
+  text-align: center;
+  background-color: #FDF9EE;
+}
+
+.private-deal .balanceSheetTable .tr-sub-header td.td-value-highlight {
+  color: #FFFFFF;
+  text-align: center;
+  background-color: #1a1a1c;
+}
+
+/* Indented rows (Share Capital, Reserves & Surplus) */
+.balanceSheetTable .tr-indented td.td-label {
+  padding-left: 36px;
+  color: #64748B;
+  text-align: left;
+  font-weight: 400;
+}
+
+.private-deal .balanceSheetTable .tr-indented td.td-label {
+  color: #9CA3AF;
+}
+
+.balanceSheetTable .tr-indented td.td-value-dim {
+  color: #64748B;
+  text-align: center;
+  font-weight: 400;
+}
+
+.private-deal .balanceSheetTable .tr-indented td.td-value-dim {
+  color: #9CA3AF;
+  text-align: center;
+}
+
+.balanceSheetTable .tr-indented td.td-value-highlight {
+  color: #64748B;
+  font-weight: 400;
+  text-align: center;
+  background-color: #FDF9EE;
+}
+
+.private-deal .balanceSheetTable .tr-indented td.td-value-highlight {
+  color: #D4D4D8;
+  background-color: #1a1a1c;
+}
+
+/* Tooltip container and popover styles */
+.bs-tooltip-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.bs-tooltip-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.bs-tooltip-icon:hover {
+  opacity: 1;
+}
+
+.bs-tooltip-text {
+  visibility: hidden;
+  width: 240px;
+  background-color: #1E293B;
+  color: #FFFFFF;
+  text-align: left;
+  border-radius: 8px;
+  padding: 10px 12px;
+  position: absolute;
+  z-index: 1050;
+  bottom: 130%;
+  /* Show above icon */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 150%;
+  pointer-events: none;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.bs-tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -6px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: #1E293B transparent transparent transparent;
+}
+
+.bs-tooltip-container:hover .bs-tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Bold indented rows (Current Liabilities, Non-Current Liabilities) */
+.balanceSheetTable .tr-indented.tr-indented-bold td.td-label {
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.private-deal .balanceSheetTable .tr-indented.tr-indented-bold td.td-label {
+  color: #E5E7EB;
+}
+
+.balanceSheetTable .tr-indented.tr-indented-bold td.td-value-dim {
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.private-deal .balanceSheetTable .tr-indented.tr-indented-bold td.td-value-dim {
+  color: #E5E7EB;
+}
+
+.balanceSheetTable .tr-indented.tr-indented-bold td.td-value-highlight {
+  font-weight: 500;
+  color: #1F2937;
+  background-color: #FDF9EE;
+}
+
+.private-deal .balanceSheetTable .tr-indented.tr-indented-bold td.td-value-highlight {
+  color: #FFFFFF;
+  background-color: #1a1a1c;
+}
+
+/* Cash Flow Accordion Styles */
+.cashFlowTableWrapper {
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  padding: 0;
+  overflow-x: auto;
+  position: relative;
+  margin-top: 16px;
+}
+
+.private-deal .cashFlowTableWrapper {
+  border-color: #3F3F46 !important;
+  background-color: #18181B !important;
+}
+
+.cashFlowTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  min-width: 600px;
+}
+
+.cashFlowTable th,
+.cashFlowTable td {
+  padding: 14px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.cashFlowTable thead th {
+  font-weight: 500;
+  font-size: 14px;
+  color: #9CA3AF;
+  border-bottom: 1px solid #E5E7EB;
+  text-transform: capitalize;
+}
+
+.cashFlowTable .th-metric {
+  text-align: left;
+  font-weight: 500;
+  color: #9CA3AF;
+  width: 250px;
+  min-width: 250px;
+}
+
+.cashFlowTable .th-year-dim {
+  color: #9CA3AF;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.cashFlowTable .th-year-highlight {
+  color: #B59131;
+  background-color: #FDF9EE;
+  font-weight: 500;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.private-deal .cashFlowTable .th-year-highlight {
+  color: #D4AF37;
+  background-color: #1a1a1c;
+}
+
+.cashFlowTable .tr-row {
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.private-deal .cashFlowTable .tr-row {
+  border-bottom-color: #3F3F46 !important;
+}
+
+.cashFlowTable .tr-row:last-child {
+  border-bottom: none;
+}
+
+.cashFlowTable .td-label {
+  text-align: left;
+  color: #1F2937;
+  font-weight: 500;
+  width: 250px;
+  min-width: 250px;
+}
+
+.private-deal .cashFlowTable .td-label {
+  color: #FFFFFF;
+}
+
+.cf-metric-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.private-deal .cf-metric-title {
+  color: #FFFFFF;
+}
+
+.cf-metric-desc {
+  font-size: 13px;
+  color: #9CA3AF;
+  margin-top: 4px;
+  font-weight: 300;
+  white-space: normal;
+  line-height: 140%;
+}
+
+.private-deal .cf-metric-desc {
+  color: #9CA3AF;
+}
+
+.cashFlowTable .td-value-dim {
+  font-weight: 500;
+  text-align: center;
+}
+
+.cashFlowTable .td-value-highlight {
+  font-weight: 500;
+  text-align: center;
+  background-color: #FDF9EE;
+}
+
+.private-deal .cashFlowTable .td-value-highlight {
+  background-color: #1a1a1c;
+}
+
+/* Green and Red values styling for Cash Flow */
+.cf-positive {
+  color: #16A34A !important;
+}
+
+.private-deal .cf-positive {
+  color: #10B981 !important;
+}
+
+.cf-negative {
+  color: #DC2626 !important;
+}
+
+.private-deal .cf-negative {
+  color: #EF4444 !important;
+}
+
+/* Working Capital Accordion Styles */
+.workingCapitalTableWrapper {
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  padding: 0;
+  overflow-x: auto;
+  position: relative;
+  margin-top: 16px;
+}
+
+.private-deal .workingCapitalTableWrapper {
+  border-color: #3F3F46 !important;
+  background-color: #18181B !important;
+}
+
+.workingCapitalTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  min-width: 600px;
+}
+
+.workingCapitalTable th,
+.workingCapitalTable td {
+  padding: 14px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.workingCapitalTable thead th {
+  font-weight: 500;
+  font-size: 14px;
+  color: #9CA3AF;
+  border-bottom: 1px solid #E5E7EB;
+  text-transform: capitalize;
+}
+
+.workingCapitalTable .th-metric {
+  text-align: left;
+  font-weight: 500;
+  color: #9CA3AF;
+  width: 250px;
+  min-width: 250px;
+}
+
+.workingCapitalTable .th-year-dim {
+  color: #9CA3AF;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.workingCapitalTable .th-year-highlight {
+  color: #B59131;
+  background-color: #FDF9EE;
+  font-weight: 500;
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.private-deal .workingCapitalTable .th-year-highlight {
+  color: #D4AF37;
+  background-color: #1a1a1c;
+}
+
+.workingCapitalTable .tr-row {
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.private-deal .workingCapitalTable .tr-row {
+  border-bottom-color: #3F3F46 !important;
+}
+
+.workingCapitalTable .tr-row:last-child {
+  border-bottom: none;
+}
+
+.workingCapitalTable .td-label {
+  text-align: left;
+  color: #1F2937;
+  font-weight: 500;
+  width: 250px;
+  min-width: 250px;
+}
+
+.private-deal .workingCapitalTable .td-label {
+  color: #FFFFFF;
+}
+
+.wc-metric-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1F2937;
+}
+
+.private-deal .wc-metric-title {
+  color: #FFFFFF;
+}
+
+.wc-metric-desc {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 4px;
+  font-weight: 300;
+  white-space: normal;
+  line-height: 140%;
+}
+
+.private-deal .wc-metric-desc {
+  color: #9CA3AF;
+}
+
+.workingCapitalTable .td-value-dim {
+  font-weight: 500;
+  color: #4B5563;
+  text-align: center;
+}
+
+.private-deal .workingCapitalTable .td-value-dim {
+  color: #E5E7EB;
+}
+
+.workingCapitalTable .td-value-highlight {
+  font-weight: 500;
+  color: #111827;
+  text-align: center;
+  background-color: #FDF9EE;
+}
+
+.private-deal .workingCapitalTable .td-value-highlight {
+  color: #FFFFFF;
+  background-color: #1a1a1c;
+}
+
+/* CCC Specific row styles */
+.workingCapitalTable .tr-ccc {
+  background-color: #F8FAFC;
+}
+
+.private-deal .workingCapitalTable .tr-ccc {
+  background-color: #27272A;
+}
+
+.workingCapitalTable .tr-ccc td {
+  font-weight: 500 !important;
+}
+
+.workingCapitalTable .tr-ccc .wc-metric-title {
+  font-weight: 500 !important;
+}
+
+.workingCapitalTable .tr-ccc .wc-metric-desc {
+  font-weight: 400 !important;
+  color: #9CA3AF !important;
+}
+
+.private-deal .workingCapitalTable .tr-ccc .wc-metric-desc {
+  color: #A1A1AA !important;
+}
+
+.ratioTabDescription {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0%;
+  color: #64748B;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.private-deal .ratioTabDescription {
+  color: #9CA3AF;
 }
