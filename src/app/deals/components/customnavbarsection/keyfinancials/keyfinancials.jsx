@@ -119,65 +119,134 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
     { label: "PAT Margin (%)", key: "patMargin", format: "percentage" }
   ];
 
+  const tableWrapperRef = useRef(null);
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  const checkScroll = () => {
+    if (tableWrapperRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tableWrapperRef.current;
+      const hasOverflow = scrollWidth > clientWidth;
+      setShowLeftShadow(hasOverflow && scrollLeft > 5);
+      setShowRightShadow(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+
+    if (tableWrapperRef.current) {
+      const { scrollWidth, clientWidth } = tableWrapperRef.current;
+      if (scrollWidth > clientWidth) {
+        setShowScrollHint(true);
+      } else {
+        setShowScrollHint(false);
+      }
+    }
+
+    const element = tableWrapperRef.current;
+    if (element) {
+      if (typeof window !== "undefined" && "ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(() => {
+          checkScroll();
+        });
+        resizeObserver.observe(element);
+        return () => resizeObserver.disconnect();
+      } else {
+        window.addEventListener("resize", checkScroll);
+        return () => window.removeEventListener("resize", checkScroll);
+      }
+    }
+  }, [data]);
+
+  const handleScroll = () => {
+    checkScroll();
+    if (showScrollHint) {
+      setShowScrollHint(false);
+    }
+  };
+
   return (
     <div>
-      <div className="incomeStatementTableWrapper">
-        <table className="incomeStatementTable">
-          <thead>
-            <tr>
-              <th className="th-metric">Financial Metric</th>
-              {trendsData.map((col, idx) => {
-                const isLatest = idx === trendsData.length - 1;
-                const displayYear = `FY ${col.year}`;
-                return (
-                  <th
-                    key={col.year}
-                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
-                  >
-                    {displayYear}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.key} className="tr-row">
-                <td className="td-label">{row.label}</td>
+      <div className="income-statement-wrapper-relative">
+        <div className={`scroll-shadow-right ${showRightShadow ? "visible" : ""}`} />
+        
+        {showScrollHint && (
+          <div className="scroll-hint-badge" onClick={() => setShowScrollHint(false)}>
+            <span className="scroll-hint-icon-wrapper">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8L22 12L18 16" />
+                <path d="M6 8L2 12L6 16" />
+                <path d="M2 12H22" />
+              </svg>
+            </span>
+            <span>Swipe to view more</span>
+          </div>
+        )}
+
+        <div 
+          className="incomeStatementTableWrapper"
+          ref={tableWrapperRef}
+          onScroll={handleScroll}
+        >
+          <table className="incomeStatementTable">
+            <thead>
+              <tr>
+                <th className="th-metric">Financial Metric</th>
                 {trendsData.map((col, idx) => {
                   const isLatest = idx === trendsData.length - 1;
-                  const value = col[row.key];
-
-                  let displayVal = "-";
-                  if (value !== null && value !== undefined) {
-                    if (row.format === "percentage") {
-                      displayVal = `${Number(value).toFixed(1)}%`;
-                    } else if (row.format === "currency") {
-                      if (row.key === "revenue") {
-                        displayVal = Number(value) % 1 === 0
-                          ? Number(value).toFixed(0)
-                          : Number(value).toFixed(1);
-                      } else {
-                        displayVal = Number(value).toFixed(1);
-                      }
-                    } else {
-                      displayVal = value.toString();
-                    }
-                  }
-
+                  const displayYear = `FY ${col.year}`;
                   return (
-                    <td
+                    <th
                       key={col.year}
-                      className={isLatest ? "td-value-highlight" : "td-value-dim"}
+                      className={isLatest ? "th-year-highlight" : "th-year-dim"}
                     >
-                      {displayVal}
-                    </td>
+                      {displayYear}
+                    </th>
                   );
                 })}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.key} className="tr-row">
+                  <td className="td-label">{row.label}</td>
+                  {trendsData.map((col, idx) => {
+                    const isLatest = idx === trendsData.length - 1;
+                    const value = col[row.key];
+
+                    let displayVal = "-";
+                    if (value !== null && value !== undefined) {
+                      if (row.format === "percentage") {
+                        displayVal = `${Number(value).toFixed(1)}%`;
+                      } else if (row.format === "currency") {
+                        if (row.key === "revenue") {
+                          displayVal = Number(value) % 1 === 0
+                            ? Number(value).toFixed(0)
+                            : Number(value).toFixed(1);
+                        } else {
+                          displayVal = Number(value).toFixed(1);
+                        }
+                      } else {
+                        displayVal = value.toString();
+                      }
+                    }
+
+                    return (
+                      <td
+                        key={col.year}
+                        className={isLatest ? "td-value-highlight" : "td-value-dim"}
+                      >
+                        {displayVal}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="observations-container">
@@ -367,74 +436,144 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
 
+  const tableWrapperRef = useRef(null);
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  const checkScroll = () => {
+    if (tableWrapperRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tableWrapperRef.current;
+      const hasOverflow = scrollWidth > clientWidth;
+      setShowLeftShadow(hasOverflow && scrollLeft > 5);
+      setShowRightShadow(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+
+    if (tableWrapperRef.current) {
+      const { scrollWidth, clientWidth } = tableWrapperRef.current;
+      if (scrollWidth > clientWidth) {
+        setShowScrollHint(true);
+      } else {
+        setShowScrollHint(false);
+      }
+    }
+
+    const element = tableWrapperRef.current;
+    if (element) {
+      if (typeof window !== "undefined" && "ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(() => {
+          checkScroll();
+        });
+        resizeObserver.observe(element);
+        return () => resizeObserver.disconnect();
+      } else {
+        window.addEventListener("resize", checkScroll);
+        return () => window.removeEventListener("resize", checkScroll);
+      }
+    }
+  }, [data]);
+
+  const handleScroll = () => {
+    checkScroll();
+    if (showScrollHint) {
+      setShowScrollHint(false);
+    }
+  };
+
   return (
     <div>
-      <div className="balanceSheetTableWrapper">
-        <table className="balanceSheetTable">
-          <thead>
-            <tr>
-              <th className="th-metric">Financial Metric</th>
-              {trendsData.map((col, idx) => {
-                const isLatest = idx === trendsData.length - 1;
-                const displayYear = `FY ${col.year}`;
+      <div className="balance-sheet-wrapper-relative">
+        <div className={`scroll-shadow-right ${showRightShadow ? "visible" : ""}`} />
+        
+        {showScrollHint && (
+          <div className="scroll-hint-badge" onClick={() => setShowScrollHint(false)}>
+            <span className="scroll-hint-icon-wrapper">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8L22 12L18 16" />
+                <path d="M6 8L2 12L6 16" />
+                <path d="M2 12H22" />
+              </svg>
+            </span>
+            <span>Swipe to view more</span>
+          </div>
+        )}
+
+        <div 
+          className="balanceSheetTableWrapper"
+          ref={tableWrapperRef}
+          onScroll={handleScroll}
+        >
+          <table className="balanceSheetTable">
+            <thead>
+              <tr>
+                <th className="th-metric">Financial Metric</th>
+                {trendsData.map((col, idx) => {
+                  const isLatest = idx === trendsData.length - 1;
+                  const displayYear = `FY ${col.year}`;
+                  return (
+                    <th
+                      key={col.year}
+                      className={isLatest ? "th-year-highlight" : "th-year-dim"}
+                    >
+                      {displayYear}
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {balanceSheetRows.map((row, rowIdx) => {
+                let trClass = "tr-row";
+                if (row.type === "category-header") {
+                  trClass = "tr-category-header";
+                } else if (row.type === "sub-header") {
+                  trClass = "tr-sub-header";
+                } else if (row.type === "indented") {
+                  trClass = row.isBold ? "tr-indented tr-indented-bold" : "tr-indented";
+                }
+
                 return (
-                  <th
-                    key={col.year}
-                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
-                  >
-                    {displayYear}
-                  </th>
+                  <tr key={rowIdx} className={trClass}>
+                    <td className="td-label">
+                      {row.label}
+                      <span className="bs-tooltip-container">
+                        <img src="/toolTippublic.svg" alt="info" className="bs-tooltip-icon" />
+                        <span className="bs-tooltip-text">{row.tooltip}</span>
+                      </span>
+                    </td>
+                    {trendsData.map((col, idx) => {
+                      const isLatest = idx === trendsData.length - 1;
+                      const apiItem = col.apiItem;
+                      const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+
+                      let displayVal = "-";
+                      if (value !== null && value !== undefined) {
+                        const numVal = Number(value);
+                        const formattedNum = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(1);
+                        displayVal = `₹ ${formattedNum} Cr`;
+                      }
+
+                      return (
+                        <td
+                          key={col.year}
+                          className={isLatest ? "td-value-highlight" : "td-value-dim"}
+                        >
+                          {displayVal}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 );
               })}
-            </tr>
-          </thead>
-          <tbody>
-            {balanceSheetRows.map((row, rowIdx) => {
-              let trClass = "tr-row";
-              if (row.type === "category-header") {
-                trClass = "tr-category-header";
-              } else if (row.type === "sub-header") {
-                trClass = "tr-sub-header";
-              } else if (row.type === "indented") {
-                trClass = row.isBold ? "tr-indented tr-indented-bold" : "tr-indented";
-              }
-
-              return (
-                <tr key={rowIdx} className={trClass}>
-                  <td className="td-label">
-                    {row.label}
-                    <span className="bs-tooltip-container">
-                      <img src="/toolTippublic.svg" alt="info" className="bs-tooltip-icon" />
-                      <span className="bs-tooltip-text">{row.tooltip}</span>
-                    </span>
-                  </td>
-                  {trendsData.map((col, idx) => {
-                    const isLatest = idx === trendsData.length - 1;
-                    const apiItem = col.apiItem;
-                    const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
-
-                    let displayVal = "-";
-                    if (value !== null && value !== undefined) {
-                      const numVal = Number(value);
-                      const formattedNum = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(1);
-                      displayVal = `₹ ${formattedNum} Cr`;
-                    }
-
-                    return (
-                      <td
-                        key={col.year}
-                        className={isLatest ? "td-value-highlight" : "td-value-dim"}
-                      >
-                        {displayVal}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
+
 
       <div className="observations-container">
         <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
@@ -504,57 +643,126 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
     return Number(val) >= 0 ? "cf-positive" : "cf-negative";
   };
 
+  const tableWrapperRef = useRef(null);
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  const checkScroll = () => {
+    if (tableWrapperRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tableWrapperRef.current;
+      const hasOverflow = scrollWidth > clientWidth;
+      setShowLeftShadow(hasOverflow && scrollLeft > 5);
+      setShowRightShadow(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+
+    if (tableWrapperRef.current) {
+      const { scrollWidth, clientWidth } = tableWrapperRef.current;
+      if (scrollWidth > clientWidth) {
+        setShowScrollHint(true);
+      } else {
+        setShowScrollHint(false);
+      }
+    }
+
+    const element = tableWrapperRef.current;
+    if (element) {
+      if (typeof window !== "undefined" && "ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(() => {
+          checkScroll();
+        });
+        resizeObserver.observe(element);
+        return () => resizeObserver.disconnect();
+      } else {
+        window.addEventListener("resize", checkScroll);
+        return () => window.removeEventListener("resize", checkScroll);
+      }
+    }
+  }, [data]);
+
+  const handleScroll = () => {
+    checkScroll();
+    if (showScrollHint) {
+      setShowScrollHint(false);
+    }
+  };
+
   return (
     <div>
-      <div className="cashFlowTableWrapper">
-        <table className="cashFlowTable">
-          <thead>
-            <tr>
-              <th className="th-metric">Financial Metric</th>
-              {trendsData.map((col, idx) => {
-                const isLatest = idx === trendsData.length - 1;
-                const displayYear = `FY ${col.year}`;
+      <div className="cash-flow-wrapper-relative">
+        <div className={`scroll-shadow-right ${showRightShadow ? "visible" : ""}`} />
+        
+        {showScrollHint && (
+          <div className="scroll-hint-badge" onClick={() => setShowScrollHint(false)}>
+            <span className="scroll-hint-icon-wrapper">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8L22 12L18 16" />
+                <path d="M6 8L2 12L6 16" />
+                <path d="M2 12H22" />
+              </svg>
+            </span>
+            <span>Swipe to view more</span>
+          </div>
+        )}
+
+        <div 
+          className="cashFlowTableWrapper"
+          ref={tableWrapperRef}
+          onScroll={handleScroll}
+        >
+          <table className="cashFlowTable">
+            <thead>
+              <tr>
+                <th className="th-metric">Financial Metric</th>
+                {trendsData.map((col, idx) => {
+                  const isLatest = idx === trendsData.length - 1;
+                  const displayYear = `FY ${col.year}`;
+                  return (
+                    <th
+                      key={col.year}
+                      className={isLatest ? "th-year-highlight" : "th-year-dim"}
+                    >
+                      {displayYear}
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {cashFlowRows.map((row, rowIdx) => {
                 return (
-                  <th
-                    key={col.year}
-                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
-                  >
-                    {displayYear}
-                  </th>
+                  <tr key={rowIdx} className="tr-row">
+                    <td className="td-label">
+                      <div className="cf-metric-title">{row.label}</div>
+                      <div className="cf-metric-desc">{row.description}</div>
+                    </td>
+                    {trendsData.map((col, idx) => {
+                      const isLatest = idx === trendsData.length - 1;
+                      const apiItem = col.apiItem;
+                      const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+
+                      const displayVal = formatCashFlowValue(value);
+                      const colorClass = getCashFlowColorClass(value);
+
+                      return (
+                        <td
+                          key={col.year}
+                          className={`${isLatest ? "td-value-highlight" : "td-value-dim"} ${colorClass}`}
+                        >
+                          {displayVal}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 );
               })}
-            </tr>
-          </thead>
-          <tbody>
-            {cashFlowRows.map((row, rowIdx) => {
-              return (
-                <tr key={rowIdx} className="tr-row">
-                  <td className="td-label">
-                    <div className="cf-metric-title">{row.label}</div>
-                    <div className="cf-metric-desc">{row.description}</div>
-                  </td>
-                  {trendsData.map((col, idx) => {
-                    const isLatest = idx === trendsData.length - 1;
-                    const apiItem = col.apiItem;
-                    const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
-
-                    const displayVal = formatCashFlowValue(value);
-                    const colorClass = getCashFlowColorClass(value);
-
-                    return (
-                      <td
-                        key={col.year}
-                        className={`${isLatest ? "td-value-highlight" : "td-value-dim"} ${colorClass}`}
-                      >
-                        {displayVal}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="observations-container">
@@ -626,71 +834,140 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
     return `${num.toFixed(0)} Days`;
   };
 
+  const tableWrapperRef = useRef(null);
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  const checkScroll = () => {
+    if (tableWrapperRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tableWrapperRef.current;
+      const hasOverflow = scrollWidth > clientWidth;
+      setShowLeftShadow(hasOverflow && scrollLeft > 5);
+      setShowRightShadow(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+
+    if (tableWrapperRef.current) {
+      const { scrollWidth, clientWidth } = tableWrapperRef.current;
+      if (scrollWidth > clientWidth) {
+        setShowScrollHint(true);
+      } else {
+        setShowScrollHint(false);
+      }
+    }
+
+    const element = tableWrapperRef.current;
+    if (element) {
+      if (typeof window !== "undefined" && "ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(() => {
+          checkScroll();
+        });
+        resizeObserver.observe(element);
+        return () => resizeObserver.disconnect();
+      } else {
+        window.addEventListener("resize", checkScroll);
+        return () => window.removeEventListener("resize", checkScroll);
+      }
+    }
+  }, [data]);
+
+  const handleScroll = () => {
+    checkScroll();
+    if (showScrollHint) {
+      setShowScrollHint(false);
+    }
+  };
+
   return (
     <div>
-      <div className="workingCapitalTableWrapper">
-        <table className="workingCapitalTable">
-          <thead>
-            <tr>
-              <th className="th-metric">Efficiency Metric</th>
-              {trendsData.map((col, idx) => {
-                const isLatest = idx === trendsData.length - 1;
-                const displayYear = `FY ${col.year}`;
+      <div className="working-capital-wrapper-relative">
+        <div className={`scroll-shadow-right ${showRightShadow ? "visible" : ""}`} />
+        
+        {showScrollHint && (
+          <div className="scroll-hint-badge" onClick={() => setShowScrollHint(false)}>
+            <span className="scroll-hint-icon-wrapper">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8L22 12L18 16" />
+                <path d="M6 8L2 12L6 16" />
+                <path d="M2 12H22" />
+              </svg>
+            </span>
+            <span>Swipe to view more</span>
+          </div>
+        )}
+
+        <div 
+          className="workingCapitalTableWrapper"
+          ref={tableWrapperRef}
+          onScroll={handleScroll}
+        >
+          <table className="workingCapitalTable">
+            <thead>
+              <tr>
+                <th className="th-metric">Efficiency Metric</th>
+                {trendsData.map((col, idx) => {
+                  const isLatest = idx === trendsData.length - 1;
+                  const displayYear = `FY ${col.year}`;
+                  return (
+                    <th
+                      key={col.year}
+                      className={isLatest ? "th-year-highlight" : "th-year-dim"}
+                    >
+                      {displayYear}
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {workingCapitalRows.map((row, rowIdx) => {
+                const trClass = row.isCCC ? "tr-row tr-ccc" : "tr-row";
                 return (
-                  <th
-                    key={col.year}
-                    className={isLatest ? "th-year-highlight" : "th-year-dim"}
-                  >
-                    {displayYear}
-                  </th>
+                  <tr key={rowIdx} className={trClass}>
+                    <td className="td-label">
+                      <div className="wc-metric-title">{row.label}</div>
+                      <div className="wc-metric-desc">{row.description}</div>
+                    </td>
+                    {trendsData.map((col, idx) => {
+                      const isLatest = idx === trendsData.length - 1;
+                      const apiItem = col.apiItem;
+
+                      let value;
+                      if (row.isCCC) {
+                        const debtorVal = apiItem?.debtor_days ?? apiItem?.data?.debtor_days;
+                        const creditorVal = apiItem?.creditor_days ?? apiItem?.data?.creditor_days;
+                        const inventoryVal = apiItem?.inventory_days ?? apiItem?.data?.inventory_days;
+
+                        if (debtorVal !== undefined && creditorVal !== undefined && inventoryVal !== undefined) {
+                          value = Number(debtorVal) + Number(inventoryVal) - Number(creditorVal);
+                        } else {
+                          value = row.values[col.year];
+                        }
+                      } else {
+                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+                      }
+
+                      const displayVal = formatDaysValue(value);
+
+                      return (
+                        <td
+                          key={col.year}
+                          className={isLatest ? "td-value-highlight" : "td-value-dim"}
+                        >
+                          {displayVal}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 );
               })}
-            </tr>
-          </thead>
-          <tbody>
-            {workingCapitalRows.map((row, rowIdx) => {
-              const trClass = row.isCCC ? "tr-row tr-ccc" : "tr-row";
-              return (
-                <tr key={rowIdx} className={trClass}>
-                  <td className="td-label">
-                    <div className="wc-metric-title">{row.label}</div>
-                    <div className="wc-metric-desc">{row.description}</div>
-                  </td>
-                  {trendsData.map((col, idx) => {
-                    const isLatest = idx === trendsData.length - 1;
-                    const apiItem = col.apiItem;
-
-                    let value;
-                    if (row.isCCC) {
-                      const debtorVal = apiItem?.debtor_days ?? apiItem?.data?.debtor_days;
-                      const creditorVal = apiItem?.creditor_days ?? apiItem?.data?.creditor_days;
-                      const inventoryVal = apiItem?.inventory_days ?? apiItem?.data?.inventory_days;
-
-                      if (debtorVal !== undefined && creditorVal !== undefined && inventoryVal !== undefined) {
-                        value = Number(debtorVal) + Number(inventoryVal) - Number(creditorVal);
-                      } else {
-                        value = row.values[col.year];
-                      }
-                    } else {
-                      value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
-                    }
-
-                    const displayVal = formatDaysValue(value);
-
-                    return (
-                      <td
-                        key={col.year}
-                        className={isLatest ? "td-value-highlight" : "td-value-dim"}
-                      >
-                        {displayVal}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="observations-container">

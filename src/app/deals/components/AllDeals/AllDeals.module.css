@@ -43,7 +43,7 @@
 .dealCardCol {
     flex: 0 0 auto;
     width: 25%;
-    padding: 0 16px 32px 16px !important;
+    padding: 0 10px 32px 10px !important;
     margin-top: 0 !important;
 }
 
@@ -65,6 +65,12 @@
     /* .DealsTalkMainContainer{
         max-width: 1000px;
     } */
+}
+
+@media(max-width:1050px) {
+    .dealCardCol {
+        width: 50%;
+    }
 }
 
 @media (max-width: 1024px) {
@@ -108,18 +114,17 @@
     }
 } */
 
-@media (max-width: 768px) {
 
-    /* Mobile column width - Cascades naturally from source order overrides */
-    .dealCardCol {
-        width: 50%;
-    }
-}
 
 @media(max-width:768px) {
     .DealsTalkMainContainer {
         padding: 15px 16px;
         /* max-width: 500px; */
+    }
+
+    /* Mobile column width - Cascades naturally from source order overrides */
+    .dealCardCol {
+        width: 50%;
     }
 
     .cardLink {
@@ -521,6 +526,7 @@
 
     .allDealsHeaderRow {
         margin-top: 16px;
+        margin-bottom: 16px;
     }
 
     .filterBarRow {
@@ -623,6 +629,12 @@
         background: #FAF8F5;
         color: #8E6B0F;
         font-weight: 600;
+    }
+}
+
+@media(max-width:650px) {
+    .dealCardCol {
+        width: 100%;
     }
 }
 

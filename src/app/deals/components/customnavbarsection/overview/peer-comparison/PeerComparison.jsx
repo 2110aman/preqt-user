@@ -31,13 +31,14 @@ const PeerComparison = ({ isPrivateDeal }) => {
   };
 
   const getColumnDivisor = () => {
-    if (windowWidth < 550) return 1; // Show 3 columns total (1 metric + 2 companies)
-    if (windowWidth < 786) return 3; // Show 4 columns total (1 metric + 3 companies)
-    if (windowWidth < 1200 && windowWidth > 920) return 3; // Show 5 columns total (1 metric + 4 companies)
-    return 4; // Previous standard behavior (Metric + 4 companies)
+    if (windowWidth < 550) return 1.5; // Show 1.5 company columns (1 full + 1 half)
+    if (windowWidth < 786) return 2.5; // Show 2.5 company columns (2 full + 1 half)
+    if (windowWidth < 1200) return 3.5; // Show 3.5 company columns (3 full + 1 half)
+    return 4.5; // Show 4.5 company columns (4 full + 1 half)
   };
 
   const divisor = getColumnDivisor();
+  const metricWidth = (companies.length === 2 && windowWidth >= 550) ? 200 : 120;
 
   const metricsConfig = [
     { label: "Revenue", key: "revenue_in_cr", format: (v) => `₹${formatNumber(v)} Cr` },
@@ -63,7 +64,7 @@ const PeerComparison = ({ isPrivateDeal }) => {
       <div className={styles.tableWrapper}>
         <table 
           className={`${styles.peerTable} ${companies.length === 2 ? styles.twoColumns : ""}`}
-          style={companies.length > divisor ? { minWidth: `calc(120px + ${companies.length} * ((100% - 120px) / ${divisor}))` } : { width: '100%' }}
+          style={companies.length > divisor ? { minWidth: `calc(${metricWidth}px + ${companies.length} * ((100% - ${metricWidth}px) / ${divisor}))` } : { width: '100%' }}
         >
           <thead>
             <tr>

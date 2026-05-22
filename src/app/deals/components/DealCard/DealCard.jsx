@@ -22,6 +22,7 @@ export default function DealCard({
     const metrics = METRICS_CONFIG[variantKey] || METRICS_CONFIG.public_standard;
 
     // Handle Auth Locked State for Private deals
+    const hasRatingBadge = layout.ratingStyle !== 'none' && !!(deal?.ipo_review_rating?.status && deal?.ipo_review_rating?.weighted_composite_score);
     const isPrivate = ['private', 'ccps', 'ofs'].includes((deal.deal_type || '').toLowerCase());
     if (isPrivate && !isAuthenticated) {
         return <Sections.HiddenOverlay onLoginClick={onLoginClick} />;
@@ -111,7 +112,7 @@ export default function DealCard({
                 <img src="/ofsdealGradient.svg" alt="" className={styles.ofsGradient} />
             )}
 
-            <div className={styles.headerGroup}>
+            <div className={`${styles.headerGroup} ${!hasRatingBadge ? styles.noRating : ''}`}>
                 {layout.sections.includes('header') && (
                     <Sections.CardHeader deal={deal} layout={layout} isListView={false} />
                 )}

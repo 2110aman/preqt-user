@@ -772,8 +772,9 @@
   border: 1px solid #E5E7EB;
   padding: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
-  margin-top: 24px;
+  margin-top: 0;
 }
 
 .private-deal .incomeStatementTableWrapper {
@@ -929,6 +930,151 @@
   color: #D1D5DB !important;
 }
 
+/* Balance Sheet Scroll Hint & Shadow Overlay System */
+/* Table Scroll Hint & Shadow Overlay Systems */
+.income-statement-wrapper-relative {
+  position: relative;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.balance-sheet-wrapper-relative,
+.cash-flow-wrapper-relative,
+.working-capital-wrapper-relative {
+  position: relative;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.scroll-shadow-left {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 1px;
+  width: 50px;
+  pointer-events: none;
+  z-index: 30;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  border-top-left-radius: 11px;
+  border-bottom-left-radius: 11px;
+}
+
+.scroll-shadow-left.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-shadow-right {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  right: 1px;
+  width: 50px;
+  pointer-events: none;
+  z-index: 30;
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  border-top-right-radius: 11px;
+  border-bottom-right-radius: 11px;
+}
+
+.scroll-shadow-right.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dark mode overrides for shadows */
+.private-deal .scroll-shadow-left {
+  background: linear-gradient(to right, rgba(24, 24, 27, 0.95), rgba(24, 24, 27, 0));
+}
+
+.private-deal .scroll-shadow-right {
+  background: linear-gradient(to left, rgba(24, 24, 27, 0.95), rgba(24, 24, 27, 0));
+}
+
+/* Scroll Hint Badge / Swipe Pill */
+.scroll-hint-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  color: #1F2937;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  animation: pulse-scroll-hint 2.5s infinite ease-in-out;
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.scroll-hint-badge:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 30px -3px rgba(181, 145, 49, 0.25);
+  border-color: rgba(181, 145, 49, 0.4);
+}
+
+.scroll-hint-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #B59131;
+  animation: slide-scroll-arrow 1.8s infinite ease-in-out;
+}
+
+.private-deal .scroll-hint-badge {
+  background: rgba(39, 39, 42, 0.95);
+  border-color: rgba(63, 63, 70, 0.6);
+  color: #F4F4F5;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+.private-deal .scroll-hint-badge:hover {
+  background: rgba(39, 39, 42, 0.95);
+  box-shadow: 0 12px 30px -3px rgba(212, 175, 55, 0.25);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.private-deal .scroll-hint-icon-wrapper {
+  color: #D4AF37;
+}
+
+@keyframes pulse-scroll-hint {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-scroll-arrow {
+  0%, 100% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
 /* Balance Sheet Accordion Styles */
 .balanceSheetTableWrapper {
   border-radius: 12px;
@@ -936,8 +1082,8 @@
   border: 1px solid #E5E7EB;
   padding: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
-  margin-top: 16px;
 }
 
 .private-deal .balanceSheetTableWrapper {
@@ -1155,6 +1301,7 @@
 }
 
 .bs-tooltip-text {
+  display: none;
   visibility: hidden;
   width: 240px;
   background-color: #1E293B;
@@ -1189,6 +1336,7 @@
 }
 
 .bs-tooltip-container:hover .bs-tooltip-text {
+  display: block;
   visibility: visible;
   opacity: 1;
 }
@@ -1230,8 +1378,9 @@
   border: 1px solid #E5E7EB;
   padding: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .private-deal .cashFlowTableWrapper {
@@ -1376,8 +1525,9 @@
   border: 1px solid #E5E7EB;
   padding: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   position: relative;
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .private-deal .workingCapitalTableWrapper {

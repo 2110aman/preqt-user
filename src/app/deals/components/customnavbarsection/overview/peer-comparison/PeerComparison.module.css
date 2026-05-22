@@ -238,4 +238,9 @@ border: 1px solid transparent;
   .metricCell {
     text-align: center;
   }
+  .twoColumns .metricHeader,
+  .twoColumns .metricCell {
+    width: 120px !important;
+    min-width: 120px !important;
+  }
 }
