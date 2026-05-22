@@ -3,14 +3,13 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-
-
+  flex-wrap: wrap;
 }
 
 .body-section4 section {
 
   display: flex;
-  width: 30%;
+  /* width: 50%; */
   flex-direction: column;
   padding: 0px 15px;
 }
@@ -341,7 +340,7 @@
 
     display: flex;
     justify-content: center;
-    /* flex-direction: column; */
+    flex-direction: column;
     /* align-items: flex-start; */
     /* padding: 20px; */
     gap: 20px;
@@ -366,20 +365,20 @@
   .ipoDoc p,
   .ipoDoc {
 
-    margin: 0px auto;
+    margin: 0px;
 
   }
 }
 
 @media(min-width:1330px) {
   .body-section4 :nth-of-type(3) {
-    margin-left: 40px;
+    /* margin-left: 40px; */
   }
 
 
   .bank-det-value img {
 
-    margin: 0px 12px 0px;
+    margin: 0px 0px 0px 12px;
   }
 
 
@@ -432,7 +431,7 @@
     border-radius: 12px;
     text-align: center;
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
     padding: 8px;
 
   }
