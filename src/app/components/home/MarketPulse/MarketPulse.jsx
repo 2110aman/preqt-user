@@ -90,6 +90,11 @@ const MarketPulse = () => {
 
   const slug = post.post_slug || "understanding-market-trends-in-q2-2026";
 
+  // Show the pulse card only if its status is "published"
+  if (!post || post.status !== "published") {
+    return null;
+  }
+
   return (
     <div className={styles.cardContainer}>
       <div className={styles.headerRow}>

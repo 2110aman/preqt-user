@@ -37,6 +37,7 @@
 .liveDot {
   width: 5px;
   height: 5px;
+  margin-bottom: 2px;
   background-color: #B59131;
   border-radius: 50%;
   position: relative;
@@ -131,6 +132,7 @@
 .favorableDot {
   width: 6px;
   height: 6px;
+  margin-bottom: 3px;
   background-color: #15803D;
   border-radius: 50%;
   position: relative;
