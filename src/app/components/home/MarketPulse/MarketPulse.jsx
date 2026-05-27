@@ -14,11 +14,12 @@ const MarketPulse = () => {
     const fetchPost = async () => {
       try {
         const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
-        const url = `${baseUrl}/admin/api/community/live-puls-posts/slug/understanding-market-trends-in-q2-2026`;
+        const url = `${baseUrl}/admin/api/community/live-puls-posts`;
         const res = await fetch(url);
         if (res.ok) {
           const payload = await res.json();
-          const loadedData = payload?.data?.data || payload?.data;
+          const list = payload?.data?.data || payload?.data;
+          const loadedData = Array.isArray(list) ? list[0] : list;
           if (loadedData && typeof loadedData === "object" && (loadedData.title || loadedData.post_title)) {
             setPost(loadedData);
           }
