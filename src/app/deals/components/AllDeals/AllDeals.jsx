@@ -145,17 +145,17 @@ function AllDealsContent() {
     }, [allDeals]);
 
     const filteredDeals = useMemo(() => {
-        // Restrict rendered opportunities to strictly public and unlisted/ofs types (case-insensitive)
+        // Restrict rendered opportunities to strictly public and unlisted/unlisted types (case-insensitive)
         let deals = allDeals.filter(deal => {
             const type = (deal.deal_type || '').toLowerCase();
-            return type === 'public' || (type === 'ofs' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined));
+            return type === 'public' || (type === 'unlisted' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined));
         });
 
         // 1. Deal Type (Tabs)
         if (selectedDealType !== "All") {
             if (selectedDealType === "Unlisted") {
                 deals = deals.filter(deal => 
-                    (deal.deal_type || '').toLowerCase() === 'ofs' && 
+                    (deal.deal_type || '').toLowerCase() === 'unlisted' && 
                     (deal.deal_sub_type === null || deal.deal_sub_type === undefined)
                 );
             } else {
@@ -278,7 +278,7 @@ function AllDealsContent() {
     const formatDealType = (type) => {
         if (type === "All") return "All Deals";
         if (type.toLowerCase() === "ccps") return "CCPS Deals";
-        if (type.toLowerCase() === "ofs") return "OFS Deals";
+        if (type.toLowerCase() === "unlisted") return "unlisted Deals";
         return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase() + " Deals";
     };
 
@@ -316,7 +316,7 @@ function AllDealsContent() {
         if (allDeals.length === 0) return;
 
         allDeals.forEach((deal) => {
-            fetchRepliesCount(deal.id, deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "ofs");
+            fetchRepliesCount(deal.id, deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "unlisted");
         });
     }, [allDeals]);
 

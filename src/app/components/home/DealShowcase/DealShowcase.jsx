@@ -301,7 +301,7 @@ export default function DealShowcase() {
 
                     // =========================================================================
                     // FILTER CRITERIA FOR FEATURED DEALS:
-                    // 1. check "deal_type" matches "public", "unlisted", or "ofs"
+                    // 1. check "deal_type" matches "public", "unlisted"
                     // 2. check "deal_sub_type" matches "featured"
                     //
                     // Developer Comment: These checks are made to retrieve and display 
@@ -312,7 +312,7 @@ export default function DealShowcase() {
                     const filteredFeatured = deals.filter(deal => 
                         (deal.deal_type?.toLowerCase() === 'public' || 
                          deal.deal_type?.toLowerCase() === 'unlisted' || 
-                         deal.deal_type?.toLowerCase() === 'ofs') && 
+                         deal.deal_type?.toLowerCase() === 'unlisted') && 
                         deal.deal_sub_type?.toLowerCase() === 'featured'
                     );
 
@@ -341,7 +341,7 @@ export default function DealShowcase() {
 
                     // =========================================================================
                     // FILTER CRITERIA FOR UNLISTED SHARES:
-                    // 1. check "deal_type" matches "ofs"
+                    // 1. check "deal_type" matches "unlisted"
                     // 2. check "deal_sub_type" is null (or undefined)
                     //
                     // Developer Comment: These two checks are made to retrieve and display 
@@ -350,7 +350,7 @@ export default function DealShowcase() {
                     // modify this filtering block accordingly.
                     // =========================================================================
                     const filteredUnlisted = deals.filter(deal => 
-                        deal.deal_type?.toLowerCase() === 'ofs' && 
+                        deal.deal_type?.toLowerCase() === 'unlisted' && 
                         (deal.deal_sub_type === null || deal.deal_sub_type === undefined)
                     );
 

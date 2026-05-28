@@ -1309,7 +1309,7 @@
     .DealsTalkMainContainer {
         padding: 20px 15px;
         gap: 24px;
-        max-width: 490px;
+        /* max-width: 490px; */
     }
 
     .allDealsHead p {
