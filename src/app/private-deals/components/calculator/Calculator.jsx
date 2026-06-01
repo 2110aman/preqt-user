@@ -14,7 +14,9 @@ import GetInvite from "./GetInvite";
 
 const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, limit, qaCount, replies, isccps, authToken, isShowInterest, fetchDealDetails }) => {
 
-  const isPrivateLike = isPrivateDeal || isccps;
+  const isunlisted = dealDetails?.deal_type === "unlisted";
+  const isPrivateLike = (isPrivateDeal || isccps) && !isunlisted;
+  const isDarkTheme = (isPrivateDeal || isccps) && !isunlisted;
   console.log("The Details i got here", dealDetails);
 
   const minLots = Number(dealDetails?.deal_setpData?.min_investment?.data?.lot_size) || 1;
@@ -49,8 +51,8 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
   const isOfs = dealDetails?.deal_type === "ofs";
 
   const maxLots =
-    isOfs ? Infinity :
-      (limit && limit > 0
+    (isOfs || isunlisted) ? Infinity :
+      (limit && !isNaN(limit) && limit > 0
         ? Math.floor(limit / pricePerSingleLot)
         : minLots);
 
@@ -89,9 +91,11 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
     if (lots < maxLots) {
       setLots(prev => prev + 1);
     } else {
-      showErrorToast(
-        `You can invest up  to ₹${limit.toLocaleString("en-IN")} only.`
-      );
+      if (limit && !isNaN(limit) && limit > 0) {
+        showErrorToast(
+          `You can invest up to ₹${limit.toLocaleString("en-IN")} only.`
+        );
+      }
     }
   };
 
@@ -105,9 +109,11 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
     const nextLots = Number(digitsOnly);
     if (nextLots > maxLots) {
       setLots(maxLots);
-      showErrorToast(
-        `You can invest up to ₹${limit.toLocaleString("en-IN")} only.`
-      );
+      if (limit && !isNaN(limit) && limit > 0) {
+        showErrorToast(
+          `You can invest up to ₹${limit.toLocaleString("en-IN")} only.`
+        );
+      }
       return;
     }
 
@@ -224,11 +230,13 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
                   showErrorToast(`Minimum lot should be ${minLots}.`);
                   return;
                 }
-                if (!isOfs && lots > maxLots) {
-                  showErrorToast(`You can invest up to ₹${limit.toLocaleString("en-IN")} only.`);
+                if (!isOfs && !isunlisted && lots > maxLots) {
+                  if (limit && !isNaN(limit) && limit > 0) {
+                    showErrorToast(`You can invest up to ₹${limit.toLocaleString("en-IN")} only.`);
+                  }
                   return;
                 }
-                if (isOfs || lots <= maxLots) {
+                if (isOfs || isunlisted || lots <= maxLots) {
                   setShowInterestModal(true);
                 }
               }}
@@ -316,7 +324,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
     <>
       {/* Desktop / Tablet View */}
       {!isMobile && (
-        <div className={styles.card}>
+        <div className={`${styles.card} ${isDarkTheme ? "" : styles.lightCard}`}>
           {showQnA ? (
             <PrivateQuestion onBack={() => setShowQnA(false)} qaCount={qaCount} replies={replies} />
           ) : showchatbot ? (
@@ -340,7 +348,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
         <>
           {/* FIXED BOTTOM SHOW INTEREST BUTTON */}
           {isPrivateDeal && (
-            <div className={styles.fixedBottomBtn}>
+            <div className={`${styles.fixedBottomBtn} ${isDarkTheme ? "" : styles.lightCard}`}>
               <button onClick={() => setShowSlider(true)}>Show Interest</button>
             </div>
           )}
@@ -352,7 +360,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
               onClick={() => setShowSlider(false)}
             >
               <div
-                className={styles.slider}
+                className={`${styles.slider} ${isDarkTheme ? "" : styles.lightCard}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 {renderCalculatorContent()}
@@ -367,7 +375,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
               onClick={() => setShowQnA(false)}
             >
               <div
-                className={styles.qnaSlider}
+                className={`${styles.qnaSlider} ${isDarkTheme ? "" : styles.lightCard}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <PrivateQuestion
@@ -391,6 +399,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
             setShowInterestModal(false);
           }}
           myStep={currentStep}
+          isunlisted={isunlisted}
         />
       )}
     </>

@@ -23,13 +23,12 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
 
             return data
                 .map(item => {
-                    if (!item || typeof item !== 'object') {
-                        console.warn('DebtBarChart: Invalid item in data array', item);
+                    if (!item || typeof item !== 'object' || item.observation_and_insights || !item.year) {
                         return null;
                     }
 
                     return {
-                        year: item.year ? Math.floor(Number(item.year)).toString() : "0000",
+                        year: Math.floor(Number(item.year)).toString(),
                         // FIX: convert string/number to number
                         value: Number(item.debt_to_equity) || 0
                     };
@@ -98,7 +97,7 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
 
     return (
         <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={chartData} barSize={60} margin={{ top: 25, right: 10, left: -20, bottom: 5 }}>
+            <BarChart data={chartData} barSize={60} margin={{ top: 25, right: 10, left: 15, bottom: 5 }}>
                 <defs>
                     <linearGradient id="debtLatestBarGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#E4C575" />
@@ -124,6 +123,7 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
                 <YAxis
                     domain={domain}
                     ticks={ticks}
+                    width={65}
                     tick={{
                         fill: "var(--Gray-500, #4B5563)", // text color
                         fontSize: 13,
@@ -161,7 +161,7 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
                 />
                 <Bar
                     dataKey="value"
-                    radius={[6, 6, 0, 0]} // rounded top corners
+                    radius={[8, 8, 0, 0]} // rounded top corners
                 >
                     {chartData.map((entry, index) => {
                         const isLatest = index === chartData.length - 1;

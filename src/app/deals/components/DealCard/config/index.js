@@ -16,7 +16,7 @@ export function determineVariant(deal) {
         return 'public_standard';
     }
 
-    if (type === 'unlisted' || (type === 'ofs' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined))) {
+    if (type === 'unlisted' || (type === 'ofs' && (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null'))) {
         return 'unlisted_nse';
     }
     

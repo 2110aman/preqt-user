@@ -14,6 +14,92 @@ import ROCEBarchart from "../charts/ROCEBarchart";
 import { useDealStore } from "@/store/dealStore";
 // import { useSearchParams } from "next/navigation";
 
+const AccordionToggleIcon = ({ isOpen }) => {
+  if (isOpen) {
+    return (
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+        <circle cx="18" cy="18" r="18" fill="#FDF7E7" />
+        <rect x="9" y="16.5" width="18" height="3" rx="1.5" fill="#B58D23" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+      <circle cx="18" cy="18" r="18" fill="#FDF7E7" />
+      <rect x="9" y="16.5" width="18" height="3" rx="1.5" fill="#B58D23" />
+      <rect x="16.5" y="9" width="3" height="18" rx="1.5" fill="#B58D23" />
+    </svg>
+  );
+};
+
+const extractObservationHtml = (sectionNode, dataArray) => {
+  // 1. Check the root/sibling level of the section node
+  if (sectionNode) {
+    // Check observation_and_insights object
+    const obsObj = sectionNode.observation_and_insights;
+    if (obsObj) {
+      if (obsObj.status !== false && obsObj.data) {
+        return obsObj.data;
+      }
+    }
+    // Check observations_and_insights object/field
+    const obsPlural = sectionNode.observations_and_insights;
+    if (obsPlural) {
+      if (typeof obsPlural === "object") {
+        if (obsPlural.status !== false && obsPlural.data) {
+          return obsPlural.data;
+        }
+      } else if (typeof obsPlural === "string" && sectionNode.status !== false) {
+        return obsPlural;
+      }
+    }
+    // Check observations/observations_status
+    if (sectionNode.observations && sectionNode.observations_status !== false) {
+      if (typeof sectionNode.observations === "string") {
+        return sectionNode.observations;
+      } else if (sectionNode.observations.data) {
+        return sectionNode.observations.data;
+      }
+    }
+  }
+
+  // 2. Check the data array elements
+  const arr = Array.isArray(dataArray) ? dataArray : (Array.isArray(sectionNode?.data) ? sectionNode.data : []);
+  for (const item of arr) {
+    if (!item) continue;
+    
+    // Check item.observation_and_insights
+    if (item.observation_and_insights) {
+      const o = item.observation_and_insights;
+      if (o.status !== false && o.data) {
+        return o.data;
+      }
+    }
+
+    // Check item.observations_and_insights
+    if (item.observations_and_insights) {
+      const o = item.observations_and_insights;
+      if (typeof o === "object") {
+        if (o.status !== false && o.data) {
+          return o.data;
+        }
+      } else if (typeof o === "string" && item.status !== false) {
+        return o;
+      }
+    }
+
+    // Check item.observations / item.status / item.observation
+    if (item.observations && item.status !== false) {
+      if (typeof item.observations === "string") {
+        return item.observations;
+      } else if (item.observations.data) {
+        return item.observations.data;
+      }
+    }
+  }
+
+  return null;
+};
 
 const dummyPerfData = [
   // { isCategory: true, label: "Revenue & Growth" },
@@ -106,6 +192,10 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
       patMargin: apiItem?.pat_percent ?? apiItem?.patMargin ?? defaultItem.patMargin,
     };
   });
+
+  const dealDetails = useDealStore((state) => state.dealDetails);
+  const financialHighlights = dealDetails?.data?.financial_highlights;
+  const observationHtml = extractObservationHtml(financialHighlights?.financial_trends, rawApiData);
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
@@ -251,11 +341,19 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
 
       <div className="observations-container">
         <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        <ul className="observations-list">
-          {observationsList.map((bullet, idx) => (
-            <li key={idx}>{bullet}</li>
-          ))}
-        </ul>
+        {observationHtml ? (
+          <div 
+            className="observations-html-content"
+            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+            dangerouslySetInnerHTML={{ __html: observationHtml }}
+          />
+        ) : (
+          <ul className="observations-list">
+            {observationsList.map((bullet, idx) => (
+              <li key={idx}>{bullet}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -420,18 +518,94 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
     "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
   ];
 
-  const rawApiData = data || [];
-  const yearsToUse = rawApiData.length > 0
-    ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
-    : ["2023", "2024", "2025"];
+  const dealDetails = useDealStore((state) => state.dealDetails);
+  const financialHighlights = dealDetails?.data?.financial_highlights;
 
-  const trendsData = yearsToUse.map((yearStr) => {
-    const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
-    return {
-      year: yearStr,
-      apiItem
+  const bsNode = financialHighlights?.balance_sheet;
+  const rawApiData = bsNode?.data || data || [];
+
+  const bsDataNode = Array.isArray(rawApiData) ? rawApiData[0] : rawApiData;
+  const bsTreeData = bsDataNode?.balance_sheet_data || [];
+
+  // Recursive tree flattener
+  const flattenBSNode = (node, level = 0) => {
+    if (!node || !node.metric_name) return [];
+
+    const totalObj = node.data?.[0];
+    const totalArray = totalObj?.total || [];
+    const valuesByYear = {};
+    totalArray.forEach(t => {
+      if (t && t.year) {
+        valuesByYear[t.year.toString()] = t.value;
+      }
+    });
+
+    let type = "indented";
+    if (level === 0) {
+      type = "category-header";
+    } else if (level === 1) {
+      type = "sub-header";
+    }
+
+    const children = node.data?.slice(1) || [];
+    const isBold = level < 2 && children.length > 0;
+
+    const row = {
+      label: node.metric_label || "",
+      key: node.metric_name,
+      tooltip: node.tooltip_allowed ? node.tooltip_content : null,
+      type: type,
+      level: level,
+      isBold: isBold,
+      values: valuesByYear
     };
-  });
+
+    const flatChildren = [];
+    children.forEach(child => {
+      flatChildren.push(...flattenBSNode(child, level + 1));
+    });
+
+    return [row, ...flatChildren];
+  };
+
+  const rootNodes = bsTreeData.filter(node => node && node.metric_name);
+  const isNewBSDynamicShape = rootNodes.length > 0;
+
+  let finalRows = [];
+  let yearsToUse = [];
+
+  if (isNewBSDynamicShape) {
+    const allYears = new Set();
+    const flatRows = [];
+    rootNodes.forEach(node => {
+      const flattened = flattenBSNode(node, 0);
+      flatRows.push(...flattened);
+      flattened.forEach(row => {
+        Object.keys(row.values).forEach(yr => {
+          allYears.add(yr);
+        });
+      });
+    });
+
+    yearsToUse = Array.from(allYears).sort((a, b) => Number(a) - Number(b));
+    if (yearsToUse.length === 0) {
+      yearsToUse = ["2023", "2024", "2025"];
+    }
+    finalRows = flatRows;
+  } else {
+    // Fallback to legacy static rows structure
+    yearsToUse = rawApiData.length > 0
+      ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
+      : ["2023", "2024", "2025"];
+    finalRows = balanceSheetRows;
+  }
+
+  // Parse observations correctly checking status
+  const obsNode = bsTreeData.find(node => node && node.observation_and_insights);
+  const observationHtml = (isNewBSDynamicShape && obsNode?.observation_and_insights)
+    ? (obsNode.observation_and_insights.status ? obsNode.observation_and_insights.data : null)
+    : (extractObservationHtml(financialHighlights?.balance_sheet, rawApiData) 
+       || extractObservationHtml(financialHighlights?.financial_performance, financialHighlights?.financial_performance?.data));
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
@@ -511,12 +685,12 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
             <thead>
               <tr>
                 <th className="th-metric">Financial Metric</th>
-                {trendsData.map((col, idx) => {
-                  const isLatest = idx === trendsData.length - 1;
-                  const displayYear = `FY ${col.year}`;
+                {yearsToUse.map((yearStr, idx) => {
+                  const isLatest = idx === yearsToUse.length - 1;
+                  const displayYear = `FY ${yearStr}`;
                   return (
                     <th
-                      key={col.year}
+                      key={yearStr}
                       className={isLatest ? "th-year-highlight" : "th-year-dim"}
                     >
                       {displayYear}
@@ -526,7 +700,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
               </tr>
             </thead>
             <tbody>
-              {balanceSheetRows.map((row, rowIdx) => {
+              {finalRows.map((row, rowIdx) => {
                 let trClass = "tr-row";
                 if (row.type === "category-header") {
                   trClass = "tr-category-header";
@@ -536,22 +710,32 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
                   trClass = row.isBold ? "tr-indented tr-indented-bold" : "tr-indented";
                 }
 
+                const paddingLeft = row.level > 1 ? `${(row.level - 1) * 20}px` : undefined;
+
                 return (
                   <tr key={rowIdx} className={trClass}>
-                    <td className="td-label">
+                    <td className="td-label" style={{ paddingLeft }}>
                       {row.label}
-                      <span className="bs-tooltip-container">
-                        <img src="/toolTippublic.svg" alt="info" className="bs-tooltip-icon" />
-                        <span className="bs-tooltip-text">{row.tooltip}</span>
-                      </span>
+                      {row.tooltip && (
+                        <span className="bs-tooltip-container">
+                          <img src="/toolTippublic.svg" alt="info" className="bs-tooltip-icon" />
+                          <span className="bs-tooltip-text">{row.tooltip}</span>
+                        </span>
+                      )}
                     </td>
-                    {trendsData.map((col, idx) => {
-                      const isLatest = idx === trendsData.length - 1;
-                      const apiItem = col.apiItem;
-                      const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+                    {yearsToUse.map((yearStr, idx) => {
+                      const isLatest = idx === yearsToUse.length - 1;
+
+                      let value;
+                      if (isNewBSDynamicShape) {
+                        value = row.values[yearStr];
+                      } else {
+                        const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
+                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[yearStr];
+                      }
 
                       let displayVal = "-";
-                      if (value !== null && value !== undefined) {
+                      if (value !== null && value !== undefined && value !== "") {
                         const numVal = Number(value);
                         const formattedNum = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(1);
                         displayVal = `₹ ${formattedNum} Cr`;
@@ -559,7 +743,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
 
                       return (
                         <td
-                          key={col.year}
+                          key={yearStr}
                           className={isLatest ? "td-value-highlight" : "td-value-dim"}
                         >
                           {displayVal}
@@ -577,69 +761,126 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
 
       <div className="observations-container">
         <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        <ul className="observations-list">
-          {observationsList.map((bullet, idx) => (
-            <li key={idx}>{bullet}</li>
-          ))}
-        </ul>
+        {observationHtml ? (
+          <div 
+            className="observations-html-content"
+            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+            dangerouslySetInnerHTML={{ __html: observationHtml }}
+          />
+        ) : (
+          <ul className="observations-list">
+            {observationsList.map((bullet, idx) => (
+              <li key={idx}>{bullet}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
 };
 
 const CashFlowSection = ({ isPrivateDeal, data }) => {
-  const cashFlowRows = [
-    {
-      label: "CFO (₹ Cr)",
-      description: "Cash generated from core business operations.",
-      key: "cfo",
-      values: { "2023": 45, "2024": 62, "2025": 88 }
-    },
-    {
-      label: "CFI (₹ Cr)",
-      description: "Cash used for investments and long-term assets.",
-      key: "cfi",
-      values: { "2023": -30, "2024": -45, "2025": -55 }
-    },
-    {
-      label: "CFF (₹ Cr)",
-      description: "Cash flow related to funding and borrowings.",
-      key: "cff",
-      values: { "2023": -10, "2024": 15, "2025": -20 }
-    }
-  ];
-
   const defaultObservations = [
     "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
     "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
     "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
   ];
 
-  const rawApiData = data || [];
-  const yearsToUse = rawApiData.length > 0
-    ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
-    : ["2023", "2024", "2025"];
+  const dealDetails = useDealStore((state) => state.dealDetails);
+  const financialHighlights = dealDetails?.data?.financial_highlights;
 
-  const trendsData = yearsToUse.map((yearStr) => {
-    const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
-    return {
-      year: yearStr,
-      apiItem
-    };
-  });
+  const cashFlowAnalysisNode = financialHighlights?.cash_flow_analysis || financialHighlights?.cash_flow;
+  const rawApiData = cashFlowAnalysisNode?.data || data || [];
+
+  // Identify if rawApiData is in the new dynamic shape (metrics with matric_data/data arrays)
+  const isNewDynamicShape = Array.isArray(rawApiData) && rawApiData.length > 0 && 
+    (rawApiData[0]?.matric_data || rawApiData[0]?.data) && 
+    (rawApiData[0]?.matric_label || rawApiData[0]?.matric_name || rawApiData[0]?.financial_metrics_label);
+
+  let finalRows = [];
+  let yearsToUse = [];
+
+  if (isNewDynamicShape) {
+    // 1. Gather all unique years from all metrics to determine columns
+    const allYears = new Set();
+    rawApiData.forEach(metric => {
+      if (!metric) return;
+      const mData = metric.matric_data || metric.data || [];
+      mData.forEach(d => {
+        if (d && d.year) {
+          allYears.add(d.year.toString());
+        }
+      });
+    });
+
+    yearsToUse = Array.from(allYears).sort((a, b) => Number(a) - Number(b));
+    if (yearsToUse.length === 0) {
+      yearsToUse = ["2023", "2024", "2025"];
+    }
+
+    // 2. Build rows dynamically
+    finalRows = rawApiData.map(metric => {
+      if (!metric) return null;
+      const mData = metric.matric_data || metric.data || [];
+      const values = {};
+      mData.forEach(d => {
+        if (d && d.year) {
+          values[d.year.toString()] = d.value;
+        }
+      });
+
+      return {
+        label: metric.matric_label || metric.financial_metrics_label || "Custom Metric",
+        description: metric.matric_disclaimer || metric.financial_metrics_disclaimer || "",
+        key: metric.matric_name || metric.financial_metrics || "custom_key",
+        values: values
+      };
+    }).filter(Boolean);
+  } else {
+    // Fallback to legacy default rows structure
+    const defaultCashFlowRows = [
+      {
+        label: "CFO (₹ Cr)",
+        description: "Cash generated from core business operations.",
+        key: "cfo",
+        values: { "2023": 45, "2024": 62, "2025": 88 }
+      },
+      {
+        label: "CFI (₹ Cr)",
+        description: "Cash used for investments and long-term assets.",
+        key: "cfi",
+        values: { "2023": -30, "2024": -45, "2025": -55 }
+      },
+      {
+        label: "CFF (₹ Cr)",
+        description: "Cash flow related to funding and borrowings.",
+        key: "cff",
+        values: { "2023": -10, "2024": 15, "2025": -20 }
+      }
+    ];
+
+    yearsToUse = rawApiData.length > 0
+      ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
+      : ["2023", "2024", "2025"];
+
+    finalRows = defaultCashFlowRows;
+  }
+
+  const observationHtml = extractObservationHtml(financialHighlights?.cash_flow_analysis, rawApiData)
+    || extractObservationHtml(financialHighlights?.cash_flow, rawApiData);
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
 
   const formatCashFlowValue = (val) => {
-    if (val === null || val === undefined) return "-";
+    if (val === null || val === undefined || val === "") return "-";
     const num = Number(val);
     const sign = num >= 0 ? "+" : ""; // Negative numbers already include "-"
     return `${sign}${num.toFixed(0)} Cr`;
   };
 
   const getCashFlowColorClass = (val) => {
-    if (val === null || val === undefined) return "";
+    if (val === null || val === undefined || val === "") return "";
     return Number(val) >= 0 ? "cf-positive" : "cf-negative";
   };
 
@@ -718,12 +959,12 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
             <thead>
               <tr>
                 <th className="th-metric">Financial Metric</th>
-                {trendsData.map((col, idx) => {
-                  const isLatest = idx === trendsData.length - 1;
-                  const displayYear = `FY ${col.year}`;
+                {yearsToUse.map((yearStr, idx) => {
+                  const isLatest = idx === yearsToUse.length - 1;
+                  const displayYear = `FY ${yearStr}`;
                   return (
                     <th
-                      key={col.year}
+                      key={yearStr}
                       className={isLatest ? "th-year-highlight" : "th-year-dim"}
                     >
                       {displayYear}
@@ -733,24 +974,30 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
               </tr>
             </thead>
             <tbody>
-              {cashFlowRows.map((row, rowIdx) => {
+              {finalRows.map((row, rowIdx) => {
                 return (
                   <tr key={rowIdx} className="tr-row">
                     <td className="td-label">
                       <div className="cf-metric-title">{row.label}</div>
                       <div className="cf-metric-desc">{row.description}</div>
                     </td>
-                    {trendsData.map((col, idx) => {
-                      const isLatest = idx === trendsData.length - 1;
-                      const apiItem = col.apiItem;
-                      const value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+                    {yearsToUse.map((yearStr, idx) => {
+                      const isLatest = idx === yearsToUse.length - 1;
+
+                      let value;
+                      if (isNewDynamicShape) {
+                        value = row.values[yearStr];
+                      } else {
+                        const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
+                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[yearStr];
+                      }
 
                       const displayVal = formatCashFlowValue(value);
                       const colorClass = getCashFlowColorClass(value);
 
                       return (
                         <td
-                          key={col.year}
+                          key={yearStr}
                           className={`${isLatest ? "td-value-highlight" : "td-value-dim"} ${colorClass}`}
                         >
                           {displayVal}
@@ -767,11 +1014,19 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
 
       <div className="observations-container">
         <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        <ul className="observations-list">
-          {observationsList.map((bullet, idx) => (
-            <li key={idx}>{bullet}</li>
-          ))}
-        </ul>
+        {observationHtml ? (
+          <div 
+            className="observations-html-content"
+            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+            dangerouslySetInnerHTML={{ __html: observationHtml }}
+          />
+        ) : (
+          <ul className="observations-list">
+            {observationsList.map((bullet, idx) => (
+              <li key={idx}>{bullet}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -813,17 +1068,50 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
   ];
 
   const rawApiData = data || [];
-  const yearsToUse = rawApiData.length > 0
-    ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
+
+  const dealDetails = useDealStore((state) => state.dealDetails);
+  const financialHighlights = dealDetails?.data?.financial_highlights;
+
+  // Extract from financial_performance if working_capital is not set or empty, or if we want to prioritize it
+  const performanceArray = financialHighlights?.financial_performance?.data || [];
+  const mappedPerfData = performanceArray
+    .filter(item => item?.status !== false && item?.value && item?.data?.working_capital)
+    .map(item => {
+      let yearVal = "N/A";
+      if (item.value) {
+        const parsed = parseFloat(item.value);
+        if (!isNaN(parsed)) {
+          yearVal = parsed.toFixed(0);
+        } else {
+          yearVal = String(item.value);
+        }
+      }
+      const wc = item.data.working_capital;
+      return {
+        year: yearVal,
+        debtor_days: wc.debtor_days?.data ?? wc.debtor_days ?? null,
+        creditor_days: wc.creditor_days?.data ?? wc.creditor_days ?? null,
+        inventory_days: wc.inventory_days?.data ?? wc.inventory_days ?? null,
+        working_capital_ccc: wc.working_capital_ccc?.data ?? wc.working_capital_ccc ?? null,
+      };
+    });
+
+  const finalWcData = mappedPerfData.length > 0 ? mappedPerfData : rawApiData;
+
+  const yearsToUse = finalWcData.length > 0
+    ? [...new Set(finalWcData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
     : ["2023", "2024", "2025"];
 
   const trendsData = yearsToUse.map((yearStr) => {
-    const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
+    const apiItem = finalWcData.find(item => item?.year?.toString() === yearStr);
     return {
       year: yearStr,
       apiItem
     };
   });
+
+  const observationHtml = extractObservationHtml(financialHighlights?.financial_performance, financialHighlights?.financial_performance?.data)
+    || extractObservationHtml(financialHighlights?.working_capital, rawApiData);
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
@@ -941,8 +1229,11 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
                         const debtorVal = apiItem?.debtor_days ?? apiItem?.data?.debtor_days;
                         const creditorVal = apiItem?.creditor_days ?? apiItem?.data?.creditor_days;
                         const inventoryVal = apiItem?.inventory_days ?? apiItem?.data?.inventory_days;
+                        const cccVal = apiItem?.working_capital_ccc ?? apiItem?.data?.working_capital_ccc;
 
-                        if (debtorVal !== undefined && creditorVal !== undefined && inventoryVal !== undefined) {
+                        if (cccVal !== undefined && cccVal !== null) {
+                          value = cccVal;
+                        } else if (debtorVal !== undefined && creditorVal !== undefined && inventoryVal !== undefined && debtorVal !== null && creditorVal !== null && inventoryVal !== null) {
                           value = Number(debtorVal) + Number(inventoryVal) - Number(creditorVal);
                         } else {
                           value = row.values[col.year];
@@ -972,11 +1263,19 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
 
       <div className="observations-container">
         <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        <ul className="observations-list">
-          {observationsList.map((bullet, idx) => (
-            <li key={idx}>{bullet}</li>
-          ))}
-        </ul>
+        {observationHtml ? (
+          <div 
+            className="observations-html-content"
+            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+            dangerouslySetInnerHTML={{ __html: observationHtml }}
+          />
+        ) : (
+          <ul className="observations-list">
+            {observationsList.map((bullet, idx) => (
+              <li key={idx}>{bullet}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -1133,6 +1432,18 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
   const data = financialData.length > 0 ? financialData : (isPrivateDeal ? [] : []);
   console.log("data", data);
 
+  const ratiosNode = dealDetails?.data?.financial_highlights?.financial_ratio;
+  const rawRatiosData = ratiosNode?.data || [];
+  const ratiosObservationHtml = extractObservationHtml(ratiosNode, rawRatiosData);
+
+  const defaultRatiosObservations = [
+    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
+    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
+    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
+  ];
+  const apiRatiosObservations = rawRatiosData?.[0]?.observations || defaultRatiosObservations;
+  const ratiosObservationsList = Array.isArray(apiRatiosObservations) ? apiRatiosObservations : defaultRatiosObservations;
+
   const showData = dealDetails?.data?.financial_highlights?.financial_performance?.data?.data?.revenue_in_cr?.status;
   console.log('Showing the data for Revenue', showData);
 
@@ -1255,7 +1566,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
           >
             <h3>Income Statement</h3>
             <span>
-              {openStates.financialTrends ? <ChevronUp /> : <ChevronDown />}
+              <AccordionToggleIcon isOpen={openStates.financialTrends} />
             </span>
           </div>
           <Collapse in={openStates.financialTrends}>
@@ -1285,7 +1596,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
           >
             <h3>Balance Sheet</h3>
             <span>
-              {openStates.balanceSheet ? <ChevronUp /> : <ChevronDown />}
+              <AccordionToggleIcon isOpen={openStates.balanceSheet} />
             </span>
           </div>
 
@@ -1309,7 +1620,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
           >
             <h3>Cash Flow</h3>
             <span>
-              {openStates.cashFlow ? <ChevronUp /> : <ChevronDown />}
+              <AccordionToggleIcon isOpen={openStates.cashFlow} />
             </span>
           </div>
 
@@ -1333,7 +1644,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
           >
             <h3>Working Capital</h3>
             <span>
-              {openStates.workingCapital ? <ChevronUp /> : <ChevronDown />}
+              <AccordionToggleIcon isOpen={openStates.workingCapital} />
             </span>
           </div>
 
@@ -1357,7 +1668,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
           >
             <h3>Financial Ratios</h3>
             <span>
-              {openStates.financialRatios ? <ChevronUp /> : <ChevronDown />}
+              <AccordionToggleIcon isOpen={openStates.financialRatios} />
             </span>
           </div>
           <Collapse in={openStates.financialRatios}>
@@ -1431,6 +1742,25 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
                     />
                   )}
                 </div>
+
+                {/* Observations & Insights for Financial Ratios */}
+                <div className="observations-container" style={{ marginTop: "24px" }}>
+                  <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+                  {ratiosObservationHtml ? (
+                    <div 
+                      className="observations-html-content"
+                      style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+                      dangerouslySetInnerHTML={{ __html: ratiosObservationHtml }}
+                    />
+                  ) : (
+                    <ul className="observations-list">
+                      {ratiosObservationsList.map((bullet, idx) => (
+                        <li key={idx}>{bullet}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
               </div>
             </div>
           </Collapse>

@@ -45,8 +45,13 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
           return null;
         }
 
+        // Ignore observation_and_insights node or items without a valid year
+        if (item.observation_and_insights || !item.year || item.year === "0000" || Number(item.year) === 0) {
+          return null;
+        }
+
         return {
-          year: item.year ? `FY'${Math.floor(Number(item.year)).toString().slice(-2)}` : "FY'00",
+          year: `FY'${Math.floor(Number(item.year)).toString().slice(-2)}`,
           revenue: Number(item.revenue_in_cr) || 0,
           ebitda: Number(item.ebitda_percent) || 0,
           pat: Number(item.pat_percent) || 0,

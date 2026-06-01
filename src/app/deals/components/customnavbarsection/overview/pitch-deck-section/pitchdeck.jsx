@@ -9,7 +9,7 @@ const Pitchdeck = ({ isPrivateDeal, pdfUrl }) => {
   const dealStepData = dealDetails?.data?.deal_setpData;
 
   const dealType = dealDetails?.data?.deal_type;
-  const isPrivateLike = isPrivateDeal || dealType === "private" || dealType === "ccps" || dealType === "ofs";
+  const isPrivateLike = isPrivateDeal || dealType === "private" || dealType === "ccps" || dealType === "ofs" || dealType === "unlisted";
 
   // ✅ States for image and logo errors
   const [imgError, setImgError] = useState(false);

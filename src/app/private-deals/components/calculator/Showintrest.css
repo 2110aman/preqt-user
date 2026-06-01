@@ -570,3 +570,140 @@ h3.t_success {
     background: #C9A74E !important;
     color: #FFFFFF !important;
 }
+
+/* Light Theme overrides for unlisted deals */
+.light-theme-modal .modal-content {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.08) !important;
+}
+
+.light-theme-modal h5,
+.light-theme-modal h3,
+.light-theme-modal .t_success,
+.light-theme-modal .t_subccess,
+.light-theme-modal .errorContainer h3 {
+    color: #1F2937 !important;
+}
+
+.light-theme-modal label,
+.light-theme-modal .form-group label {
+    background: #FFFFFF !important;
+    color: #6B7280 !important;
+}
+
+.light-theme-modal .small_text,
+.light-theme-modal .t_botomsubccess,
+.light-theme-modal .bottom_successm,
+.light-theme-modal .errorResponsible p {
+    color: #6B7280 !important;
+}
+
+.light-theme-modal .back-arrow-btn,
+.light-theme-modal .close_poup {
+    background: #F3F4F6 !important;
+    border: 1px solid #E5E7EB !important;
+    box-shadow: none !important;
+}
+
+.light-theme-modal .back-arrow-btn svg,
+.light-theme-modal .close_poup svg {
+    color: #1F2937 !important;
+}
+
+.light-theme-modal .form-group input,
+.light-theme-modal .form-group textarea,
+.light-theme-modal .phoneInputWrapper,
+.light-theme-modal .button_select,
+.light-theme-modal .form-control,
+.light-theme-modal .input_field,
+.light-theme-modal .input_filed {
+    background-color: #FFFFFF !important;
+    color: #1F2937 !important;
+    border: 1px solid #D1D5DB !important;
+}
+
+.light-theme-modal .form-group input:focus,
+.light-theme-modal .form-group textarea:focus,
+.light-theme-modal .phoneInputWrapper:focus-within {
+    border-color: #B59131 !important;
+}
+
+.light-theme-modal .form-group input.phoneInput {
+    color: #1F2937 !important;
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.light-theme-modal .countryTrigger {
+    color: #1F2937 !important;
+}
+
+.light-theme-modal .button_select span {
+    color: #1F2937 !important;
+}
+
+.light-theme-modal .button_select svg {
+    color: #1F2937 !important;
+}
+
+.light-theme-modal .absolute_position {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #D1D5DB !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+.light-theme-modal .absolute_position li {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #1F2937 !important;
+}
+
+.light-theme-modal .absolute_position li:hover {
+    background: #F3F4F6 !important;
+    background-color: #F3F4F6 !important;
+    color: #1F2937 !important;
+}
+
+.light-theme-modal .absolute_position li.bg-secondary {
+    background: linear-gradient(135deg, #b59131 0%, #e6cf93 100%) !important;
+    color: #FFFFFF !important;
+}
+
+.light-theme-modal .countryMenu {
+    background: #FFFFFF !important;
+    border: 1px solid #E5E7EB !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+.light-theme-modal .countryOption {
+    color: #1F2937 !important;
+}
+
+.light-theme-modal .countryOption:hover {
+    background: #F3F4F6 !important;
+}
+
+.light-theme-modal .countryOptionActive {
+    background: linear-gradient(135deg, #b59131 0%, #e6cf93 100%) !important;
+    color: #FFFFFF !important;
+}
+
+.light-theme-modal [class*="otpInput"] {
+    background: #FFFFFF !important;
+    color: #1F2937 !important;
+    border: 1px solid #D1D5DB !important;
+}
+
+.light-theme-modal [class*="otpInputFilled"] {
+    background: #FFFFFF !important;
+    color: #1F2937 !important;
+    border: 1px solid #B59131 !important;
+}
+
+.light-theme-modal .bottom_successm {
+    background: #F3F4F6 !important;
+}
+

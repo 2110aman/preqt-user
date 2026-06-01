@@ -285,9 +285,8 @@ const TopDeal = () => {
       // Private and OFS deals are always filtered in (but might be locked in UI)
       if (type === "private" || type === "ofs") return true;
 
-      // CCPS and Public deals are filtered in if the user has a token OR it's that type
-      // (Note: the current logic seems to mean "show if logged in OR if it's CCPS/Public")
-      if (accessToken || type === "ccps" || type === "public") return true;
+      // CCPS, Public and Unlisted deals are filtered in if the user has a token OR it's that type
+      if (accessToken || type === "ccps" || type === "public" || type === "unlisted") return true;
 
       return false;
     });
@@ -495,9 +494,10 @@ const TopDeal = () => {
 
         {filteredDeals.length > 0 && filteredDeals.map((deal, index) => {
           const type = deal?.deal_type?.toLowerCase()
-          const isPrivateLike = type === 'private' || type === 'ccps' || type === 'ofs'
+          const isPrivateLike = type === 'private' || type === 'ccps' || type === 'ofs' || type === 'unlisted'
+          const isDarkTheme = type === 'private' || type === 'ccps' || type === 'ofs'
           const isofs = type === 'ofs'
-          const isPublic = type === 'public'
+          const isPublic = type === 'public' || type === 'unlisted'
           const rating = (deal?.ipo_review_rating?.status && deal?.ipo_review_rating?.weighted_composite_score);
 
           const numericRating = parseFloat(rating) || 0;
@@ -505,7 +505,7 @@ const TopDeal = () => {
           const hasHalfStar = numericRating % 1 > 0;
           const emptyStars = Math.max(0, 5 - fullStars - (hasHalfStar ? 1 : 0));
 
-          if (!accessToken && isPrivateLike) {
+          if (!accessToken && isDarkTheme) {
             return (
               <React.Fragment key={deal?.id}>
                 {renderHiddenCard(deal?.id)}
@@ -569,8 +569,8 @@ const TopDeal = () => {
                     {(deal?.target_funding_in_cr || 0) > 0 && (
                       <div className={Styles.percentAndProgressBar}>
                         <div className={Styles.progessMainContainer}>
-                          <p className={Styles.priceInCr} style={{ color: "#FFF" }}>{formatNumberWithCommas(deal?.raised_amount) || "0.0"} Cr / {deal?.target_funding_in_cr ? "₹" : ""}{formatNumberWithCommas(deal?.target_funding_in_cr) || "0.0"} {deal?.target_funding_in_cr ? "Cr" : ""}</p>
-                          <p className={Styles.percent} style={{ color: "#FFF" }}>{(deal?.target_funding_in_cr ? ((deal?.raised_amount || 0) / deal.target_funding_in_cr * 100).toFixed(2) : "0.00")}% </p>
+                          <p className={Styles.priceInCr} style={{ color: isPublic ? "#6B7280" : "#FFF" }}>{formatNumberWithCommas(deal?.raised_amount) || "0.0"} Cr / {deal?.target_funding_in_cr ? "₹" : ""}{formatNumberWithCommas(deal?.target_funding_in_cr) || "0.0"} {deal?.target_funding_in_cr ? "Cr" : ""}</p>
+                          <p className={Styles.percent} style={{ color: isPublic ? "#1F2937" : "#FFF" }}>{(deal?.target_funding_in_cr ? ((deal?.raised_amount || 0) / deal.target_funding_in_cr * 100).toFixed(2) : "0.00")}% </p>
                         </div>
 
                         <div className={Styles.progressBarContainer}>

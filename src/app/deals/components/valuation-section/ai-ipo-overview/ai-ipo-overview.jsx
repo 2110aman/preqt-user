@@ -17,14 +17,17 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
   const dealDetails = useDealStore((state) => state.dealDetails);
   const dealData = dealDetails?.data?.deal_setpData;
 
+  const dealType = dealDetails?.data?.deal_type;
+  const isunlisted = dealType === "unlisted";
   // OFS and CCPS deals behave exactly like private deals
-  const isPrivateLike = isPrivateDeal || isofs || isccps;
+  const isPrivateLike = isPrivateDeal || isofs || isccps || isunlisted;
+  const isDarkTheme = isPrivateDeal || isofs || isccps; // Excludes unlisted
+
   const minLots = Number(dealData?.min_investment?.data?.lot_size) || 1;
   const lotSize = Number(dealData?.lot_size?.data) || 1;
   const sharesPerLot = lotSize;
   const perSharePrice = Number(dealData?.offer_price?.data) || 0;
   const pricePerCcps = Number(dealData?.price_per_ccps?.data) || 0;
-  const dealType = dealDetails?.data?.deal_type;
 
   const pricePerLot = dealType === "ccps"
     ? pricePerCcps * lotSize * minLots
@@ -223,7 +226,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
       <section className="others" key={fieldKey}>
         <h6 className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
           {fieldKey === "company_website" && (
-            isPrivateLike ? (
+            isDarkTheme ? (
               <img src="/companyWebsiteLogoprivate.svg" alt="web" className="company-web-icon" style={{ marginRight: '8px' }} />
             ) : (
               <svg
@@ -252,7 +255,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
           {showTooltip && (
             <div className="custom-tooltip-wrapper">
               <span className="tooltip-icon">
-                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ cursor: "pointer", width: "12px", height: "12px" }} />
+                <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ cursor: "pointer", width: "12px", height: "12px" }} />
               </span>
               <div className="custom-tooltip-box">{tooltipData}</div>
             </div>
@@ -260,7 +263,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
         </h6>
 
         {isLink && displayValue !== "-" && displayValue !== "TBD" ? (
-          <Link href={displayValue} target="_blank" style={{ color: isPrivateLike ? "#f9d65c" : "#B59131" }}>
+          <Link href={displayValue} target="_blank" style={{ color: isDarkTheme ? "#f9d65c" : "#B59131" }}>
             {displayValue.replace(/^https?:\/\//, '').replace(/\/$/, '')}
           </Link>
         ) : (
@@ -410,27 +413,24 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
           {isPrivateLike ? (
             <>
               {dealData?.listing_timeline?.status && (
-                <section className="subs1-topp">
+                <section className="subs1-topp" style={{ backgroundColor: isDarkTheme ? "#1D1D1D" : "#F3F4F6" }}>
                   <div className="label-with-tooltip">
                     <div style={{ display: "flex", alignItems: "center" }}>
                       <p>{"Listing Timeline"}</p>
                       {shouldShowTooltip(dealData?.listing_timeline?.tool_tip) && (
                         <div className={`custom-tooltip-wrapper ${isMobile ? "main-other" : ""}`}>
                           <span className="tooltip-icon">
-                            <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                            <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                           </span>
                           <div className="custom-tooltip-box">{typeof dealData.listing_timeline.tool_tip === 'string' ? dealData.listing_timeline.tool_tip : dealData.listing_timeline.tool_tip?.data}</div>
                         </div>
                       )}
                     </div>
-                    <Image
-                      src={"/assets/pictures/listing-timeline.svg"}
-                      height={40}
-                      width={40}
-                      alt="The asset match"
-                    />
+                    <span className={isDarkTheme ? "valuation-bg" : "valuation-bg-light"}>
+                      <PeMultiple />
+                    </span>
                   </div>
-                  <span className="offer-day" style={{ color: "white" }}>
+                  <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                     {(() => {
                       const dl = dealData?.listing_timeline?.data;
                       if (!dl) return "TBD";
@@ -595,15 +595,15 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                           {shouldShowTooltip(dealData?.valuation_in_cr?.tool_tip) && (
                             <div className="custom-tooltip-wrapper main-other">
                               <span className="tooltip-icon">
-                                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                               </span>
                               <div className="custom-tooltip-box">{typeof dealData.valuation_in_cr.tool_tip === 'string' ? dealData.valuation_in_cr.tool_tip : dealData.valuation_in_cr.tool_tip?.data}</div>
                             </div>
                           )}
                         </div>
-                        <span className="valuation-bg"><Valuation /></span>
+                        <span className={isDarkTheme ? "valuation-bg" : "valuation-bg-light"}><Valuation /></span>
                       </div>
-                      <span className="offer-day" style={{ color: "white" }}>
+                      <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                         {(() => {
                           const value = dealData?.valuation_in_cr?.data;
                           if (!value || value === 0) return "TBD";
@@ -620,15 +620,15 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                             {shouldShowTooltip(dealData?.revenue_fy25_in_cr?.tool_tip) && (
                               <div className="custom-tooltip-wrapper">
                                 <span className="tooltip-icon">
-                                  <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                  <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                                 </span>
                                 <div className="custom-tooltip-box">{typeof dealData.revenue_fy25_in_cr.tool_tip === 'string' ? dealData.revenue_fy25_in_cr.tool_tip : dealData.revenue_fy25_in_cr.tool_tip?.data}</div>
                               </div>
                             )}
                           </div>
-                          <span className="valuation-bg"><RevenueIcon /></span>
+                          <span className={isDarkTheme ? "valuation-bg" : "valuation-bg-light"}><RevenueIcon /></span>
                         </div>
-                        <span className="offer-day" style={{ color: "white" }}>
+                        <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                           {(() => {
                             const value = dealData?.revenue_fy25_in_cr?.data;
                             if (!value || value === 0) return "TBD";
@@ -649,15 +649,15 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                           {shouldShowTooltip(dealData?.pat_fy25_in_cr?.tool_tip) && (
                             <div className="custom-tooltip-wrapper main-other">
                               <span className="tooltip-icon">
-                                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                               </span>
                               <div className="custom-tooltip-box">{typeof dealData.pat_fy25_in_cr.tool_tip === 'string' ? dealData.pat_fy25_in_cr.tool_tip : dealData.pat_fy25_in_cr.tool_tip?.data}</div>
                             </div>
                           )}
                         </div>
-                        <span className="valuation-bg"><PatIcon /></span>
+                        <span className={isDarkTheme ? "valuation-bg" : "valuation-bg-light"}><PatIcon /></span>
                       </div>
-                      <span className="offer-day" style={{ color: "white" }}>
+                      <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                         {(() => {
                           const value = dealData?.pat_fy25_in_cr?.data;
                           if (!value || value === 0) return "TBD";
@@ -675,17 +675,17 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                           {shouldShowTooltip(dealData?.pe_multiple?.tool_tip) && (
                             <div className="custom-tooltip-wrapper">
                               <span className="tooltip-icon">
-                                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                               </span>
                               <div className="custom-tooltip-box">{typeof dealData.pe_multiple.tool_tip === 'string' ? dealData.pe_multiple.tool_tip : dealData.pe_multiple.tool_tip.data}</div>
                             </div>
                           )}
                         </div>
-                        <span className="valuation-bg">
+                        <span className={isDarkTheme ? "valuation-bg" : "valuation-bg-light"}>
                           <PeMultiple />
                         </span>
                       </div>
-                      <span className="offer-day" style={{ color: "white" }}>
+                      <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                         {(() => {
                           const value = dealData?.pe_multiple?.data;
                           if (!value || value === 0) return "TBD";
@@ -811,7 +811,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               {renderField("debt_to_equity_fy25")}
               {renderField("merchant_banker_appointed")}
               {renderField("expecting_listing_date", true)}
-              {!isofs && !isccps && renderField("target_valuation")}
+              {!isofs && !isccps && !isunlisted && renderField("target_valuation")}
               {renderField("company_website", false, false, true)}
             </section>
           </>

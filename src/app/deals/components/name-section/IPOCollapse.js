@@ -10,6 +10,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
 
     const dealDetails = useDealStore((state) => state.dealDetails);
     const dealData = dealDetails?.data?.deal_setpData;
+    const isUnlisted = dealDetails?.data?.deal_type === "unlisted";
 
     const formatNumber = (value) => {
         if (value === null || value === undefined || isNaN(Number(value))) return value ?? "-";
@@ -99,7 +100,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                     )}
                 </div>
 
-                {!isPrivateDeal && (
+                {!isPrivateDeal && !isUnlisted && (
                     <>
                         <div className={styles.ipocollapseCenter}>
                             {(dealData?.gmp?.status || true) && (

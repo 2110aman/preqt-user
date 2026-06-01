@@ -155,7 +155,7 @@ function DealsTalkContent() {
                     const type = (deal.deal_type || '').toLowerCase();
                     return type === 'public' || 
                            type === 'unlisted' || 
-                           (type === 'ofs' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined));
+                           (type === 'ofs' && (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null'));
                 });
                 setAllTopDeals(filteredDeals);
             } else {

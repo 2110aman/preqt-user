@@ -20,6 +20,14 @@
   color: #fff;
 }
 
+.investmentCard.lightCard {
+  color: #1F2937;
+}
+
+.investmentCard.lightCard .amt {
+  color: #1F2937;
+}
+
 .investmentHeader {
   display: flex;
   justify-content: space-between;

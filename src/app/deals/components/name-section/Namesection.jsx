@@ -450,7 +450,9 @@ const Namedetailsection = ({ slug }) => {
 
   const isccps = dealDetails?.data?.deal_type === "ccps";
   const isofs = dealDetails?.data?.deal_type === "ofs";
-  const isPrivateLike = isPrivateDeal || isccps || isofs;
+  const isunlisted = dealDetails?.data?.deal_type === "unlisted";
+  const isPrivateLike = isPrivateDeal || isccps || isofs || isunlisted;
+  const isDarkTheme = isPrivateDeal || isccps || isofs;
   const isPrivateAndOfs = isPrivateDeal && isofs;
 
   const dealData = dealDetails?.data?.deal_setpData;
@@ -525,7 +527,7 @@ const Namedetailsection = ({ slug }) => {
   }
 
   return (
-    <div className={`main-container ${isPrivateLike ? 'private-deal-theme' : ''}`}>
+    <div className={`main-container ${isDarkTheme ? 'private-deal-theme' : ''}`}>
       <div className="subcontainer">
 
         <section className="topbar">
@@ -552,7 +554,7 @@ const Namedetailsection = ({ slug }) => {
               fillRule="evenodd"
               clipRule="evenodd"
               d="M1.14206 13.6663C0.898251 13.6663 0.654443 13.573 0.468734 13.3873C0.0963594 13.0149 0.0963594 12.413 0.468734 12.0407L5.50958 6.99976L0.468734 1.95893C0.0963594 1.58656 0.0963594 0.984664 0.468734 0.612289C0.841109 0.239914 1.443 0.239914 1.81538 0.612289L7.52958 6.32651C7.90192 6.69884 7.90192 7.30076 7.52958 7.67309L1.81538 13.3873C1.62967 13.573 1.38586 13.6663 1.14206 13.6663Z"
-              fill={isPrivateLike ? 'white' : " #6b7280"}
+              fill={isDarkTheme ? 'white' : " #6b7280"}
             />
           </svg>
 
@@ -572,7 +574,7 @@ const Namedetailsection = ({ slug }) => {
               fillRule="evenodd"
               clipRule="evenodd"
               d="M1.14206 13.6663C0.898251 13.6663 0.654443 13.573 0.468734 13.3873C0.0963594 13.0149 0.0963594 12.413 0.468734 12.0407L5.50958 6.99976L0.468734 1.95893C0.0963594 1.58656 0.0963594 0.984664 0.468734 0.612289C0.841109 0.239914 1.443 0.239914 1.81538 0.612289L7.52958 6.32651C7.90192 6.69884 7.90192 7.30076 7.52958 7.67309L1.81538 13.3873C1.62967 13.573 1.38586 13.6663 1.14206 13.6663Z"
-              fill={isPrivateLike ? 'white' : " #6b7280"}
+              fill={isDarkTheme ? 'white' : " #6b7280"}
             />
           </svg>
 
@@ -766,12 +768,12 @@ const Namedetailsection = ({ slug }) => {
 
 
 
-              <div className={hideForReferral ? "hideCardUI private-qualities" : isPrivateLike ? "private-qualities" : "qualities"}>
+              <div className={hideForReferral ? "hideCardUI private-qualities" : isDarkTheme ? "private-qualities" : "qualities"}>
                 {dealData?.key_highlights?.status &&
                   dealData?.key_highlights?.data?.map((item, index) => (
                     <span key={index}>{item}</span>
                   ))}
-                {!isPrivateLike && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private") && dealData?.preqt_summary?.status && (
+                {!isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
                   <PreqtSummarySection 
                     isPrivateLike={false} 
                     summaryData={dealData?.preqt_summary?.data} 
@@ -779,8 +781,8 @@ const Namedetailsection = ({ slug }) => {
                   />
                 )}
               </div>
-              {!isPrivateLike && !hideForReferral && (dealData?.ipo_review_rating?.status === true || dealData?.ipo_review_rating?.status === "true") && <IPOReviewAndRating reviewData={dealData?.ipo_review_rating?.data} />}
-              {isPrivateLike && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private") && dealData?.preqt_summary?.status && (
+              {!isDarkTheme && !hideForReferral && (dealData?.ipo_review_rating?.status === true || dealData?.ipo_review_rating?.status === "true") && <IPOReviewAndRating reviewData={dealData?.ipo_review_rating?.data} />}
+              {isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
                 <PreqtSummarySection 
                   isPrivateLike={true} 
                   summaryData={dealData?.preqt_summary?.data} 
@@ -790,7 +792,7 @@ const Namedetailsection = ({ slug }) => {
 
               {!hideForReferral && <div>
 
-                <IPOCollapse isPrivateDeal={isPrivateLike} isccps={isccps} isofs={isofs} />
+                <IPOCollapse isPrivateDeal={isDarkTheme} isccps={isccps} isofs={isofs} />
 
                 <Valuation isPrivateDeal={isPrivateDeal} isccps={isccps}  isofs={isofs}/>
 
@@ -854,7 +856,7 @@ const Namedetailsection = ({ slug }) => {
               </div> */}
             </div>
 
-            {authToken && <button className={`${isPrivateLike ? " private-qna-btn" : "qna-mob-btn"}`}
+            {authToken && <button className={`${isDarkTheme ? " private-qna-btn" : "qna-mob-btn"}`}
               onClick={() => { isPrivateLike ? setShowPrivateQna(true) : setShowQnA(true) }}
             >
               <>
@@ -896,10 +898,10 @@ const Namedetailsection = ({ slug }) => {
         </div>
         <div className="secondhalf">
           {isMobile ? (
-            hideForReferral ? "" : <Customnavbar isPrivateDeal={isPrivateLike} />
+            hideForReferral ? "" : <Customnavbar isPrivateDeal={isDarkTheme} />
 
           ) :
-            hideForReferral ? " " : <PrivateDealDetails isPrivateDeal={isPrivateLike} />}
+            hideForReferral ? " " : <PrivateDealDetails isPrivateDeal={isDarkTheme} />}
         </div>
       </div>
       {/* <QuestionAnswer /> */}

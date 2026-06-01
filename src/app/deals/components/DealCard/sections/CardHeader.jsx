@@ -31,6 +31,12 @@ export default function CardHeader({ deal, layout, isListView }) {
                         {statusMap[statusKey]}
                     </Badge>
                 )}
+
+                {deal?.deal_type?.toLowerCase() === 'unlisted' && deal?.tags?.[0] && (
+                    <Badge color="sme" variant="pill">
+                        {deal.tags[0]}
+                    </Badge>
+                )}
                 
                 {isListView ? (
                     <Badge color="dealType" variant="pill" className={styles.dealTypeHeaderBadge}>
@@ -40,7 +46,7 @@ export default function CardHeader({ deal, layout, isListView }) {
                     <>
                         {deal.deal_type?.toLowerCase() === 'public' && (
                             <Badge color="sme" variant="pill">
-                                IPO- SME
+                                {deal.tags?.[0] || 'IPO'}
                             </Badge>
                         )}
 

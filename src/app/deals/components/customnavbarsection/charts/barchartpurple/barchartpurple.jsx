@@ -27,10 +27,13 @@ const transformData = (apiData) => {
           return null;
         }
 
+        // Ignore observation_and_insights node or items without a valid year
+        if (item.observation_and_insights || !item.year || item.year === "0000" || Number(item.year) === 0) {
+          return null;
+        }
+
         return {
-          year: item.year
-            ? `FY'${Math.floor(Number(item.year)).toString().slice(-2)}`
-            : "FY'00",
+          year: `FY'${Math.floor(Number(item.year)).toString().slice(-2)}`,
 
           // FIX: convert both number and string to number
           growth: Number(item.roe_percent) || 0,

@@ -609,3 +609,82 @@
     min-width: unset;
   }
 }
+
+/* Light theme overrides to match the clean white public layout */
+.lightCard {
+  background: #FFFFFF !important;
+  color: #1F2937 !important;
+  box-shadow: 0 4px 60px 0 rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid #E5E7EB !important;
+}
+
+.lightCard .minInvestment {
+  background: #F3F4F6 !important;
+}
+
+.lightCard .minInvestment .div p {
+  color: #6B7280 !important;
+}
+
+.lightCard .minInvestment .div span {
+  color: #1F2937 !important;
+}
+
+.lightCard .lotContainer p {
+  color: #1F2937 !important;
+}
+
+.lightCard .valueInput {
+  color: #1F2937 !important;
+  border: 1px solid #D1D5DB !important;
+  background: #FFFFFF !important;
+}
+
+.lightCard .amount p {
+  color: #6B7280 !important;
+}
+
+.lightCard .amount h2 {
+  background: none !important;
+  -webkit-text-fill-color: #B59131 !important;
+  color: #B59131 !important;
+}
+
+.lightCard .imageStack {
+  background: #FDF9EE !important;
+  border: 1px solid #D1D5DB !important;
+}
+
+.lightCard .imageStack .s1 {
+  color: #1F2937 !important;
+}
+
+.lightCard .askAiButton {
+  background: #FFFFFF !important;
+  color: #B59131 !important;
+  border: 1.5px solid #B59131 !important;
+}
+
+.lightCard .getInviteWrapper {
+  background: #F3F4F6 !important;
+  background-image: none !important;
+  border: 1px solid #D1D5DB !important;
+}
+
+.lightCard .getInviteWrapper span {
+  color: #B59131 !important;
+}
+
+.lightCard .getInviteWrapper .meetingDate {
+  color: #6B7280 !important;
+}
+
+.lightCard button[class*="inviteButton"] {
+  background-color: transparent !important;
+}
+
+.lightCard.fixedBottomBtn {
+  background: #FFFFFF !important;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05) !important;
+  border-top: 1px solid #E5E7EB !important;
+}

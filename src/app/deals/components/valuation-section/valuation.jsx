@@ -18,6 +18,8 @@ const Valuation = ({ isPrivateDeal, isccps, isofs }) => {
   const perSharePrice = Number(dealData?.offer_price?.data) || 0;
   const pricePerCcps = Number(dealData?.price_per_ccps?.data) || 0;
   const dealType = dealDetails?.data?.deal_type;
+  const isunlisted = dealType === "unlisted";
+  const isDarkTheme = isPrivateDeal || isofs || isccps;
 
   const pricePerLot = dealType === "ccps"
     ? pricePerCcps * lotSize * minLots
@@ -60,8 +62,8 @@ const Valuation = ({ isPrivateDeal, isccps, isofs }) => {
 
   return (
     <div>
-      {(isPrivateDeal || isofs) && (
-        <div className="investmentCard">
+      {(isPrivateDeal || isofs || isunlisted) && (
+        <div className={`investmentCard ${isDarkTheme ? '' : 'lightCard'}`}>
           {dealData?.min_investment?.status && (
             <div className="investmentHeader">
               <div>

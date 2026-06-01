@@ -148,7 +148,7 @@ function AllDealsContent() {
         // Restrict rendered opportunities to strictly public and unlisted/unlisted types (case-insensitive)
         let deals = allDeals.filter(deal => {
             const type = (deal.deal_type || '').toLowerCase();
-            return type === 'public' || (type === 'unlisted' && (deal.deal_sub_type === null || deal.deal_sub_type === undefined));
+            return type === 'public' || (type === 'unlisted' && (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null'));
         });
 
         // 1. Deal Type (Tabs)
@@ -156,7 +156,7 @@ function AllDealsContent() {
             if (selectedDealType === "Unlisted") {
                 deals = deals.filter(deal => 
                     (deal.deal_type || '').toLowerCase() === 'unlisted' && 
-                    (deal.deal_sub_type === null || deal.deal_sub_type === undefined)
+                    (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
                 );
             } else {
                 deals = deals.filter(deal => (deal.deal_type || '').toLowerCase() === selectedDealType.toLowerCase());

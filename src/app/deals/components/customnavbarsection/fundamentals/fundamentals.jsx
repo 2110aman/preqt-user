@@ -12,6 +12,7 @@ import { Allison } from "next/font/google";
 const Fundamentals = ({ isPrivateDeal }) => {
   const [showAll, setShowAll] = useState(true);
   const dealDetails = useDealStore((state) => state.dealDetails);
+  const isUnlisted = dealDetails?.data?.deal_type === "unlisted";
   console.log("dealDetails5", dealDetails);
 
   const [openStates, setOpenStates] = useState({
@@ -274,7 +275,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
     <div
       className={`fundamentals-container ${isPrivateDeal ? "privateDeal" : ""}`}
     >
-      {dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights?.data && (
+      {dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights?.data && !isUnlisted && (
         <>
           <hr className="hr" />
           <Dropdown title="IPO key Highlights">

@@ -61,8 +61,10 @@ export default function NavBar({ onSigninClick, hasToken }) {
   let isPrivateDeal = dealType == "private";
   let isccps = dealType == "ccps";
   let isofs = dealType == "ofs";
+  let isunlisted = dealType == "unlisted";
 
-  const isPrivateLike = isPrivateDeal || isccps || isofs || pathname == "/become-a-partner" || pathname == "/deal-sourcing";
+  const isPrivateLike = isPrivateDeal || isccps || isofs || isunlisted || pathname == "/become-a-partner" || pathname == "/deal-sourcing";
+  const isDarkTheme = isPrivateDeal || isccps || isofs || pathname == "/become-a-partner" || pathname == "/deal-sourcing";
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -170,7 +172,7 @@ export default function NavBar({ onSigninClick, hasToken }) {
 
   return (
     <div className={`${dealType == "private" || pathname == "become-a-partner" && styles.privateDeal} `}>
-      <div className={`${styles.responsiveNav} ${isPrivateLike ? styles.privateDealTheme : ""}`}>
+      <div className={`${styles.responsiveNav} ${isDarkTheme ? styles.privateDealTheme : ""}`}>
         <article className={styles.mainNavContainer}>
           {/* hamburger */}
           <div
@@ -194,21 +196,21 @@ export default function NavBar({ onSigninClick, hasToken }) {
                 >
                   <path
                     d="M4 12.3301H20"
-                    stroke={isPrivateLike ? "white" : "black"}
+                    stroke={isDarkTheme ? "white" : "black"}
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
                     d="M4 18.3301H20"
-                    stroke={isPrivateLike ? "white" : "black"}
+                    stroke={isDarkTheme ? "white" : "black"}
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                   <path
                     d="M4 6.33008H20"
-                    stroke={isPrivateLike ? "white" : "black"}
+                    stroke={isDarkTheme ? "white" : "black"}
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -219,7 +221,7 @@ export default function NavBar({ onSigninClick, hasToken }) {
           {/* logo */}
           <Link href='/'>  <img
             src={
-              isPrivateLike
+              isDarkTheme
                 ? "/private-logo.png"
                 : "/logo.svg"
             }
@@ -442,7 +444,7 @@ export default function NavBar({ onSigninClick, hasToken }) {
       </nav>
 
       <section
-        className={`${styles.mainContainer} ${isPrivateLike ? styles.privateDealTheme : ""
+        className={`${styles.mainContainer} ${isDarkTheme ? styles.privateDealTheme : ""
           }`}
       >
         <div className={styles.navLeftSection}>
@@ -450,7 +452,7 @@ export default function NavBar({ onSigninClick, hasToken }) {
             {" "}
             <img
               src={
-                isPrivateLike
+                isDarkTheme
                   ? "/private-logo.png"
                   : "/logo.png"
               }
