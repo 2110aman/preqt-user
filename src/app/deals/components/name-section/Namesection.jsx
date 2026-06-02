@@ -48,6 +48,7 @@ const Namedetailsection = ({ slug }) => {
   const [loading, setLoading] = useState(true);
   const [replies, setReplies] = useState(null); // Store replies data
   const isMobile = useMediaQuery({ maxWidth: 920 });
+  const isBelow500 = useMediaQuery({ maxWidth: 500 });
   const { selectedDeal } = useDealStore();
   const router = useRouter();
   const [mainLoader, setMainLoader] = useState(true);
@@ -578,7 +579,11 @@ const Namedetailsection = ({ slug }) => {
             />
           </svg>
 
-          <span className="dea">{dealData?.company_name} </span>
+          <span className="dea">
+            {dealData?.company_name && dealData.company_name.length > 20 && isBelow500
+              ? dealData.company_name.substring(0, 20) + "..."
+              : dealData?.company_name}
+          </span>
            
            <div className="shareAndBell">
             <div onClick={() => {
@@ -618,7 +623,9 @@ const Namedetailsection = ({ slug }) => {
               />
             </svg>
             <span className="dea" style={{ marginTop: '3px' }}>
-              {dealData?.company_name}
+              {dealData?.company_name && dealData.company_name.length > 20 && isBelow500
+                ? dealData.company_name.substring(0, 20) + "..."
+                : dealData?.company_name}
             </span>
           </button>
           <div>

@@ -283,8 +283,10 @@ font-style: normal;
 font-weight: 300;
 line-height: 20px;
 }
-.businessModal{
+.businessModal {
   padding-top: 15px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 
