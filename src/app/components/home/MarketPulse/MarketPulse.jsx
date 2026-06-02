@@ -9,6 +9,7 @@ const DEFAULT_POST = {
 
 const MarketPulse = () => {
   const [post, setPost] = useState(DEFAULT_POST);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -26,6 +27,8 @@ const MarketPulse = () => {
         }
       } catch (error) {
         console.error("Failed to fetch live pulse post:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchPost();
@@ -89,6 +92,25 @@ const MarketPulse = () => {
     : post.post_headline || "Favorable for selective investing";
 
   const slug = post.post_slug || "understanding-market-trends-in-q2-2026";
+
+  if (isLoading) {
+    return (
+      <div className={styles.cardContainer} style={{ minHeight: '230px' }}>
+        <div className={styles.headerRow}>
+          <div style={{ width: '150px', height: '24px', backgroundColor: '#F3F4F6', borderRadius: '6px', opacity: 0.6 }}></div>
+          <div style={{ width: '180px', height: '20px', backgroundColor: '#F3F4F6', borderRadius: '4px', opacity: 0.6 }}></div>
+        </div>
+        <div style={{ width: '80%', height: '38px', backgroundColor: '#F3F4F6', borderRadius: '6px', opacity: 0.6, margin: '8px 0' }}></div>
+        <div className={styles.middleRow}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ width: '120px', height: '14px', backgroundColor: '#F3F4F6', borderRadius: '4px', opacity: 0.6 }}></div>
+            <div style={{ width: '80px', height: '48px', backgroundColor: '#F3F4F6', borderRadius: '8px', opacity: 0.6 }}></div>
+          </div>
+          <div style={{ width: '140px', height: '40px', backgroundColor: '#F3F4F6', borderRadius: '20px', opacity: 0.6 }}></div>
+        </div>
+      </div>
+    );
+  }
 
   // Show the pulse card only if its status is "published"
   if (!post || post.status !== "published") {

@@ -504,7 +504,7 @@
 .teaserNoMargin {
     margin-top: 0px !important;
     margin-bottom: 0px !important;
-    padding: 64px 32px 55px 32px !important;
+    padding: 64px 32px 64px 32px !important;
     border-radius: 32px !important;
 }
 

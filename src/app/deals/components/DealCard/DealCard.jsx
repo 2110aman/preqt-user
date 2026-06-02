@@ -13,13 +13,26 @@ export default function DealCard({
     onLoginClick,
     qaCount,
     replies,
-    isListView
+    isListView,
+    ignoreFeatured = false
 }) {
     // 1. Determine Variant
-    const variantKey = variantOverride || determineVariant(deal);
+    const variantKey = variantOverride || determineVariant(deal, ignoreFeatured);
     const theme = CARD_THEMES[variantKey] || CARD_THEMES.public_standard;
     const layout = CARD_LAYOUTS[variantKey] || CARD_LAYOUTS.public_standard;
-    const metrics = METRICS_CONFIG[variantKey] || METRICS_CONFIG.public_standard;
+    let metrics = METRICS_CONFIG[variantKey] || METRICS_CONFIG.public_standard;
+
+    // Overriding metrics for featured unlisted deals to match the updated UI design:
+    if (variantKey === 'featured_deal' && deal?.deal_type?.toLowerCase() === 'unlisted') {
+        metrics = {
+            hero: [
+                { label: "VALUATION", key: "valuation_in_cr", format: "currency", suffix: "Cr" },
+                { label: "SHARE PRICE", keys: ["per_share_price", "offer_price"], format: "currency", perShare: true },
+                { label: "EXP. LISTING", key: "listing_timeline", format: "date" }
+            ],
+            grid: []
+        };
+    }
 
     // Handle Auth Locked State for Private deals
     const hasRatingBadge = layout.ratingStyle !== 'none' && !!(deal?.ipo_review_rating?.status && deal?.ipo_review_rating?.weighted_composite_score);
@@ -36,7 +49,7 @@ export default function DealCard({
         upcoming: 'Upcoming',
         closed: isSeriesA ? 'Round Closed' : 'Closed'
     };
-    const shouldRenderStatus = !isPrivateDeal || isSeriesA;
+    const shouldRenderStatus = deal?.deal_type?.toLowerCase() === 'public';
 
     const content = isListView ? (
         <div className={`${styles.cardContainer} ${styles.listView} ${styles[theme.theme]} ${theme.gradient ? styles[theme.gradient] : ''} ${layout.hasOFSGradient ? styles.ofsCard : ''} ${styles[variantKey] || ''}`}>

@@ -113,7 +113,7 @@ const techMahindraTeaserMock = {
     sector_industry: "IT Services"
 };
 
-export default function UnlockTeaser({ className = "", isAllDeals = false, isListView = false, isGridCard = false }) {
+export default function UnlockTeaser({ className = "", isAllDeals = false, isListView = false, isGridCard = false, isTopDeal = false }) {
     const handleGooglePlayClick = () => {
         window.open("https://play.google.com/store/apps/details?id=com.preqt.app", "_blank");
     };
@@ -121,6 +121,56 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
     const handleAppStoreClick = () => {
         window.open("https://apps.apple.com/in/app/preqt/id6751903472", "_blank");
     };
+
+    if (isTopDeal) {
+        return (
+            <div className={`${styles.topDealsTeaser} ${className}`}>
+                <div className={styles.frostedOverlay}></div>
+                <div className={styles.foreground}>
+                    <div className={styles.phoneWrapper}>
+                        <img
+                            src="/downloadPreqt.png"
+                            className={styles.phoneGraphic}
+                            alt="Download PreQT App"
+                            draggable={false}
+                        />
+                        <img
+                            src="/preqtylogo.png"
+                            className={styles.phoneLogo}
+                            alt="PreQT Logo"
+                            draggable={false}
+                        />
+                    </div>
+                    <div className={styles.textSection}>
+                        <h3 className={styles.actionTitle}>Unlock Exclusive Private Deals</h3>
+                        <p className={styles.actionDesc}>
+                            Download the mobile app to unlock verified private market opportunities, startup deals, and exclusive IPO access.
+                        </p>
+                        <div className={styles.badgeContainer}>
+                            <Image
+                                src="/downloadapplePreqt.png"
+                                width={80}
+                                height={22}
+                                alt="Download on the App Store"
+                                className={styles.storeBadge}
+                                onClick={handleAppStoreClick}
+                                draggable={false}
+                            />
+                            <Image
+                                src="/androiddownloadpreqt.png"
+                                width={80}
+                                height={22}
+                                alt="Get it on Google Play"
+                                className={styles.storeBadge}
+                                onClick={handleGooglePlayClick}
+                                draggable={false}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (isGridCard) {
         return (

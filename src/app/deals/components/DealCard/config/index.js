@@ -4,10 +4,11 @@ import { METRICS_CONFIG } from './metricsMap';
 
 export { CARD_THEMES, CARD_LAYOUTS, METRICS_CONFIG };
 
-export function determineVariant(deal) {
+export function determineVariant(deal, ignoreFeatured = false) {
     const type = (deal.deal_type || '').toLowerCase();
+    const subType = (deal.deal_sub_type || '').toLowerCase().trim();
     
-    if (type === 'featured') {
+    if (!ignoreFeatured && (type === 'featured' || subType === 'featured')) {
         return 'featured_deal';
     }
 

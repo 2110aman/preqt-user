@@ -18,15 +18,23 @@ export default function CardHeaderFeatured({ deal }) {
     // For featured deals, we want to split them into rows or just let them wrap
     // The design shows LIVE + 2 tags on top, 3 tags below.
     const tags = deal.tags || [];
+    const shouldRenderStatus = deal?.deal_type?.toLowerCase() === 'public' || deal?.deal_type?.toLowerCase() === 'featured';
 
     return (
         <div className={styles.headerFeatured}>
             <div className={styles.headerFeaturedRow}>
-                <Badge color={statusKey === 'live' ? 'featuredLive' : statusKey} variant="pill" className={styles.featureBadge}>
-                    <span className={`${styles.statusDot} ${statusKey === 'live' ? styles.featuredLive : styles[statusKey]}`} />
-                    {statusMap[statusKey]}
-                </Badge>
-                {tags.slice(0, 2).map((tag, idx) => {
+                {shouldRenderStatus && (
+                    <Badge color={statusKey === 'live' ? 'featuredLive' : statusKey} variant="pill" className={styles.featureBadge}>
+                        <span className={`${styles.statusDot} ${statusKey === 'live' ? styles.featuredLive : styles[statusKey]}`} />
+                        {statusMap[statusKey]}
+                    </Badge>
+                )}
+                {(deal.hight_conviction === true || deal.hight_conviction === "true") && (
+                    <Badge color="highConviction" variant="pill" className={styles.featureBadge}>
+                        HIGH CONVICTION
+                    </Badge>
+                )}
+                {tags.map((tag, idx) => {
                     const isHighConviction = tag === 'HIGH CONVICTION';
                     return (
                         <Badge key={idx} color={isHighConviction ? 'highConviction' : 'sme'} variant="solid" className={styles.featureBadge}>
@@ -35,16 +43,6 @@ export default function CardHeaderFeatured({ deal }) {
                     );
                 })}
             </div>
-            
-            {tags.length > 2 && (
-                <div className={styles.headerFeaturedRow}>
-                    {tags.slice(2).map((tag, idx) => (
-                        <Badge key={idx} color="sme" variant="solid" className={styles.featureBadge}>
-                            {tag}
-                        </Badge>
-                    ))}
-                </div>
-            )}
         </div>
     );
 }

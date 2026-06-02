@@ -724,6 +724,7 @@ function AllDealsContent() {
                                                         qaCount={qaCounts[deal.id] || 0}
                                                         replies={replies[deal.id]}
                                                         isListView={viewType === 'list'}
+                                                        ignoreFeatured={true}
                                                     />
                                                 </div>
                                             ))}

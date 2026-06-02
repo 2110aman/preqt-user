@@ -882,13 +882,17 @@
   /* beautiful green in dark mode */
 }
 
-/* Observations and Insights Styles */
 .observations-container {
   background: #B591310D;
   border: 1px solid #B5913126;
   border-radius: 12px;
   padding: 16px;
   margin-top: 24px;
+}
+
+.observations-html-content p {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .observations-title {

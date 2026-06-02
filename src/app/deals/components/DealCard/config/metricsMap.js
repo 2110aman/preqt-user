@@ -3,7 +3,7 @@ export const METRICS_CONFIG = {
         hero: [
             { label: "Issue Size", keys: ["issue_size_overall", "issue_size_amount", "target_funding_in_cr"], format: "currency", suffix: "Cr" },
             { label: "GMP", key: "estimated_gain_loss", format: "percent_gain" },
-            { label: "Open Date", key: "listing_timeline", format: "date" }
+            { label: "Open Date", key: "timeline_ipo_open_date", format: "date" }
         ],
         grid: []
     },

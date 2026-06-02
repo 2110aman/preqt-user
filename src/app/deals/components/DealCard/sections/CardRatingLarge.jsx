@@ -8,7 +8,9 @@ export default function CardRatingLarge({ deal }) {
 
     const rating = ipoReviewRating.weighted_composite_score;
     const showRating = ipoReviewRating.status === true || ipoReviewRating.status === "true";
-    const recommendation = ipoReviewRating.overall_recommendation;
+    const badgeTextObj = ipoReviewRating.badge_text;
+    const showBadgeText = badgeTextObj?.status === true || badgeTextObj?.status === "true";
+    const recommendation = showBadgeText ? badgeTextObj?.value : ipoReviewRating.overall_recommendation;
 
     // If rating is hidden/unavailable and there is no recommendation text, hide the component to prevent empty space
     if (!showRating && !recommendation) return null;
@@ -31,7 +33,7 @@ export default function CardRatingLarge({ deal }) {
             {/* The recommendation pill */}
             {recommendation ? (
                 <div className={styles.strongBuyPill}>
-                    {recommendation}
+                    {recommendation.toUpperCase()}
                 </div>
             ) : (
                 /* Fallback to STRONG BUY only if we have rating but no explicit recommendation text */

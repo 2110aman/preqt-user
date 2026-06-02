@@ -380,12 +380,15 @@ function DealsTalkContent() {
                     {/* Header: Badges & Rating */}
                     <div className={styles.topHeaderRow}>
                         <div className={styles.leftBadges}>
-                            <div className={badgeClass}>
-                                <div className={styles.dotWrapper}>
-                                    <div className={`${styles.dotInner} ${dotClass}`}></div>
+                            {deal?.deal_type?.toLowerCase() === 'public' && (
+                                <div className={badgeClass}>
+                                    <div className={styles.dotWrapper}>
+                                        <div className={`${styles.dotInner} ${dotClass}`}></div>
+                                    </div>
+                                    {label}
                                 </div>
-                                {label}
-                            </div>
+                            )}
+
                             {(() => {
                                 let totalChars = 0;
                                 return (deal?.tags || []).filter((tag, index) => {

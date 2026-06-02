@@ -12,13 +12,24 @@ import Link from 'next/link'
 import { showSuccessToast, showErrorToast } from '../../../components/ToastProvider'
 import { useDeals } from '@/app/context/DealContext'
 import { formatDate } from "@/app/utils/FormatDate";
+import UnlockTeaser from '@/app/components/home/DealShowcase/UnlockTeaser';
+import RatingBadge from '@/app/deals/components/DealCard/ui/RatingBadge';
 
-const truncateWords = (text, maxWords = 12) => {
-  if (!text || typeof text !== 'string') return 'N/A'
-  const words = text.trim().split(/\s+/)
-  if (words.length <= maxWords) return text.trim()
-  return `${words.slice(0, maxWords).join(' ')}..`
-}
+const truncateDescription = (text) => {
+  if (!text || typeof text !== 'string') return '';
+  const maxLength = 85;
+  if (text.length <= maxLength) return text;
+  let truncated = text.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > 0) {
+    truncated = truncated.slice(0, lastSpace);
+  }
+  return `${truncated}....`;
+};
+
+const DEFAULT_PUBLIC_DEALS = [
+ 
+];
 
 const TopDeal = () => {
   const router = useRouter()
@@ -185,8 +196,7 @@ const TopDeal = () => {
       const list = payload.data || []
       console.log("list2", list)
       setTotalDealss(payload.pagination?.totalRecords || list?.length || 0)
-      setDeals(Array.isArray(list) ? list.slice(0, 3) : [])
-      //  setDeals([])
+      setDeals(Array.isArray(list) ? list : [])
     } catch (e) {
       console.error('Failed to fetch top deals', e)
     } finally {
@@ -277,20 +287,36 @@ const TopDeal = () => {
   const accessToken = Cookies.get("accessToken");
 
   const filteredDeals = useMemo(() => {
-    return (Array.isArray(deals) ? deals : []).filter((deal) => {
+    const list = (Array.isArray(deals) ? deals : []).filter((deal) => {
       if (!deal || !deal.deal_type) return false;
 
       const type = deal.deal_type.toLowerCase();
 
-      // Private and OFS deals are always filtered in (but might be locked in UI)
-      if (type === "private" || type === "ofs") return true;
-
-      // CCPS, Public and Unlisted deals are filtered in if the user has a token OR it's that type
-      if (accessToken || type === "ccps" || type === "public" || type === "unlisted") return true;
-
-      return false;
+      return type === "public" || type === "unlisted";
     });
-  }, [deals, accessToken]);
+
+    const combined = [...list];
+    for (const defaultDeal of DEFAULT_PUBLIC_DEALS) {
+      if (combined.length >= 2) break;
+      const isAlreadyPresent = combined.some(
+        (d) => d.company_name?.toLowerCase() === defaultDeal.company_name.toLowerCase()
+      );
+      if (!isAlreadyPresent) {
+        combined.push(defaultDeal);
+      }
+    }
+
+    return combined.slice(0, 2);
+  }, [deals]);
+
+  const showOverlayDeal = useMemo(() => {
+    const list = (Array.isArray(deals) ? deals : []).filter((deal) => {
+      if (!deal || !deal.deal_type) return false;
+      const type = deal.deal_type.toLowerCase();
+      return type === "public" || type === "unlisted";
+    });
+    return list.length === 0;
+  }, [deals]);
 
 
 
@@ -492,18 +518,17 @@ const TopDeal = () => {
 
         {/* anthem banner */}
 
-        {filteredDeals.length > 0 && filteredDeals.map((deal, index) => {
+        <UnlockTeaser isTopDeal={true} />
+
+        {filteredDeals.map((deal, index) => {
           const type = deal?.deal_type?.toLowerCase()
-          const isPrivateLike = type === 'private' || type === 'ccps' || type === 'ofs' || type === 'unlisted'
+          const isPrivateLike = type === 'private' || type === 'ccps' || type === 'ofs'
           const isDarkTheme = type === 'private' || type === 'ccps' || type === 'ofs'
           const isofs = type === 'ofs'
           const isPublic = type === 'public' || type === 'unlisted'
           const rating = (deal?.ipo_review_rating?.status && deal?.ipo_review_rating?.weighted_composite_score);
 
           const numericRating = parseFloat(rating) || 0;
-          const fullStars = Math.floor(numericRating);
-          const hasHalfStar = numericRating % 1 > 0;
-          const emptyStars = Math.max(0, 5 - fullStars - (hasHalfStar ? 1 : 0));
 
           if (!accessToken && isDarkTheme) {
             return (
@@ -522,22 +547,7 @@ const TopDeal = () => {
 
                 {isPublic && numericRating > 0 && (
                   <div className={Styles.ratingContainer}>
-                    <div className="ratingBadgeNew">
-                      <div className="ratingNumberBox">
-                        {rating}
-                      </div>
-                      <div className="starsBox">
-                        {[...Array(fullStars)].map((_, i) => (
-                          <img key={`full-${i}`} src="/starwhite.svg" alt="star" className="starIconSmall" />
-                        ))}
-                        {hasHalfStar && (
-                          <img src="/halfstar.svg" alt="half star" className="starIconSmall" />
-                        )}
-                        {[...Array(emptyStars)].map((_, i) => (
-                          <img key={`empty-${i}`} src="/emptystar.svg" alt="empty star" className="starIconSmall" />
-                        ))}
-                      </div>
-                    </div>
+                    <RatingBadge rating={rating} />
                   </div>
                 )}
 
@@ -557,7 +567,7 @@ const TopDeal = () => {
 
                 {deal?.tag_line && (
                   <div className={Styles.anthemDescription} style={{ color: isPublic ? "#6B7280" : "#FFF" }}>
-                    {deal?.tag_line}
+                    {truncateDescription(deal.tag_line)}
                   </div>
                 )}
 

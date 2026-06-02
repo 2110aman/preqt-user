@@ -20,7 +20,7 @@ export default function CardHeader({ deal, layout, isListView }) {
     };
 
     const rating = deal?.ipo_review_rating?.status && deal?.ipo_review_rating?.weighted_composite_score;
-    const shouldRenderStatus = !isPrivateDeal || isSeriesA;
+    const shouldRenderStatus = deal?.deal_type?.toLowerCase() === 'public';
 
     return (
         <div className={styles.headerRow}>
@@ -31,6 +31,8 @@ export default function CardHeader({ deal, layout, isListView }) {
                         {statusMap[statusKey]}
                     </Badge>
                 )}
+
+
 
                 {deal?.deal_type?.toLowerCase() === 'unlisted' && deal?.tags?.[0] && (
                     <Badge color="sme" variant="pill">

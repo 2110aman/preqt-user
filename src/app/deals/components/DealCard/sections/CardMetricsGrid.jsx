@@ -21,7 +21,7 @@ export default function CardMetricsGrid({ deal, config }) {
             case 'percent':
                 return `${formatNumberWithCommas(value)}%`;
             case 'date':
-                return formatDateMonthDay(value);
+                return formatDateMonthDay(value).toUpperCase();
             case 'date_short':
                 if (!value) return "TBD";
                 const d = new Date(value);

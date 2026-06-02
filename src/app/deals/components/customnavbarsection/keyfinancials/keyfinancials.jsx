@@ -129,40 +129,10 @@ const dummyPerfData = [
 ];
 
 const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
-  const defaultTrendsData = [
-    {
-      year: "2023",
-      revenue: 120.0,
-      growth: 28.0,
-      ebitda: 12.6,
-      ebitdaMargin: 10.5,
-      pat: 5.8,
-      patMargin: 4.8
-    },
-    {
-      year: "2024",
-      revenue: 157.0,
-      growth: 31.0,
-      ebitda: 17.0,
-      ebitdaMargin: 10.8,
-      pat: 7.7,
-      patMargin: 4.9
-    },
-    {
-      year: "2025",
-      revenue: 209.0,
-      growth: 33.0,
-      ebitda: 23.0,
-      ebitdaMargin: 11.0,
-      pat: 10.5,
-      patMargin: 5.0
-    }
-  ];
+  const defaultTrendsData = [];
 
   const defaultObservations = [
-    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
-    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
-    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
+    
   ];
 
   const rawApiData = data || [];
@@ -512,11 +482,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
     }
   ];
 
-  const defaultObservations = [
-    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
-    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
-    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
-  ];
+  const defaultObservations = [];
 
   const dealDetails = useDealStore((state) => state.dealDetails);
   const financialHighlights = dealDetails?.data?.financial_highlights;
@@ -731,7 +697,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
                         value = row.values[yearStr];
                       } else {
                         const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
-                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[yearStr];
+                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key];
                       }
 
                       let displayVal = "-";
@@ -780,11 +746,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
 };
 
 const CashFlowSection = ({ isPrivateDeal, data }) => {
-  const defaultObservations = [
-    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
-    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
-    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
-  ];
+  const defaultObservations = [];
 
   const dealDetails = useDealStore((state) => state.dealDetails);
   const financialHighlights = dealDetails?.data?.financial_highlights;
@@ -989,7 +951,7 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
                         value = row.values[yearStr];
                       } else {
                         const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
-                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[yearStr];
+                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key];
                       }
 
                       const displayVal = formatCashFlowValue(value);
@@ -1061,11 +1023,7 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
     }
   ];
 
-  const defaultObservations = [
-    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
-    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
-    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
-  ];
+  const defaultObservations = [];
 
   const rawApiData = data || [];
 
@@ -1236,10 +1194,10 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
                         } else if (debtorVal !== undefined && creditorVal !== undefined && inventoryVal !== undefined && debtorVal !== null && creditorVal !== null && inventoryVal !== null) {
                           value = Number(debtorVal) + Number(inventoryVal) - Number(creditorVal);
                         } else {
-                          value = row.values[col.year];
+                          value = undefined;
                         }
                       } else {
-                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key] ?? row.values[col.year];
+                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key];
                       }
 
                       const displayVal = formatDaysValue(value);
@@ -1432,15 +1390,27 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
   const data = financialData.length > 0 ? financialData : (isPrivateDeal ? [] : []);
   console.log("data", data);
 
+  const performanceArray = dealDetails?.data?.financial_highlights?.financial_performance?.data || [];
+  const hasWorkingCapitalData = performanceArray.some(item => {
+    const wc = item?.data?.working_capital;
+    if (!wc) return false;
+    const debtor = wc.debtor_days?.data ?? wc.debtor_days;
+    const creditor = wc.creditor_days?.data ?? wc.creditor_days;
+    const inventory = wc.inventory_days?.data ?? wc.inventory_days;
+    return (debtor !== null && debtor !== undefined) ||
+           (creditor !== null && creditor !== undefined) ||
+           (inventory !== null && inventory !== undefined);
+  }) || !!(dealDetails?.data?.financial_highlights?.working_capital?.data?.length > 0);
+
+  const hasBalanceSheetData = !!(dealDetails?.data?.financial_highlights?.balance_sheet?.data?.length > 0);
+
+  const hasCashFlowData = !!(dealDetails?.data?.financial_highlights?.cash_flow_analysis?.data?.length > 0 || dealDetails?.data?.financial_highlights?.cash_flow?.data?.length > 0);
+
   const ratiosNode = dealDetails?.data?.financial_highlights?.financial_ratio;
   const rawRatiosData = ratiosNode?.data || [];
   const ratiosObservationHtml = extractObservationHtml(ratiosNode, rawRatiosData);
 
-  const defaultRatiosObservations = [
-    "Revenue has shown a consistent CAGR of ~32% over the last 3 years, indicating strong market demand.",
-    "EBITDA margins remain stable around 11%, demonstrating effective cost management despite rapid scaling.",
-    "PAT growth is mirroring revenue trends, signifying healthy bottom-line conversion."
-  ];
+  const defaultRatiosObservations = [];
   const apiRatiosObservations = rawRatiosData?.[0]?.observations || defaultRatiosObservations;
   const ratiosObservationsList = Array.isArray(apiRatiosObservations) ? apiRatiosObservations : defaultRatiosObservations;
 
@@ -1588,7 +1558,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
       )}
 
       {/* Balance Sheet */}
-      {(dealDetails?.data?.financial_highlights?.balance_sheet?.status || dealDetails?.data?.financial_highlights?.financial_performance?.status) && (
+      {(hasBalanceSheetData || dealDetails?.data?.financial_highlights?.financial_performance?.status) && (
         <div className="section">
           <div
             className="section-header"
@@ -1612,7 +1582,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
       )}
 
       {/* Cash Flow */}
-      {(dealDetails?.data?.financial_highlights?.cash_flow?.status || dealDetails?.data?.financial_highlights?.financial_performance?.status || dealDetails?.data?.financial_highlights?.balance_sheet?.status) && (
+      {(hasCashFlowData || dealDetails?.data?.financial_highlights?.financial_performance?.status) && (
         <div className="section">
           <div
             className="section-header"
@@ -1628,7 +1598,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
             <div className="section-body financial-performance-ui">
               <CashFlowSection
                 isPrivateDeal={isPrivateDeal}
-                data={dealDetails?.data?.financial_highlights?.cash_flow?.data || []}
+                data={dealDetails?.data?.financial_highlights?.cash_flow_analysis?.data || dealDetails?.data?.financial_highlights?.cash_flow?.data || []}
               />
             </div>
           </Collapse>
@@ -1636,7 +1606,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
       )}
 
       {/* Working Capital */}
-      {(dealDetails?.data?.financial_highlights?.working_capital?.status || dealDetails?.data?.financial_highlights?.financial_performance?.status || dealDetails?.data?.financial_highlights?.balance_sheet?.status) && (
+      {(hasWorkingCapitalData || dealDetails?.data?.financial_highlights?.financial_performance?.status) && (
         <div className="section">
           <div
             className="section-header"

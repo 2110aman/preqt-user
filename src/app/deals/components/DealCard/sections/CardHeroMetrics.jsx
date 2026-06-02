@@ -23,7 +23,7 @@ export default function CardHeroMetrics({ deal, config, style }) {
     const formatMetricValue = (value, metric) => {
         if (value === "TBD") return "TBD";
         if (metric.format === 'date') {
-            return formatDateMonthDay(value);
+            return formatDateMonthDay(value).toUpperCase();
         }
         return formatNumberWithCommas(value);
     };
