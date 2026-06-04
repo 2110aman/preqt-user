@@ -1141,6 +1141,12 @@
         padding: 16px !important;
     }
 
+    .listView .companyLogo {
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+    }
+
 
     .companyName {
         font-size: 16px !important;
@@ -1264,7 +1270,7 @@
     .listView .heroBoxes {
         display: flex !important;
         flex-direction: row !important;
-        gap: 12px !important;
+        gap: 20px !important;
         justify-content: flex-end;
         margin: 0 !important;
         padding: 0 !important;
@@ -1327,6 +1333,9 @@
     .companyText {
         gap: 0px;
     }
+    .listView .heroBoxes{
+        gap:15px !important;
+    }
 
     .mobileTagsInline {
         max-width: 175px !important;
@@ -1337,7 +1346,7 @@
     }
 
     .listView {
-        grid-template-columns: 1.15fr 0.85fr !important;
+        grid-template-columns: 0.5fr 1fr !important;
         gap: 2px 2px !important;
         padding: 12px !important;
     }
@@ -1356,8 +1365,11 @@
     .mobileTagsInline {
         max-width: 120px !important;
     }
+    .listView .heroBoxes{
+        gap:5px !important;
+    }
 
     .listView {
-        grid-template-columns: 1.1fr 0.9fr !important;
+        /* grid-template-columns: 1.1fr 0.9fr !important; */
     }
 }

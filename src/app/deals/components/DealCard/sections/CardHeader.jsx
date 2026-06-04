@@ -40,24 +40,16 @@ export default function CardHeader({ deal, layout, isListView }) {
                     </Badge>
                 )}
                 
-                {isListView ? (
-                    <Badge color="dealType" variant="pill" className={styles.dealTypeHeaderBadge}>
-                        {deal.deal_type ? `${deal.deal_type.replace(/deals$/i, '').trim().charAt(0).toUpperCase() + deal.deal_type.replace(/deals$/i, '').trim().slice(1).toLowerCase()} Deals` : 'Public Deals'}
+                {deal.deal_type?.toLowerCase() === 'public' && (
+                    <Badge color="sme" variant="pill">
+                        {deal.tags?.[0] || 'IPO'}
                     </Badge>
-                ) : (
-                    <>
-                        {deal.deal_type?.toLowerCase() === 'public' && (
-                            <Badge color="sme" variant="pill">
-                                {deal.tags?.[0] || 'IPO'}
-                            </Badge>
-                        )}
+                )}
 
-                        {isPrivateDeal && (
-                            <Badge color="preIpoSme" variant="pill">
-                                {deal.stage || 'Pre IPO- SME'}
-                            </Badge>
-                        )}
-                    </>
+                {isPrivateDeal && (
+                    <Badge color="preIpoSme" variant="pill">
+                        {deal.stage || 'Pre IPO- SME'}
+                    </Badge>
                 )}
             </div>
 

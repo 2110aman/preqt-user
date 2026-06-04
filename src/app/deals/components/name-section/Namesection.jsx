@@ -18,6 +18,7 @@ import Calculator from "@/app/private-deals/components/calculator/Calculator";
 import PrivateDealDetails from "./private-deal-detail/page";
 import IPOCollapse from "./IPOCollapse";
 import IPOReviewAndRating from "./IPOReviewAndRating";
+import RatingBadge from "../DealCard/ui/RatingBadge";
 import { Bellactive, BellOff, ShareIcon } from "./svgicon";
 import { useMediaQuery } from "react-responsive";
 
@@ -676,34 +677,8 @@ const Namedetailsection = ({ slug }) => {
                   return (
                     <div className={`deal-badges-column ${!hasTags ? 'no-tags' : ''} ${hasRating ? 'has-rating' : ''}`}>
                       {dealDetails?.data?.deal_type === "public" && hasRating && (
-                        <div className="ratingContainer">
-                          <div className="ratingBadgeNew">
-                            <div className="ratingNumberBox">
-                              {rating}
-                            </div>
-                            <div className="starsBox">
-                              {/* ... star rendering ... */}
-                              {/* I need to make sure I don't break the existing logic here, I'll use the full stars logic from before */}
-                              {(() => {
-                                const fullStars = Math.floor(numericRating);
-                                const hasHalfStar = numericRating % 1 > 0;
-                                const emptyStars = Math.max(0, 5 - fullStars - (hasHalfStar ? 1 : 0));
-                                return (
-                                  <>
-                                    {[...Array(fullStars)].map((_, i) => (
-                                      <img key={`full-${i}`} src="/starwhite.svg" alt="star" className="starIconSmall" />
-                                    ))}
-                                    {hasHalfStar && (
-                                      <img src="/halfstar.svg" alt="half star" className="starIconSmall" />
-                                    )}
-                                    {[...Array(emptyStars)].map((_, i) => (
-                                      <img key={`empty-${i}`} src="/emptystar.svg" alt="empty star" className="starIconSmall" />
-                                    ))}
-                                  </>
-                                );
-                              })()}
-                            </div>
-                          </div>
+                        <div className={`ratingContainer ${dealData?.exclusive_deal ? 'has-exclusive' : ''}`}>
+                          <RatingBadge rating={rating} />
                         </div>
                       )}
                       {dealData?.exclusive_deal && (

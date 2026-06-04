@@ -366,7 +366,8 @@
 
 @media (max-width: 550px) {
     .bgColumnPrivate {
-        width: 600px;
+        width: 374px;
+        margin-top: 90px;
     }
 
     .bgColumnStartup {

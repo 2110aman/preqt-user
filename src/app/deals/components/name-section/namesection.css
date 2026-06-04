@@ -157,7 +157,7 @@
 .body1-buttons {
   /* background: linear-gradient(to left , #FFF2D0 ,#8E6B0F); */
   display: flex;
-  gap: 5px;
+  gap: 8px;
   flex-wrap: wrap;
   width: 70%;
 }
@@ -1653,7 +1653,7 @@
 .qualities {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   flex-wrap: wrap;
@@ -1876,15 +1876,18 @@
 
 .ratingContainer {
   position: absolute;
-  top: -14px;
-  right: 79px;
-  width: 30px;
-  height: 70px;
+  top: 0px;
+  right: 24px; /* Align to the right edge when no exclusive tag is present */
+  width: auto;
+  height: auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10;
+}
+
+.ratingContainer.has-exclusive {
+  right: 144px; /* Shift to the left of the exclusive deal tag */
 }
 
 /* @media (max-width: 1200px) {
@@ -2535,6 +2538,15 @@
     .subcontainer {
       padding: 0 16px;
     }
+    .deal-badges-column {
+      right: 0px !important;
+      top: -10px !important;
+      gap: 8px !important;
+    }
+    .ratingContainer {
+      position: static !important;
+      margin-top: 9px !important;
+    }
   }
 
 
@@ -3041,7 +3053,7 @@
   }
 
   .body1-buttons {
-    width: 50%;
+    width: 55%;
   }
 
   .ratingContainer {

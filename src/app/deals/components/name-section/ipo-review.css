@@ -145,6 +145,7 @@
   display: flex;
   background-color: #F8FAFC;
   padding: 12px;
+  gap: 2px;
   align-items: center;
   border-bottom: 1px solid #E5E7EB;
 }
@@ -310,61 +311,150 @@
 
 @media (max-width: 600px) {
   .ipo-review-breakdown-wrapper {
-    overflow-x: auto;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     position: relative;
+    max-width: 500px;
+    margin: 24px auto 0 auto;
   }
 
   .ipo-review-table-header,
   .ipo-review-row {
-    min-width: 600px; /* Ensure content is wider than container to trigger scroll */
+    width: 100% !important;
+    min-width: auto !important; /* Auto fit container width instead of forcing min-width */
     flex-wrap: nowrap;
+    box-sizing: border-box;
   }
 
   .ipo-review-table-header {
     display: flex !important;
+    padding: 8px 6px !important;
   }
 
   .ipo-review-row {
     flex-direction: row !important;
     align-items: stretch !important;
     margin: auto;
+    gap:2px;
+    padding: 8px 2px !important;
   }
 
   .param-col {
-    position: sticky;
-    left: 0;
-    z-index: 10;
-    width: 120px !important;
-    min-width: 120px !important;
-    background-color: #F8FAFC; /* Match header background */
-    /* border-right: 1px solid #E5E7EB; */
-    padding-left: 12px !important;
+    position: static !important; /* No sticky column needed as table fits screen width */
+    width: 28% !important;
+    min-width: 76px !important;
+    max-width: 78px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
     box-sizing: border-box;
     display: flex;
     align-items: center;
   }
 
-  .ipo-review-row .weight-col, .score-col{
-    margin: auto;
+  .ipo-review-row .weight-col, 
+  .ipo-review-row .score-col {
+    margin: auto 0;
   }
 
+  /* Reset sticky backgrounds */
   .ipo-review-row .param-col {
-    background-color: #FFFFFF; /* Default row background */
-    min-height: 30px;
+    background-color: transparent !important;
+    min-height: auto;
   }
 
   .ipo-review-row-group:nth-child(even) .ipo-review-row .param-col {
-    background-color: #FAFBFC; /* Striped row background */
-    min-height: 33px;
+    background-color: transparent !important;
+    min-height: auto;
   }
 
-  .weight-col { width: 15% !important; text-align: center; }
-  .score-col { width: 25% !important; text-align: center; }
-  .factors-col { width: 40% !important; }
+  .weight-col { 
+    width: 14% !important;
+    min-width: 42px !important;
+    max-width: 50px !important;
+    text-align: center;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    box-sizing: border-box;
+  }
+
+  .score-col { 
+    width: 17% !important;
+    min-width: 52px !important;
+    max-width: 65px !important;
+    text-align: center;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+    box-sizing: border-box;
+  }
+
+  .factors-col { 
+    width: 40% !important;
+    flex-grow: 1 !important;
+    padding-left: 6px !important;
+    padding-right: 4px !important;
+    box-sizing: border-box;
+  }
 
   /* Revert mobile-only stacked styling */
   .ipo-review-table-body .weight-col::before {
     content: none !important;
+  }
+
+  /* Adjust typography for more compact layout */
+  .ipo-col {
+    font-size: 12px !important;
+    letter-spacing: -0.2px;
+  }
+
+  .strong-col {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+    font-weight: 600 !important;
+  }
+
+  .ipo-review-row .weight-col {
+    font-size: 12px !important;
+  }
+
+  .ipo-score-pill {
+    padding: 2px 4px !important;
+    font-size: 12px !important;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .key-factor-col {
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+  }
+
+  .italic-col {
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+  }
+
+  .ipo-show-more-btn {
+    font-size: 12px !important;
+    margin-top: 4px !important;
+  }
+
+  .ipo-show-more-btn svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+
+  .ipo-review-nested-details {
+    padding: 12px 16px !important;
+    font-size: 12px !important;
+  }
+
+  .ipo-nested-block h5 {
+    font-size: 11px !important;
+  }
+
+  .ipo-nested-block p,
+  .ipo-nested-block ul {
+    font-size: 12px !important;
+    line-height: 15px !important;
   }
 }
 

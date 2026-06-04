@@ -241,7 +241,7 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
                 <path d="M2 12H22" />
               </svg>
             </span>
-            <span>Swipe to view more</span>
+            <span>Scroll to view more</span>
           </div>
         )}
 
@@ -638,7 +638,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
                 <path d="M2 12H22" />
               </svg>
             </span>
-            <span>Swipe to view more</span>
+            <span>Scroll to view more</span>
           </div>
         )}
 
@@ -908,7 +908,7 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
                 <path d="M2 12H22" />
               </svg>
             </span>
-            <span>Swipe to view more</span>
+            <span>Scroll to view more</span>
           </div>
         )}
 
@@ -1142,7 +1142,7 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
                 <path d="M2 12H22" />
               </svg>
             </span>
-            <span>Swipe to view more</span>
+            <span>Scroll to view more</span>
           </div>
         )}
 
