@@ -527,3 +527,10 @@
   box-shadow: none !important;
   -webkit-tap-highlight-color: transparent !important;
 }
+
+/* Ensure the Google reCAPTCHA badge has the highest z-index to stay visible at the top */
+.grecaptcha-badge {
+  z-index: 99 !important;
+  transform: translate3d(0, 0, 9px) !important;
+  will-change: transform !important;
+}
