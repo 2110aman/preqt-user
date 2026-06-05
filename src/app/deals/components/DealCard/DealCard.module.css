@@ -19,7 +19,7 @@
     position: relative;
     height: 100%;
     width: 100%;
-    max-width: 340px;
+    min-width: 340px;
     margin: 0 auto;
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
 }
@@ -172,6 +172,7 @@
     margin-top: 0 !important;
     margin-bottom: auto !important;
     flex-wrap: wrap;
+    max-width: calc(100% - 140px);
 }
 
 .statusDot {
@@ -1318,11 +1319,12 @@
 
     .cardContainer {
         margin: 0 auto !important;
+        max-width: 100%;
     }
 }
 
 @media (max-width: 480px) {
-    .companyName {
+    .listView .companyName {
         max-width: 175px !important;
         overflow: hidden !important;
         white-space: nowrap !important;
@@ -1358,7 +1360,7 @@
 }
 
 @media (max-width: 440px) {
-    .companyName {
+    .listView .companyName {
         max-width: 120px !important;
     }
 

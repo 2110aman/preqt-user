@@ -1423,6 +1423,7 @@
 
     .dealsRow {
         --bs-gutter-y: 17px;
+        margin: 0px;
     }
 
     .exclusiveTagWrapperofs {
@@ -1444,8 +1445,10 @@
 
     .DealsTalkMainContainer {
         gap: 2px;
-        padding: 20px 20px;
+        padding: 15px 16px;
         max-width: 450px;
+        margin-top: 0;
+
         /* padding: 20px 16px; */
     }
 

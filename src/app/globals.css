@@ -515,3 +515,15 @@
       top: 10px;
     }
   }
+
+/* Disable focus outlines, tap highlights, and box-shadows on all Recharts chart elements */
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface *,
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}

@@ -157,9 +157,13 @@
 .body1-buttons {
   /* background: linear-gradient(to left , #FFF2D0 ,#8E6B0F); */
   display: flex;
-  gap: 8px;
+  gap: 4px;
   flex-wrap: wrap;
   width: 70%;
+}
+
+.body1-buttons.unlisted-buttons {
+  width: 100% !important;
 }
 
 .body1-buttons span {
@@ -2553,7 +2557,7 @@
   @media (max-width: 480px) {
 
     .subcontainer {
-      padding: 0 16px;
+      padding: 0 10px;
     }
 
     .pitch-deck-header {
@@ -2612,7 +2616,7 @@
     }
 
     .firsthalf {
-      padding: 20px 16px;
+      padding: 20px 12px;
     }
 
     .topbar {
@@ -2620,7 +2624,7 @@
     }
 
     .overview-container {
-      padding: 0px 15px;
+      padding: 0px 10px;
     }
 
     .mob-topbar {
@@ -2658,7 +2662,7 @@
     }
 
     .secondhalf {
-      padding: 10px 5px;
+      padding: 10px 0px;
     }
 
     .timeline {

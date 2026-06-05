@@ -193,7 +193,7 @@ border: 1px solid transparent;
 
 @media (max-width: 768px) {
   .container {
-    padding: 1rem;
+    padding: 12px 10px;
   }
   .peerTable th, 
   .peerTable td {

@@ -652,7 +652,7 @@ const Namedetailsection = ({ slug }) => {
               <div className="deal-header-top-row">
                 <div className="deal-tags-column">
                   {(isofs || (dealData?.tags?.status && Array.isArray(dealData?.tags?.data) && dealData?.tags?.data.length > 0)) && (
-                    <section className="body1-buttons">
+                    <section className={`body1-buttons ${dealDetails?.data?.deal_type === "unlisted" ? "unlisted-buttons" : ""}`}>
                       {isofs && (
                         <div className="ofsDefaultTag">
                           <p className="ofsDefaultTagText">Unlisted Shares</p>

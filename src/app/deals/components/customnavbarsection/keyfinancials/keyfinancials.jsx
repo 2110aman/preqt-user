@@ -17,7 +17,7 @@ import { useDealStore } from "@/store/dealStore";
 const AccordionToggleIcon = ({ isOpen }) => {
   if (isOpen) {
     return (
-      <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+      <svg width="30" height="30" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{  display: "block",  height:"105%"}}>
         <circle cx="18" cy="18" r="18" fill="#FDF7E7" />
         <rect x="9" y="16.5" width="18" height="3" rx="1.5" fill="#B58D23" />
       </svg>
@@ -138,7 +138,7 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
   const rawApiData = data || [];
   const yearsToUse = rawApiData.length > 0
     ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
-    : ["2023", "2024", "2025"];
+    : ["2023", "2024", "2026"];
 
   const trendsData = yearsToUse.map((yearStr) => {
     const apiItem = rawApiData.find(item => item?.year?.toString() === yearStr);
@@ -235,7 +235,7 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
         {showScrollHint && (
           <div className="scroll-hint-badge" onClick={() => setShowScrollHint(false)}>
             <span className="scroll-hint-icon-wrapper">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
                 <path d="M18 8L22 12L18 16" />
                 <path d="M6 8L2 12L6 16" />
                 <path d="M2 12H22" />

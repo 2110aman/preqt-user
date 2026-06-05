@@ -590,8 +590,8 @@
    ========================================== */
 .gridCardTeaser {
     width: 100% !important;
-    max-width: 340px !important;
-    height: 423px !important;
+    min-width: 340px !important;
+    height: 390px !important;
     border-radius: 20px !important;
     border: 1px solid #D8BE62 !important;
     /* Premium gold accent border */
@@ -858,4 +858,15 @@
     width: auto !important;
     border-radius: 4px !important;
     cursor: pointer;
+}
+
+@media (max-width: 480px) {
+    .gridCardTeaser {
+        max-width: 100% !important;
+        height: 370px !important;
+    }
+
+    .gridPhoneWrapper {
+        width: 100px !important;
+    }
 }

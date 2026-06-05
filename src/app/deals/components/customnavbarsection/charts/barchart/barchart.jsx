@@ -81,7 +81,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
     <ResponsiveContainer width="100%" height={isMobile ? 350 : 450} padding={{ top: 10, right: 0, left: 0, bottom: 2 }}>
       <ComposedChart
         data={chartData}
-        margin={{ top: 0, right: 5, left: 5, bottom: 20 }}
+        margin={{ top: 15, right: 5, left: 5, bottom: 20 }}
         barCategoryGap="15%"   // default is ~20–30%
         barGap={2}
       >
@@ -115,7 +115,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
         <YAxis
           yAxisId="right"
           orientation="right"
-          domain={['auto', 'auto']}
+          domain={['auto', (dataMax) => Math.ceil(dataMax * 1.15)]}
           label={{
             value: "Margins (%)",
             angle: 90,

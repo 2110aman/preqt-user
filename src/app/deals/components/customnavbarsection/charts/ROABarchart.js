@@ -12,6 +12,31 @@ import {
     LabelList,
 } from "recharts";
 
+const CustomBar = (props) => {
+    const { fill, x, y, width, height, value } = props;
+    if (width <= 0 || height <= 0) return null;
+    const r = Math.min(8, height, width / 2);
+    
+    let path = "";
+    if (value >= 0) {
+        path = `M${x},${y + height} 
+                L${x},${y + r} 
+                A${r},${r} 0 0,1 ${x + r},${y} 
+                L${x + width - r},${y} 
+                A${r},${r} 0 0,1 ${x + width},${y + r} 
+                L${x + width},${y + height} Z`;
+    } else {
+        path = `M${x},${y} 
+                L${x + width},${y} 
+                L${x + width},${y + height - r} 
+                A${r},${r} 0 0,1 ${x + width - r},${y + height} 
+                L${x + r},${y + height} 
+                A${r},${r} 0 0,1 ${x},${y + height - r} Z`;
+    }
+    
+    return <path d={path} fill={fill} />;
+};
+
 const ROABarchart = ({ isPrivate, data: apiData }) => {
     // Transform API data to chart format with error handling
     const transformData = (data) => {
@@ -68,29 +93,55 @@ const ROABarchart = ({ isPrivate, data: apiData }) => {
     })();
 
     const { ticks, domain } = React.useMemo(() => {
-        const maxAbsVal = Math.max(...chartData.map(d => Math.abs(d.value)), 0) || 31.8;
+        const hasNegative = chartData.some(d => d.value < 0);
         
-        // For standard mockup range, use exact screenshot ticks matching [-40, -20, 0, 20, 40]
-        if (maxAbsVal <= 40.0) {
+        if (hasNegative) {
+            const maxAbsVal = Math.max(...chartData.map(d => Math.abs(d.value)), 0) || 31.8;
+            
+            // For standard mockup range, use exact screenshot ticks matching [-40, -20, 0, 20, 40]
+            if (maxAbsVal <= 40.0) {
+                return {
+                    ticks: [-40, -20, 0, 20, 40],
+                    domain: [-40, 40]
+                };
+            }
+            
+            // Nice steps for larger ranges
+            const rawInterval = maxAbsVal / 2.0;
+            const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
+            const normalized = rawInterval / magnitude;
+            
+            const niceSteps = [1, 2, 5, 10];
+            const step = niceSteps.find(s => s >= normalized) || 10;
+            const interval = step * magnitude;
+            
             return {
-                ticks: [-40, -20, 0, 20, 40],
-                domain: [-40, 40]
+                ticks: [-2 * interval, -interval, 0, interval, 2 * interval],
+                domain: [-2 * interval, 2 * interval]
+            };
+        } else {
+            const maxVal = Math.max(...chartData.map(d => d.value), 0) || 31.8;
+            
+            if (maxVal <= 40.0) {
+                return {
+                    ticks: [0, 10, 20, 30, 40],
+                    domain: [0, 40]
+                };
+            }
+            
+            const rawInterval = maxVal / 3.5;
+            const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
+            const normalized = rawInterval / magnitude;
+            
+            const niceSteps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+            const step = niceSteps.find(s => s >= normalized) || 10;
+            const interval = step * magnitude;
+            
+            return {
+                ticks: [0, interval, 2 * interval, 3 * interval, 4 * interval],
+                domain: [0, 4 * interval]
             };
         }
-        
-        // Nice steps for larger ranges
-        const rawInterval = maxAbsVal / 2.0;
-        const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
-        const normalized = rawInterval / magnitude;
-        
-        const niceSteps = [1, 2, 5, 10];
-        const step = niceSteps.find(s => s >= normalized) || 10;
-        const interval = step * magnitude;
-        
-        return {
-            ticks: [-2 * interval, -interval, 0, interval, 2 * interval],
-            domain: [-2 * interval, 2 * interval]
-        };
     }, [chartData]);
 
     const renderCustomizedLabel = (props) => {
@@ -179,7 +230,7 @@ const ROABarchart = ({ isPrivate, data: apiData }) => {
                 />
                 <Bar
                     dataKey="value"
-                    radius={[8, 8, 8, 8]} // rounded corners on both ends
+                    shape={<CustomBar />}
                 >
                     {chartData.map((entry, index) => {
                         const isLatest = index === chartData.length - 1;

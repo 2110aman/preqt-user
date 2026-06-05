@@ -1700,3 +1700,111 @@
 .private-deal .ratioTabDescription {
   color: #9CA3AF;
 }
+
+
+@media (max-width: 600px) {
+  .incomeStatementTable {
+    min-width: 400px;
+  }
+  .incomeStatementTable .th-metric{
+    min-width: 140px;
+    width: 140px;
+  }
+  .incomeStatementTable th, .incomeStatementTable td{
+    font-size: 14px;
+    padding: 12px 10px;
+    ;
+  }
+
+  .incomeStatementTable .th-year-dim{
+    min-width: 90px;
+    width: 90px;
+  }
+  .incomeStatementTable .th-year-highlight{
+    min-width: 90px;
+    width: 90px;
+  }
+
+  .balanceSheetTable {
+    min-width: 400px;
+  }
+  .balanceSheetTable .th-metric{
+    min-width: 140px;
+    width: 140px;
+  }
+  .balanceSheetTable th, .balanceSheetTable td{
+    font-size: 14px;
+    padding: 12px 10px;
+    ;
+  }
+
+  .balanceSheetTable .th-year-dim{
+    min-width: 90px;
+    width: 90px;
+  }
+  .balanceSheetTable .th-year-highlight{
+    min-width: 90px;
+    width: 90px;
+  }
+
+  .cashFlowTable {
+    min-width: 400px;
+  }
+  .cashFlowTable .th-metric{
+    min-width: 140px;
+    width: 140px;
+  }
+  .cashFlowTable th, .cashFlowTable td{
+    font-size: 14px;
+    padding: 12px 10px;
+    ;
+  }
+
+  .cashFlowTable .td-label{
+    min-width: 140px;
+    width: 140px;
+  }
+
+  .cashFlowTable .th-year-dim{
+    min-width: 90px;
+    width: 90px;
+  }
+  .cashFlowTable .th-year-highlight{
+    min-width: 90px;
+    width: 90px;
+  }
+
+
+
+  .workingCapitalTable {
+    min-width: 400px;
+  }
+  .workingCapitalTable .th-metric{
+    min-width: 140px;
+    width: 140px;
+  }
+  .workingCapitalTable th, .workingCapitalTable td{
+    font-size: 14px;
+    padding: 12px 10px;
+    ;
+  }
+
+  .workingCapitalTable .td-label{
+    min-width: 140px;
+    width: 140px;
+  }
+
+  .workingCapitalTable .th-year-dim{
+    min-width: 90px;
+    width: 90px;
+  }
+  .workingCapitalTable .th-year-highlight{
+    min-width: 90px;
+    width: 90px;
+  }
+
+  
+}
+
+
+  
