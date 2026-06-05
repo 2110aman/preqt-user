@@ -21,10 +21,10 @@
 .liveBadge {
   background: #E4C57533;
   color: #B59131;
-  padding: 4px 8px;
+  padding: 7px 8px 2px 8px;
   border-radius: 6px;
   font-size: 12px;
-  line-height: 1.25;
+  line-height: 1;
   font-weight: 500;
   border: 1px solid #EAD8B8;
   letter-spacing: 0.5px;

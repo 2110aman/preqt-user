@@ -36,9 +36,16 @@
   top: 0rem;
   background: white;
   border-radius: 20px;
-  padding: 24px;
-  padding-top: 12px;
+  padding: 30px 24px 30px 24px;
 }
+
+/* Specific padding adjustment for iOS devices (Safari / iOS browsers) */
+@supports (-webkit-touch-callout: none) {
+  .chatbot-maincontainer {
+    padding: 50px 24px 55px 24px;
+  }
+}
+
 .privateChatBot{
   padding: 0 !important;
 }
