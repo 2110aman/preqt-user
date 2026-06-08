@@ -341,24 +341,23 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               dealData?.merchant_banker?.status && (
                 <section className="bank-sec">
                   <div className="bank-det">
-                    <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                      <p>{"Merchant Banker"}</p>
-                      {shouldShowTooltip(dealData?.merchant_banker?.tool_tip) && (
-                        <div className="custom-tooltip-wrapper">
-                          <span className="tooltip-icon">
-                            <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", marginBottom: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
-                          </span>
-                          <div className="custom-tooltip-box">{typeof dealData.merchant_banker.tool_tip === 'string' ? dealData.merchant_banker.tool_tip : dealData.merchant_banker.tool_tip?.data}</div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="bank-det-value">
-                      <img
-                        src={imgSrc}
-                        alt={dealData?.company_name || "Company Logo"}
-                        onError={handleImageError}
-                        style={{ height: "36px", width: "36px", borderRadius: '50%' }}
-                      />
+                    <img
+                      src={imgSrc}
+                      alt={dealData?.company_name || "Company Logo"}
+                      onError={handleImageError}
+                    />
+                    <div className="bank-info">
+                      <div className="label-with-tooltip">
+                        <p>{"Merchant Banker"}</p>
+                        {shouldShowTooltip(dealData?.merchant_banker?.tool_tip) && (
+                          <div className="custom-tooltip-wrapper">
+                            <span className="tooltip-icon">
+                              <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                            </span>
+                            <div className="custom-tooltip-box">{typeof dealData.merchant_banker.tool_tip === 'string' ? dealData.merchant_banker.tool_tip : dealData.merchant_banker.tool_tip?.data}</div>
+                          </div>
+                        )}
+                      </div>
                       <h6 className="mb-0">{dealData?.merchant_banker?.data?.banker_name || "-"}</h6>
                     </div>
                   </div>

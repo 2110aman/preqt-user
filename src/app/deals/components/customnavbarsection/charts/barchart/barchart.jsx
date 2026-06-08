@@ -81,7 +81,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
     <ResponsiveContainer width="100%" height={isMobile ? 350 : 450} padding={{ top: 10, right: 0, left: 0, bottom: 2 }}>
       <ComposedChart
         data={chartData}
-        margin={{ top: 15, right: 5, left: 5, bottom: 20 }}
+        margin={{ top: 15, right: 5, left: 15, bottom: 20 }}
         barCategoryGap="15%"   // default is ~20–30%
         barGap={2}
       >
@@ -97,6 +97,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
         <YAxis
           yAxisId="left"
           orientation="left"
+          width={70}
           domain={[0, (dataMax) => Math.ceil(dataMax * 1.15)]}
           label={{
             value: "Revenue (₹ Cr)",
@@ -106,7 +107,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
           }}
 
           tick={{ fontSize: 12 }}
-          tickFormatter={(val) => `${val}`}
+          tickFormatter={(val) => `${val} Cr`}
           axisLine={{ stroke: isPrivateDeal ? "#374151" : "#E2E8F0" }}
           tickLine={{ stroke: isPrivateDeal ? "#374151" : "#E2E8F0" }}
         />
@@ -287,7 +288,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
         <Bar
           yAxisId="left"
           dataKey="revenue"
-          barSize={isMobile ? 30 : 60} // 👈 smaller bar on mobile
+          barSize={isMobile ? 30 : 83} // 👈 smaller bar on mobile
           radius={[6, 6, 0, 0]}
         >
           {chartData.map((entry, index) => {

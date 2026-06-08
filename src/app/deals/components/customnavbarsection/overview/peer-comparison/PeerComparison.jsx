@@ -85,7 +85,7 @@ const PeerComparison = ({ isPrivateDeal }) => {
                         src={getLogoUrl(company.company_logo)}
                         alt={company.company_name?.data}
                         className={styles.companyLogoImg || "companyLogoImg"}
-                        style={{ width: "28px", maxWidth: "28px", maxHeight: "28px",border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain", marginTop: "5px" }}
+                        style={{ width: "28px", maxWidth: "28px", maxHeight: "28px",border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain"}}
                         onError={(e) => {
                           e.target.style.display = 'none';
                         }}

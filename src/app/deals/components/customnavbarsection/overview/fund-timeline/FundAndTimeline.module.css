@@ -24,7 +24,7 @@
 }
 
 .card {
-  padding: 15px 10px; 
+  padding: 24px 16px; 
 }
 
 .cardHeader {
@@ -73,12 +73,14 @@
 }
 
 .sourceLabel {
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
   color: #6B7280;
 }
 
 .sourceValue {
   font-size: 12px;
+  font-weight: 500;
   color: #6B7280;
   text-align: center;
 }
@@ -111,7 +113,8 @@
 }
 
 .legendLabel {
-  font-size: 14px;
+  font-size: 12px;
+  line-height: 18px;
   color: #4B5563;
 }
 
@@ -121,14 +124,17 @@
 }
 
 .legendVal {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color:#1F2937;
 }
 
 .legendPercent {
-  font-size: 14px;
-  color: #6B7280;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+  color: #1F2937;
 }
 
 /* Timeline */
@@ -141,7 +147,7 @@
 .timelineStep {
   display: flex;
   margin-bottom: 20px;
-  min-height: 40px;
+  min-height: 49px;
 }
 
 .timelineStep:last-child {
@@ -158,8 +164,8 @@
 }
 
 .checkIcon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   background-color: #B59131;
   border-radius: 50%;
   display: flex;
@@ -201,23 +207,25 @@
 .timelineContent {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   padding-top: -2px;
 }
 
 .stepLabel {
-  font-size: 15px;
+  font-size: 16px;
+  line-height: 100%;
   font-weight: 500;
-  color: #111827;
+  color: #1F2937;
 }
 
 .completed .stepLabel {
-  color: #111827;
+  color: #1F2937;
 }
 
 .stepDate {
   font-size: 16px;
-  color: #4B5563;
+  line-height: 100%;
+  color: #1F2937;
   font-style: italic;
 }
 

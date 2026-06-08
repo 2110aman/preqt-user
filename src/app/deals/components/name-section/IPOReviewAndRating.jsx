@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./ipo-review.css";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -122,6 +122,18 @@ const CircularRating = ({ score }) => {
 const IPOReviewAndRating = ({ reviewData }) => {
   const [isMainOpen, setIsMainOpen] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
+  const contentRef = useRef(null);
+  const [maxHeight, setMaxHeight] = useState("170px");
+
+  useEffect(() => {
+    if (contentRef.current) {
+      if (isMainOpen) {
+        setMaxHeight(`${contentRef.current.scrollHeight}px`);
+      } else {
+        setMaxHeight("180px");
+      }
+    }
+  }, [isMainOpen, expandedRows, reviewData]);
 
   const toggleRow = (id) => {
     setExpandedRows(prev => ({
@@ -167,72 +179,90 @@ const IPOReviewAndRating = ({ reviewData }) => {
         </div>
       </div>
 
-      <div className="ipo-review-accordion-toggle" onClick={() => setIsMainOpen(!isMainOpen)}>
-        View detailed breakdown
-        {isMainOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-      </div>
+      <div className="ipo-review-breakdown-wrapper">
+        <div 
+          className={`ipo-review-collapsible-content ${isMainOpen ? "expanded" : "collapsed"}`}
+          style={{ maxHeight: maxHeight }}
+        >
+          <div ref={contentRef}>
+            <div className="ipo-review-table-header">
+              <div className="ipo-col param-col">PARAMETER</div>
+              <div className="ipo-col weight-col">WEIGHT</div>
+              <div className="ipo-col score-col">SCORE</div>
+              <div className="ipo-col factors-col">KEY FACTORS</div>
+            </div>
 
-      {isMainOpen && (
-        <div className="ipo-review-breakdown-wrapper">
-          <div className="ipo-review-table-header">
-            <div className="ipo-col param-col">PARAMETER</div>
-            <div className="ipo-col weight-col">WEIGHT</div>
-            <div className="ipo-col score-col">SCORE</div>
-            <div className="ipo-col factors-col">KEY FACTORS</div>
-          </div>
+            <div className="ipo-review-table-body">
+              {breakdown.map((row, index) => {
+                const isRowExpanded = expandedRows[index];
+                const hasDetails = !!row.detailed_analysis;
 
-          <div className="ipo-review-table-body">
-            {breakdown.map((row, index) => {
-              const isRowExpanded = expandedRows[index];
-              const hasDetails = !!row.detailed_analysis;
-
-              return (
-                <div key={index} className="ipo-review-row-group">
-                  <div className="ipo-review-row">
-                    <div className="ipo-col param-col strong-col">{row.parameter}</div>
-                    <div className="ipo-col weight-col">{row.weight}%</div>
-                    <div className="ipo-col score-col">
-                      <span className="ipo-score-pill">{row.score}/5</span>
-                    </div>
-                    <div className="ipo-col factors-col key-factor-col">
-                      <div className="ipo-key-factor-text">{row.key_factors}</div>
-                      {hasDetails && (
-                        <div 
-                          className="ipo-show-more-btn" 
-                          onClick={() => toggleRow(index)}
-                        >
-                          {isRowExpanded ? 'Show Less' : 'Show more'}
-                          {isRowExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Expanded Nested Details */}
-                  {isRowExpanded && hasDetails && (
-                    <div className="ipo-review-nested-details">
-                      <div className="ipo-nested-block">
-                        <h5>Detailed Analysis</h5>
-                        <div dangerouslySetInnerHTML={{ __html: row.detailed_analysis }} />
+                return (
+                  <div key={index} className="ipo-review-row-group">
+                    <div className="ipo-review-row">
+                      <div className="ipo-col param-col strong-col">{row.parameter}</div>
+                      <div className="ipo-col weight-col">{row.weight}%</div>
+                      <div className="ipo-col score-col">
+                        <span className="ipo-score-pill">{row.score}/5</span>
+                      </div>
+                      <div className="ipo-col factors-col key-factor-col">
+                        <div className="ipo-key-factor-text">{row.key_factors}</div>
+                        {hasDetails && (
+                          <div 
+                            className="ipo-show-more-btn" 
+                            onClick={() => toggleRow(index)}
+                          >
+                            {isRowExpanded ? 'Show Less' : 'Show more'}
+                            {isRowExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
 
-            {/* TOTAL Row */}
-            <div className="ipo-review-row total-row">
-              <div className="ipo-col param-col strong-col">TOTAL</div>
-              <div className="ipo-col weight-col">100%</div>
-              <div className="ipo-col score-col">
-                <span className="ipo-score-pill">{currentScore}/5</span>
+                    {/* Expanded Nested Details with Grid-based Transition */}
+                    <div className={`ipo-review-nested-details-wrapper ${isRowExpanded && hasDetails ? "open" : ""}`}>
+                      <div className="ipo-review-nested-details-inner">
+                        <div className="ipo-review-nested-details">
+                          <div className="ipo-nested-block">
+                            <h5>Detailed Analysis</h5>
+                            <div dangerouslySetInnerHTML={{ __html: row.detailed_analysis }} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* TOTAL Row */}
+              <div className="ipo-review-row total-row">
+                <div className="ipo-col param-col strong-col">TOTAL</div>
+                <div className="ipo-col weight-col">100%</div>
+                <div className="ipo-col score-col">
+                  <span className="ipo-score-pill">{currentScore}/5</span>
+                </div>
+                <div className="ipo-col factors-col italic-col">Weighted Composite Score</div>
               </div>
-              <div className="ipo-col factors-col italic-col">Weighted Composite Score</div>
             </div>
           </div>
+
+          {/* Blur overlay (fades out dynamically when expanded) */}
+          <div className={`ipo-review-blur-overlay ${isMainOpen ? "expanded" : ""}`}></div>
         </div>
-      )}
+
+        {/* Toggle section: centered button with lines on both sides */}
+        <div className="ipo-review-accordion-toggle-wrapper">
+          <div className="ipo-accordion-line"></div>
+          <button 
+            className="ipo-review-accordion-toggle-btn" 
+            onClick={() => setIsMainOpen(!isMainOpen)}
+          >
+            {isMainOpen ? 'Hide detailed breakdown' : 'View detailed breakdown'}
+            {isMainOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+          <div className="ipo-accordion-line"></div>
+        </div>
+      </div>
 
     </div>
   );

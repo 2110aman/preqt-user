@@ -3,7 +3,9 @@ import styles from "./FundAndTimeline.module.css";
 import { useDealStore } from "@/store/dealStore";
 
 const DonutChart = ({ data }) => {
-  // Use a fixed set of colors or rotate them
+  // Filter out segments with 0 percentage to ensure visual gaps are calculated only for active segments
+  const activeData = data.filter(item => (parseFloat(item.percentage) || 0) > 0);
+  
   const colors = ["#927127", "#DACC7C", "#1A1A1A", "#E8E7EE", "#B59131"];
   const strokeWidth = 24;
   const radius = 80;
@@ -12,7 +14,7 @@ const DonutChart = ({ data }) => {
   const dashGap = visualGap + strokeWidth; // 29px gap in path to account for rounded ends
   
   // Calculate total usable circumference for the actual segments
-  const totalGapSpace = data.length * dashGap;
+  const totalGapSpace = activeData.length * dashGap;
   const usableCircumference = circumference - totalGapSpace;
 
   let currentOffset = 0;
@@ -20,18 +22,19 @@ const DonutChart = ({ data }) => {
   return (
     <div className={styles.donutContainer}>
       <svg viewBox="0 0 220 220" width="220" height="220" style={{ transform: "rotate(-90deg)" }}>
-        {data.map((item, index) => {
+        {activeData.map((item, index) => {
           const percentage = parseFloat(item.percentage) || 0;
           const segmentLength = (percentage / 100) * usableCircumference;
           
-          // If segment is too small to even show rounded ends properly, we might want to skip or cap it
-          if (segmentLength <= 0) return null;
-
           const strokeDasharray = `${segmentLength} ${circumference}`;
           const strokeDashoffset = -currentOffset;
 
           // Update offset for next segment: current + length + gap
           currentOffset += (segmentLength + dashGap);
+
+          // Find the original index of this item in the raw data array to preserve its assigned color
+          const originalIndex = data.findIndex(d => d.label === item.label);
+          const strokeColor = colors[originalIndex !== -1 ? originalIndex % colors.length : index % colors.length];
 
           return (
             <circle
@@ -40,7 +43,7 @@ const DonutChart = ({ data }) => {
               cy="110"
               r={radius}
               fill="transparent"
-              stroke={colors[index % colors.length]}
+              stroke={strokeColor}
               strokeWidth={strokeWidth}
               strokeDasharray={strokeDasharray}
               strokeDashoffset={strokeDashoffset}
@@ -68,20 +71,24 @@ export default function FundAndTimeline() {
     ? utilFundsApi.data 
     : (Array.isArray(legacyFundAlloc) ? legacyFundAlloc : []);
 
-  const fundAllocation = fundAllocationRaw.map((item) => ({
-    label: item.label_name || item.category || "Unknown",
-    amount_in_cr: parseFloat(item.amount_in_cr) || 0,
-    percentage: parseFloat(item.amount_in_percent ?? item.percentage) || 0,
-  }));
+  const totalAmountCr = fundAllocationRaw.reduce((sum, item) => sum + (parseFloat(item.amount_in_cr) || 0), 0);
 
-  const totalAmountCr = fundAllocation.reduce((sum, item) => sum + item.amount_in_cr, 0);
+  const fundAllocation = fundAllocationRaw.map((item) => {
+    const amount = parseFloat(item.amount_in_cr) || 0;
+    const percentage = totalAmountCr > 0 ? (amount / totalAmountCr) * 100 : 0;
+    return {
+      label: item.label_name || item.category || "Unknown",
+      amount_in_cr: amount,
+      percentage: percentage,
+    };
+  });
   
   const colors = ["#927127", "#DACC7C", "#1A1A1A", "#E8E7EE", "#B59131"];
   const legendData = fundAllocation.map((item, index) => ({
     color: colors[index % colors.length],
     label: item.label,
-    value: `₹${item.amount_in_cr.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Cr`,
-    percent: `${item.percentage.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+    value: item.amount_in_cr.toFixed(1),
+    percent: `${item.percentage.toFixed(1)}%`
   }));
 
   // Extract Timeline Data
@@ -132,7 +139,7 @@ export default function FundAndTimeline() {
       <div className={styles.card}>
         <div className={styles.cardHeader}>
           <h2 className={styles.title}>Fund Allocation</h2>
-          <span className={styles.totalValue}>Total: ₹{totalAmountCr.toFixed(1)} Cr</span>
+          <span className={styles.totalValue}>Total: ₹{totalAmountCr % 1 === 0 ? totalAmountCr.toFixed(0) : totalAmountCr.toFixed(1)} Cr</span>
         </div>
 
         <div className={styles.chartArea}>

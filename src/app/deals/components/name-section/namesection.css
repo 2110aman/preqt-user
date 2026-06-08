@@ -167,18 +167,17 @@
 }
 
 .body1-buttons span {
-  background: linear-gradient(to right, #f5e3b7, #8E6B0F);
-  color: #ffffff;
-  padding: 3px 15px 1px;
-  background: linear-gradient(to left, #8E6B0F, #f5e4bb);
+  
+  color: #242424;
+  padding: 6.5px 10px 3.5px 10px;
+  background-color: #ECECF0;
   letter-spacing: 0.2px;
   border-radius: 7px;
-  color: #FFFFFF;
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
   letter-spacing: 0.2px;
-  line-height: 28px;
+  /* line-height: 28px; */
   /* 233.333% */
 }
 
@@ -246,6 +245,12 @@
   gap: 10px;
 }
 
+.body-section3 svg.tag-line-icon {
+  width: 34px !important;
+  height: 34px !important;
+  flex-shrink: 0 !important;
+}
+
 .body-section3 span {
   font-size: 14px;
   font-weight: 400;
@@ -280,7 +285,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  padding: 30px;
+  padding: 32px;
   border-radius: 24px;
   background: #FFF;
   box-shadow: 0 4px 60px 0 rgba(0, 0, 0, 0.06);
@@ -403,7 +408,7 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 24px 8px;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 
@@ -833,6 +838,15 @@
 .lastbtns div {
   gap: 10px;
 }
+
+.deal-summary{
+  p,h1,h2,h3,h4,h5,h6,div,span {
+    margin: 0px;
+  }
+
+}
+
+
 
 /* Image Styling */
 .customcars.carousel-image {
@@ -1657,7 +1671,7 @@
 .qualities {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   flex-wrap: wrap;
@@ -1670,7 +1684,7 @@
   font-weight: 500;
   line-height: 28px;
   border-radius: 40px;
-  border: 1px solid rgba(68, 49, 151, .27);
+  border: 1px solid #D8AD4C80;
   padding: 0 10px;
   padding-top: 2px;
 }
@@ -1943,6 +1957,8 @@
 
 
 
+
+
 @media(max-width:1024px) {
   .body-maincontainer {
     gap: 15px;
@@ -2095,6 +2111,17 @@
 
 
   }
+
+  @media(max-width:768px){
+    .firsthalf{
+      padding: 24px;
+    }
+
+    .overview-container{
+      padding: 0 24px 15px;
+    }
+  }
+    
 
 
   @media (min-width: 401px) and (max-width: 900px) {

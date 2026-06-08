@@ -730,6 +730,7 @@ const Namedetailsection = ({ slug }) => {
               {dealData?.tag_line?.status && (
                 <section className="body-section3">
                   <svg
+                    className="tag-line-icon"
                     width="34"
                     height="34"
                     viewBox="0 0 34 34"
@@ -945,24 +946,24 @@ const PreqtSummarySection = ({ isPrivateLike, summaryData, labelName }) => {
 
   return (
     <div >
+      <h3 style={{ color: theme.titleColor, marginBottom: "12px", marginTop: "10px" ,fontSize: "14px", fontWeight: "500", fontFamily: "Helvetica Neue" }}>
+          {labelName || "Preqt Summary"}
+        </h3>
       <div
         style={{
           borderLeft: "4px solid #B59131",
           color: theme.textMain,
           background: theme.bg,
-          padding: "20px",
+          padding: "12px 16px",
           borderRadius: "0 8px 8px 0",
           borderTop: theme.border,
           borderRight: theme.border,
           borderBottom: theme.border,
-          marginBottom: "16px",
         }}
       >
-        <h3 style={{ color: theme.titleColor, marginBottom: "8px", fontSize: "14px", fontWeight: "500", fontFamily: "Helvetica Neue", marginTop: 0 }}>
-          {labelName || "Preqt Summary"}
-        </h3>
         <div 
           style={{ fontSize: "12px", lineHeight: "1.6", fontFamily: "Helvetica Neue", margin: 0 }}
+          className='deal-summary'
           dangerouslySetInnerHTML={{ __html: summaryData }}
         />
       </div>

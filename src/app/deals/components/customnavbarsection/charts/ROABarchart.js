@@ -166,7 +166,7 @@ const ROABarchart = ({ isPrivate, data: apiData }) => {
 
     return (
         <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={chartData} barSize={60} margin={{ top: 25, right: 10, left: 15, bottom: 20 }}>
+            <BarChart data={chartData} barSize={77} margin={{ top: 25, right: 10, left: 15, bottom: 20 }}>
                 <defs>
                     <linearGradient id="roaLatestBarGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#E4C575" />
