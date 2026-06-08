@@ -438,7 +438,7 @@
   /* 114.286% */
   border: none !important;
   cursor: pointer !important;
-  transition: all 0.3s ease !important;
+  transition: color 0.2s ease !important;
 }
 
 
@@ -465,7 +465,7 @@
   box-shadow: none !important;
   text-align: center;
   font-family: "Helvetica Neue";
-  font-size: 13px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: 16px;
