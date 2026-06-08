@@ -734,7 +734,7 @@ function AllDealsContent() {
                                                 </div>
                                             )}
                                             {viewType === 'list' && (
-                                                <div className="col-lg-12 col-md-12 col-sm-12" style={{ width: "100%", marginTop: "10px" }}>
+                                                <div className="col-lg-12 col-md-12 col-sm-12 px-0" style={{ width: "100%", marginTop: "0px" }}>
                                                     <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} />
                                                 </div>
                                             )}

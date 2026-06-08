@@ -172,7 +172,7 @@
     margin-top: 0 !important;
     margin-bottom: auto !important;
     flex-wrap: wrap;
-    max-width: calc(100% - 140px);
+    max-width: calc(100% - 135px);
 }
 
 .statusDot {
