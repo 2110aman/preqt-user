@@ -946,7 +946,7 @@ const PreqtSummarySection = ({ isPrivateLike, summaryData, labelName }) => {
 
   return (
     <div >
-      <h3 style={{ color: theme.titleColor, marginBottom: "12px", marginTop: "10px" ,fontSize: "14px", fontWeight: "500", fontFamily: "Helvetica Neue" }}>
+      <h3 style={{ color: theme.titleColor, marginBottom: "12px", marginTop: "10px" ,fontSize: "16px", fontWeight: "500", fontFamily: "Helvetica Neue" }}>
           {labelName || "Preqt Summary"}
         </h3>
       <div
