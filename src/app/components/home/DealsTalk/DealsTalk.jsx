@@ -507,9 +507,23 @@ function DealsTalkContent() {
                     {/* Footer Bar */}
                     <div className={styles.bottomFooter}>
                         <p className={styles.qaGoldText}>
-                            {qaCounts[deal.id] > 0
-                                ? `${qaCounts[deal.id]} Q&A Answered In Last ${daysUntilLive(deal?.createdAt)} Days`
-                                : "Do you have any question? Ask now"}
+                            {qaCounts[deal.id] > 0 ? (
+                                `${qaCounts[deal.id]} Q&A Answered In Last ${daysUntilLive(deal?.createdAt)} Days`
+                            ) : (
+                                <>
+                                    Do you have any question?{" "}
+                                    <span
+                                        className={styles.askNowLink}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            window.location.href = `/deals/${deal?.slug}?qna=true`;
+                                        }}
+                                    >
+                                        Ask now
+                                    </span>
+                                </>
+                            )}
                         </p>
 
                         {qaCounts[deal.id] > 0 && (
@@ -710,9 +724,23 @@ function DealsTalkContent() {
                 <div className={styles.card2Footer}>
                     <div className={styles.card2QandA}>
                         <div className={styles.card2QandAStats}>
-                            {qaCounts[deal.id] > 0
-                                ? `${qaCounts[deal.id]} Q&A answered in last ${daysUntilLive(deal?.createdAt)} days`
-                                : "Do you have any question? Ask now"}
+                            {qaCounts[deal.id] > 0 ? (
+                                `${qaCounts[deal.id]} Q&A answered in last ${daysUntilLive(deal?.createdAt)} days`
+                            ) : (
+                                <>
+                                    Do you have any question?{" "}
+                                    <span
+                                        className={styles.askNowLink}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            window.location.href = `/deals/${deal?.slug}?qna=true`;
+                                        }}
+                                    >
+                                        Ask now
+                                    </span>
+                                </>
+                            )}
                         </div>
 
                         {qaCounts[deal.id] > 0 && (

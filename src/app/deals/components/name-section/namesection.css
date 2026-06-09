@@ -43,7 +43,7 @@
 
 .subcontainer {
   width: 100%;
-  max-width: 1326px;
+  max-width: 1400px;
   padding: 0 60px;
 }
 
@@ -415,7 +415,7 @@
 
 .others {
   border-radius: 10px;
-  padding: 0px 16px;
+  /* padding: 0px 16px; */
   display: flex;
   flex-direction: column;
   gap: 0px;
@@ -2643,7 +2643,7 @@
     }
 
     .firsthalf {
-      padding: 20px 12px;
+      padding: 20px 15px;
     }
 
     .topbar {

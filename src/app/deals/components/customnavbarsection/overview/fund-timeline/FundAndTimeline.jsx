@@ -7,46 +7,96 @@ const DonutChart = ({ data }) => {
   const activeData = data.filter(item => (parseFloat(item.percentage) || 0) > 0);
   
   const colors = ["#927127", "#DACC7C", "#1A1A1A", "#E8E7EE", "#B59131"];
-  const strokeWidth = 24;
-  const radius = 80;
-  const circumference = 2 * Math.PI * radius; // ~502.65
-  const visualGap = 5; 
-  const dashGap = visualGap + strokeWidth; // 29px gap in path to account for rounded ends
   
-  // Calculate total usable circumference for the actual segments
-  const totalGapSpace = activeData.length * dashGap;
-  const usableCircumference = circumference - totalGapSpace;
+  // Outer radius: 80 + 12 = 92
+  // Inner radius: 80 - 12 = 68
+  // We want a corner radius of 4px.
+  // We'll use a stroke-width of 8px to get a 4px corner radius.
+  // So the path dimensions must be:
+  // outerRadius = 92 - 4 = 88
+  // innerRadius = 68 + 4 = 72
+  const rOut = 88;
+  const rIn = 65;
+  const cornerRadius = 7;
+  const strokeWidth = cornerRadius * 2; // 14px
+  
+  const gapAngle = activeData.length > 1 ? (5 * Math.PI / 180) : 0; // 5 degrees gap between segments
+  const totalGapAngle = activeData.length * gapAngle;
+  const usableAngle = 2 * Math.PI - totalGapAngle;
 
-  let currentOffset = 0;
+  let currentAngle = 0;
+
+  const polarToCartesian = (centerX, centerY, radius, angleInRadians) => {
+    return {
+      x: centerX + radius * Math.cos(angleInRadians),
+      y: centerY + radius * Math.sin(angleInRadians),
+    };
+  };
+
+  const getSegmentPath = (cx, cy, rOut, rIn, startAngle, endAngle) => {
+    const startOuter = polarToCartesian(cx, cy, rOut, startAngle);
+    const endOuter = polarToCartesian(cx, cy, rOut, endAngle);
+    const startInner = polarToCartesian(cx, cy, rIn, startAngle);
+    const endInner = polarToCartesian(cx, cy, rIn, endAngle);
+
+    const angleDiff = endAngle - startAngle;
+    const largeArcFlag = angleDiff > Math.PI ? 1 : 0;
+
+    return [
+      `M ${startOuter.x} ${startOuter.y}`,
+      `A ${rOut} ${rOut} 0 ${largeArcFlag} 1 ${endOuter.x} ${endOuter.y}`,
+      `L ${endInner.x} ${endInner.y}`,
+      `A ${rIn} ${rIn} 0 ${largeArcFlag} 0 ${startInner.x} ${startInner.y}`,
+      `Z`,
+    ].join(" ");
+  };
 
   return (
     <div className={styles.donutContainer}>
       <svg viewBox="0 0 220 220" width="220" height="220" style={{ transform: "rotate(-90deg)" }}>
         {activeData.map((item, index) => {
           const percentage = parseFloat(item.percentage) || 0;
-          const segmentLength = (percentage / 100) * usableCircumference;
-          
-          const strokeDasharray = `${segmentLength} ${circumference}`;
-          const strokeDashoffset = -currentOffset;
+          const segmentAngle = (percentage / 100) * usableAngle;
+          const startAngle = currentAngle;
+          const endAngle = startAngle + segmentAngle;
 
-          // Update offset for next segment: current + length + gap
-          currentOffset += (segmentLength + dashGap);
+          // Update currentAngle for the next segment
+          currentAngle = endAngle + gapAngle;
 
           // Find the original index of this item in the raw data array to preserve its assigned color
           const originalIndex = data.findIndex(d => d.label === item.label);
           const strokeColor = colors[originalIndex !== -1 ? originalIndex % colors.length : index % colors.length];
 
+          // If there is only one active segment, render a full circle to avoid SVG arc math artifacts at 360 degrees
+          if (activeData.length === 1) {
+            return (
+              <circle
+                key={index}
+                cx="110"
+                cy="110"
+                r="80"
+                fill="transparent"
+                stroke={strokeColor}
+                strokeWidth="24"
+              />
+            );
+          }
+
+          const rCenter = (rOut + rIn) / 2;
+          const overlapAngle = cornerRadius / rCenter;
+          const pathStartAngle = startAngle + overlapAngle;
+          const pathEndAngle = Math.max(pathStartAngle + 0.001, endAngle - overlapAngle);
+
+          const pathD = getSegmentPath(110, 110, rOut, rIn, pathStartAngle, pathEndAngle);
+
           return (
-            <circle
+            <path
               key={index}
-              cx="110"
-              cy="110"
-              r={radius}
-              fill="transparent"
+              d={pathD}
+              fill={strokeColor}
               stroke={strokeColor}
               strokeWidth={strokeWidth}
-              strokeDasharray={strokeDasharray}
-              strokeDashoffset={strokeDashoffset}
+              strokeLinejoin="round"
               strokeLinecap="round"
             />
           );

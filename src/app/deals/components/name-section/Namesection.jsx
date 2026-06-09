@@ -457,6 +457,16 @@ const Namedetailsection = ({ slug }) => {
   const isDarkTheme = isPrivateDeal || isccps || isofs;
   const isPrivateAndOfs = isPrivateDeal && isofs;
 
+  useEffect(() => {
+    if (searchParams?.get("qna") === "true") {
+      if (isPrivateLike) {
+        setShowPrivateQna(true);
+      } else {
+        setShowQnA(true);
+      }
+    }
+  }, [searchParams, isPrivateLike]);
+
   const dealData = dealDetails?.data?.deal_setpData;
 
   const isShowInterest = dealDetails?.data?.is_user_showed_interest;

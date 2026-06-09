@@ -51,7 +51,19 @@ export default function CardFooter({ deal, qaCount, replies, isListView }) {
                     </>
                 ) : (
                     <>
-                        <span className={styles.qaEmpty}>Do you have any question? Ask now</span>
+                        <span className={styles.qaEmpty}>
+                            Do you have any question?{" "}
+                            <span
+                                className={styles.askNowLink}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    window.location.href = `/deals/${deal?.slug}?qna=true`;
+                                }}
+                            >
+                                Ask now
+                            </span>
+                        </span>
                         <div className={styles.mobileFooterTags}>
                             <CardTags deal={deal} isListView={true} />
                         </div>

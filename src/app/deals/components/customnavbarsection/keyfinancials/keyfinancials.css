@@ -1125,6 +1125,7 @@
 .balanceSheetTable .th-metric {
   text-align: left;
   font-weight: 500;
+  padding-left: 25px;
   color: #9CA3AF;
   width: 250px;
   min-width: 250px;
@@ -1168,7 +1169,7 @@
   text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding-left: 12px;
+  padding-left: 25px;
 }
 
 .private-deal .balanceSheetTable .tr-category-header td.td-label {
@@ -1204,17 +1205,30 @@
 }
 
 /* Row borders */
+.balanceSheetTable tbody tr {
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.private-deal .balanceSheetTable tbody tr {
+  border-bottom: 1px solid #3F3F46 !important;
+}
+
+.balanceSheetTable tbody tr:last-child {
+  border-bottom: none !important;
+}
+
 .balanceSheetTable .tr-row {
-  border-bottom: 1px solid #F3F4F6;
   text-align: center;
 }
 
-.private-deal .balanceSheetTable .tr-row {
-  border-bottom-color: #3F3F46 !important;
+/* Hover highlight effect for Balance Sheet rows */
+.balanceSheetTable tbody tr:not(.tr-category-header):hover td {
+  background-color: #F8FAFC !important;
+  transition: background-color 0.15s ease;
 }
 
-.balanceSheetTable .tr-row:last-child {
-  border-bottom: none;
+.private-deal .balanceSheetTable tbody tr:not(.tr-category-header):hover td {
+  background-color: #27272A !important;
 }
 
 /* Bold / subheader rows (Net Worth, Total Liabilities, etc) */
@@ -1222,7 +1236,7 @@
   font-weight: 500;
   text-align: left;
   color: #1F2937;
-  padding-left: 16px;
+  padding-left: 40px;
 }
 
 .private-deal .balanceSheetTable .tr-sub-header td.td-label {
@@ -1230,7 +1244,7 @@
 }
 
 .balanceSheetTable .tr-sub-header td.td-value-dim {
-  font-weight: 5next 00;
+  font-weight: 500;
   text-align: center;
   color: #1F2937;
 }
@@ -1305,8 +1319,22 @@
   transition: opacity 0.2s ease;
 }
 
+.bs-tooltip-icon path {
+  fill: #9CA3AF;
+  stroke: #9CA3AF;
+  stroke-width: 0.2px;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+
+.bs-tooltip-container:hover .bs-tooltip-icon,
 .bs-tooltip-icon:hover {
   opacity: 1;
+}
+
+.bs-tooltip-container:hover .bs-tooltip-icon path,
+.bs-tooltip-icon:hover path {
+  fill: #B59131;
+  stroke: #B59131;
 }
 
 .bs-tooltip-text {
@@ -1322,7 +1350,7 @@
   padding: 10px 12px;
   position: absolute;
   z-index: 1050;
-  bottom: 130%;
+  bottom: 136%;
   /* Show above icon */
   left: 50%;
   transform: translateX(-50%);
@@ -1426,8 +1454,8 @@
   text-align: left;
   font-weight: 500;
   color: #9CA3AF;
-  width: 250px;
-  min-width: 250px;
+  width: 100%;
+  min-width: 370px;
 }
 
 .cashFlowTable .th-year-dim {
@@ -1614,8 +1642,8 @@
   text-align: left;
   color: #1F2937;
   font-weight: 500;
-  width: 250px;
-  min-width: 250px;
+  width: 100%;
+  min-width: 360px;
 }
 
 .private-deal .workingCapitalTable .td-label {
@@ -1722,6 +1750,16 @@
     font-size: 14px;
     padding: 12px 10px;
     ;
+  }
+
+  .balanceSheetTable .tr-category-header td.td-label {
+    padding-left:10px;
+  }
+  .balanceSheetTable .th-metric {
+    padding-left:10px;
+  }
+  .balanceSheetTable .tr-sub-header td.td-label{
+    padding-left: 30px;
   }
 
   .incomeStatementTable .th-year-dim{

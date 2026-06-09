@@ -522,6 +522,18 @@
     font-size: 12px;
 }
 
+.askNowLink {
+    color: #B59131;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.askNowLink:hover {
+    color: #8E6B0F;
+}
+
 .mobileFooterTags {
     display: none;
 }
@@ -861,6 +873,14 @@
     color: #8C8C8C !important;
 }
 
+.pre_ipo_exclusive .askNowLink {
+    color: #E2B963 !important;
+}
+
+.pre_ipo_exclusive .askNowLink:hover {
+    color: #FFF !important;
+}
+
 /* Overlapping dark blue avatar styling override */
 .pre_ipo_exclusive [class*="avatar"] {
     background-color: #17253D !important;
@@ -1004,6 +1024,14 @@
 .series_a .qaSeparator,
 .series_a .qaFreshness {
     color: #8C8C8C !important;
+}
+
+.series_a .askNowLink {
+    color: #E2B963 !important;
+}
+
+.series_a .askNowLink:hover {
+    color: #FFF !important;
 }
 
 /* Overlapping dark blue avatar styling override */

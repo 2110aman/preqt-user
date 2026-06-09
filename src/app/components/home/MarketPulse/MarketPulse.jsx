@@ -95,18 +95,22 @@ const MarketPulse = () => {
 
   if (isLoading) {
     return (
-      <div className={styles.cardContainer} style={{ minHeight: '230px' }}>
+      <div className={styles.cardContainer} style={{ minHeight: '230px', width: '100%' }}>
         <div className={styles.headerRow}>
-          <div style={{ width: '150px', height: '24px', backgroundColor: '#F3F4F6', borderRadius: '6px', opacity: 0.6 }}></div>
-          <div style={{ width: '180px', height: '20px', backgroundColor: '#F3F4F6', borderRadius: '4px', opacity: 0.6 }}></div>
+          <div className={styles.skeleton} style={{ width: '150px', height: '24px', borderRadius: '6px' }}></div>
+          <div className={styles.skeleton} style={{ width: '180px', height: '20px', borderRadius: '4px' }}></div>
         </div>
-        <div style={{ width: '80%', height: '38px', backgroundColor: '#F3F4F6', borderRadius: '6px', opacity: 0.6, margin: '8px 0' }}></div>
+        <div className={styles.skeleton} style={{ width: '80%', height: '38px', borderRadius: '6px', margin: '8px 0' }}></div>
         <div className={styles.middleRow}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ width: '120px', height: '14px', backgroundColor: '#F3F4F6', borderRadius: '4px', opacity: 0.6 }}></div>
-            <div style={{ width: '80px', height: '48px', backgroundColor: '#F3F4F6', borderRadius: '8px', opacity: 0.6 }}></div>
+            <div className={styles.skeleton} style={{ width: '120px', height: '14px', borderRadius: '4px' }}></div>
+            <div className={styles.skeleton} style={{ width: '80px', height: '48px', borderRadius: '8px' }}></div>
           </div>
-          <div style={{ width: '140px', height: '40px', backgroundColor: '#F3F4F6', borderRadius: '20px', opacity: 0.6 }}></div>
+          <div className={styles.skeleton} style={{ width: '220px', height: '64px', borderRadius: '50px' }}></div>
+        </div>
+        <div className={styles.footerRow}>
+          <div className={styles.skeleton} style={{ width: '250px', height: '20px', borderRadius: '4px' }}></div>
+          <div className={styles.skeleton} style={{ width: '100%', maxWidth: '370px', height: '48px', borderRadius: '10px' }}></div>
         </div>
       </div>
     );

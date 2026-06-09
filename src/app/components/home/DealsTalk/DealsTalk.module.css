@@ -1275,6 +1275,18 @@
     font-weight: 500;
 }
 
+.askNowLink {
+    color: #C9A74E;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.askNowLink:hover {
+    color: #B59131;
+}
+
 .avatarOverlapStack {
     display: flex;
     align-items: center;
