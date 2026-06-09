@@ -15,10 +15,10 @@ const DonutChart = ({ data }) => {
   // So the path dimensions must be:
   // outerRadius = 92 - 4 = 88
   // innerRadius = 68 + 4 = 72
-  const rOut = 88;
-  const rIn = 65;
+  const rOut = 95;
+  const rIn = 70;
   const cornerRadius = 7;
-  const strokeWidth = cornerRadius * 2; // 14px
+  const strokeWidth = cornerRadius * 1.9; // 14px
   
   const gapAngle = activeData.length > 1 ? (5 * Math.PI / 180) : 0; // 5 degrees gap between segments
   const totalGapAngle = activeData.length * gapAngle;

@@ -716,7 +716,7 @@ function AllDealsContent() {
                                     {dealsToRender && dealsToRender.length > 0 ? (
                                         <>
                                             {dealsToRender.map((deal, index) => (
-                                                <div key={deal.id} className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
+                                                <div key={deal.id} className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}>
                                                     <DealCard
                                                         deal={deal}
                                                         isAuthenticated={!!authToken}
