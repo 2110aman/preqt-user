@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { CARD_THEMES, CARD_LAYOUTS, METRICS_CONFIG, determineVariant } from './config';
 import * as Sections from './sections';
+import CardFooter from './sections/CardFooter';
 import RatingBadge from './ui/RatingBadge';
 import Badge from './ui/Badge';
 import styles from './DealCard.module.css';
@@ -80,7 +81,7 @@ export default function DealCard({
                     <Sections.CardHeader deal={deal} layout={layout} isListView={true} />
                 </div>
                 <Sections.CardCompanyInfo deal={deal} isListView={true} />
-                <Sections.CardFooter deal={deal} qaCount={qaCount} replies={replies} isListView={true} />
+                <CardFooter deal={deal} qaCount={qaCount} replies={replies} isListView={true} />
             </div>
 
             {/* 2. Hero Section: Stacked boxes */}
@@ -177,7 +178,7 @@ export default function DealCard({
             )}
 
             {layout.sections.includes('footer') && (
-                <Sections.CardFooter
+                <CardFooter
                     deal={deal}
                     qaCount={qaCount}
                     replies={replies}

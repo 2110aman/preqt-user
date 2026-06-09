@@ -123,17 +123,27 @@ const IPOReviewAndRating = ({ reviewData }) => {
   const [isMainOpen, setIsMainOpen] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
   const contentRef = useRef(null);
-  const [maxHeight, setMaxHeight] = useState("170px");
+  const [maxHeight, setMaxHeight] = useState("180px");
 
   useEffect(() => {
     if (contentRef.current) {
       if (isMainOpen) {
         setMaxHeight(`${contentRef.current.scrollHeight}px`);
+        const timer = setTimeout(() => {
+          setMaxHeight("none");
+        }, 400); // Wait for transition of 0.4s to finish
+        return () => clearTimeout(timer);
       } else {
-        setMaxHeight("180px");
+        // If it was "none", we must temporarily set it to the actual scrollHeight
+        // so the browser can animate the transition down to 180px.
+        setMaxHeight(`${contentRef.current.scrollHeight}px`);
+        const timer = setTimeout(() => {
+          setMaxHeight("180px");
+        }, 20);
+        return () => clearTimeout(timer);
       }
     }
-  }, [isMainOpen, expandedRows, reviewData]);
+  }, [isMainOpen, reviewData]);
 
   const toggleRow = (id) => {
     setExpandedRows(prev => ({
