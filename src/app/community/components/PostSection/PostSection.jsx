@@ -24,7 +24,8 @@ const PostSection = ({
   resetSpace = false,
   onLoadingChange,
   initialPosts = null,
-  initialNoPosts = false
+  initialNoPosts = false,
+  isMarketSentiment = false
 }) => {
   const hasInitialPayload = Array.isArray(initialPosts);
   const pageSize = limit ? 7 : 10;
@@ -580,7 +581,7 @@ const PostSection = ({
       <input type="text" placeholder='Search' className={Styles.searchInput} />
     </div> */}
 
-      <div className={`${Styles.postsMainContainer} ${resetSpace && Styles.resetWidth}`}>
+      <div className={`${Styles.postsMainContainer} ${resetSpace && Styles.resetWidth} ${isMarketSentiment ? Styles.marketSentimentMode : ""}`}>
 
         {isLoading ? (
           // <div className={Styles.IndividualPostContainer}>
@@ -817,7 +818,7 @@ const PostSection = ({
                     <div className={Styles.logoAndTime}>
                       {/* logo */}
                       <article className={Styles.preqtLogoContainer}>
-                        <img src="/assets/pictures/preqtLogo.svg" alt="preqt logo" title="preqt logo" className={Styles.logoImage} />
+                        <Image src="/assets/pictures/preqtLogo.svg" alt="preqt logo" title="preqt logo" className={Styles.logoImage} height={42} width={42} />
                         <p className={`${Styles.PreqtLogoHeading} ${Styles.onDesktopView}`}>{'PrEqt' || 'N/A'}</p>
                         <p className={`${Styles.PreqtLogoHeading} ${Styles.onMobileView}`}>{'PrEqt' || 'N/A'}</p>
                       </article>

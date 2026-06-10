@@ -165,7 +165,6 @@
 
 
 
-
 .ViewAllText {
   color: #FFF;
   text-align: center;
@@ -199,7 +198,7 @@
   overflow: hidden;
   border: 2px solid transparent;
   width: 100%;
-  width: 420px;
+  /* width: 420px; */
   /* height: 99%; */
   margin: 2px;
   height: 71px;
@@ -238,6 +237,18 @@
   100% {
     transform: scale(0.95);
     box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+  }
+}
+
+
+@media (max-width: 1200px) {
+  .viewAllBtnContainer {
+    padding: 5px 10px 5px 10px;
+  }
+  
+  .upperRightArrow{
+    width: 18px;
+    height: 18px;
   }
 }
 

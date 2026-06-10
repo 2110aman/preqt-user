@@ -262,7 +262,7 @@ const TopDeal = () => {
       const response = await fetch(`${baseUrl}/admin/api/community/posts/slug/${encodeURIComponent(slug)}`, {
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${Cookies.get('accessToken') || ''}`,
+          'Authorization': `Bearer ${Cookies.get('accessToken') || ''}`,
         },
         cache: 'no-store',
       });

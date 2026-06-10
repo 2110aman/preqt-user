@@ -1,7 +1,7 @@
 .DealsTalkMainContainer {
     /* height: 100% !important; */
     width: 100%;
-    max-width: 1500px;
+    max-width: 1560px;
     margin: auto;
     padding: 40px 60px;
 }
@@ -177,7 +177,7 @@
 .headerActions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    /* gap: 16px; */
 }
 
 /* Active Filters Header Row spacing - cascades naturally through class composition */
@@ -271,7 +271,7 @@
 }
 
 .tabItem {
-    padding: 8px 38px;
+    padding: 9px 20px 7px ;
     border-radius: 10px;
     font-size: 14px;
     line-height: 20px;
@@ -292,25 +292,52 @@
     color: #FFFFFF;
 }
 
+.desktopFilterContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.desktopFilterBtn {
+    background: #FAFAFA;
+    border: 1px solid #F4F4F5;
+    border-radius: 12px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #71717A;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0px 1px 2px -1px #0000001A, 0px 1px 3px 0px #0000001A;
+}
+
+.desktopFilterBtn:hover {
+    background: #F4F4F5;
+    border-color: #D4D4D8;
+    color: #18181B;
+}
+
 .viewToggle {
     display: flex;
     align-items: center;
     background: #F7F5ED;
     border-radius: 12px;
-    padding: 4px;
+    padding: 3px;
     gap: 0;
     position: relative;
-    width: 80px;
-    height: 40px;
+    width: 84px;
+    height: 44px;
     cursor: pointer;
 }
 
 .toggleSlider {
     position: absolute;
-    top: 4px;
+    top: 3px;
     left: 4px;
-    width: 32px;
-    height: 32px;
+    width: 37px;
+    height: 37px;
     background: #FFFFFF;
     border-radius: 8px;
     box-shadow: 0px 1.16px 3.47px 0px #0000001A;
@@ -353,11 +380,16 @@
     padding: 8.5px 26px;
     color: #FFFFFF;
     border: none;
-    display: flex;
+    display: none;
     align-items: center;
     gap: 8px;
+    
     cursor: pointer;
     font-size: 14px;
+}
+
+.filterBtn span{
+    padding-top: 5px;
 }
 
 .filterBtn img {
@@ -451,7 +483,7 @@
         scrollbar-width: none;
         -ms-overflow-style: none;
         padding-bottom: 4px;
-        margin-bottom: 16px;
+        margin-bottom: -2px;
     }
 
     .appliedFiltersRow::-webkit-scrollbar {
@@ -461,6 +493,61 @@
     .filterTag {
         flex-shrink: 0;
     }
+
+    .viewToggle {
+    display: flex;
+    align-items: center;
+    background: #F7F5ED;
+    border-radius: 12px;
+    padding: 3px;
+    gap: 0;
+    position: relative;
+    width: 70px;
+    height: 38px;
+    cursor: pointer;
+}
+
+.toggleSlider {
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    width: 32px;
+    height: 32px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0px 1.16px 3.47px 0px #0000001A;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.slideRight {
+    transform: translateX(30px);
+}
+
+.toggleIcon {
+    flex: 1;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: all 0.2s ease;
+}
+
+.toggleIcon img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.3;
+    transition: all 0.2s ease;
+}
+
+.toggleIcon.active img {
+    opacity: 1;
+}
+
+.toggleDivider {
+    display: none;
+}
 }
 
 .filterTag {
@@ -519,11 +606,19 @@
     }
 
     .tabItem {
-        padding: 10px 10px;
+        padding: 9px 10px 7px;
     }
 }
 
 @media (max-width: 768px) {
+    .desktopFilterContainer {
+        display: none;
+    }
+
+    .filterBtn {
+        display: flex;
+    }
+
     .dealTypeTabs {
         display: none;
     }
@@ -564,19 +659,28 @@
         background: #FFFFFF;
         border: 1px solid #E6DFD3;
         color: #374151;
-        border-radius: 16px;
-        padding: 8px 20px;
+        border-radius: 14px;
+        padding: 7px 20px;
         font-size: 14px;
         font-weight: 500;
         display: flex;
         align-items: center;
         gap: 8px;
         cursor: pointer;
-        height: 40px;
+        height: 38px;
         transition: all 0.2s ease;
         outline: none;
     }
 
+    .filterBtn{
+        height: 38px;
+        border-radius: 14px;
+    }
+
+    .filterBtn span{
+        padding-top: 0px;
+    }
+    
     .chevronIcon {
         color: #374151;
         margin-left: 4px;
@@ -666,16 +770,30 @@
     }
 
     .dealTypeDropdownBtn {
-        padding: 6px 15px;
-        font-size: 12px;
-        height: 35px;
+        padding: 7px 15px 6px;
+        font-size: 13px;
+        height: 38px;
+        border-radius: 12px;
+        gap: 0px;
+    }
+
+    .dealTypeDropdownBtn span{
+        padding-top: 2px;
     }
 
     .filterBtn {
         font-size: 13px;
         padding: 6px 15px;
-        height: 35px;
+        height: 38px;
+        gap: 4px;
+        border-radius: 12px;
+        
     }
+
+    .filterBtn span{
+        padding-top: 3px;
+    }
+
 
     .dropdownItem {
         padding: 10px 15px;
@@ -684,5 +802,10 @@
 
     .mobileRightActions {
         gap: 8px;
+    }
+
+    .listView .dealCardCol,
+    .listViewCol {
+        padding: 0 0 16px 0 !important;
     }
 }

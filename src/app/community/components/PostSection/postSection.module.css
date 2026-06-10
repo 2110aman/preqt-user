@@ -7,6 +7,34 @@
   max-width: 660px;
   /* margin: 0 auto; */
 }
+
+.postsMainContainer.marketSentimentMode {
+  border: none !important;
+  gap: 20px;
+}
+
+.postsMainContainer.marketSentimentMode .LCScontainer {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.postsMainContainer.marketSentimentMode .likeContainer {
+  padding: 8px 4px;
+}
+
+.postsMainContainer.marketSentimentMode .likeContainer img {
+  width: 24px;
+  height: 24px;
+}
+
+.postsMainContainer.marketSentimentMode .likesCount {
+  font-size: 14px;
+}
+
+.postsMainContainer.marketSentimentMode .tagContainer {
+  display: none;
+}
+
 .searchContainer{
   width: 100%;
   max-width: 660px;
@@ -60,7 +88,7 @@ border: none;
 border: 1px solid rgba(68, 49, 151, 0.27);
 display: flex;
 padding: 4px 10px;
-padding-top: 7px;
+/* padding-top: 7px; */
 justify-content: center;
 align-items: center;
 gap: 10px;
@@ -87,7 +115,7 @@ white-space: nowrap;
   border-bottom: 1px solid #00000014;
 }
 .postwrapperBorder:last-child{
-  border-bottom: none;
+  /* border-bottom: none; */
 }
 
 .IndividualPostContainerMobile:last-child{
@@ -101,7 +129,7 @@ white-space: nowrap;
   /* padding-left: 3%; */
   align-items: center;
   height: 32px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .preqtLogoContainer {
@@ -111,6 +139,8 @@ white-space: nowrap;
   /* height: 8vh; */
   align-items: center;
 }
+
+
 
 .PreqtLogoHeading {
   font-size: 16px;

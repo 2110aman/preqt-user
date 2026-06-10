@@ -45,7 +45,7 @@ export default function RatingBadge({ rating, variant = 'pill', isListView = fal
     const numericRating = parseFloat(rating) || 0;
 
     const renderStars = () => (
-        <div className={styles.stars}>
+        <div className={`${styles.stars} ${variant === 'starsWithLabel' ? styles.featuredStarsGap : ''}`}>
             {[1, 2, 3, 4, 5].map((index) => {
                 let fillPercent = 0;
 

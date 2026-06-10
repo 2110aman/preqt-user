@@ -153,11 +153,12 @@ const MarketPulse = () => {
 
       <div className={styles.footerRow}>
         <div className={styles.authorInfo}>
-          <span>{authorName}, {authorRole}</span>
-          <span className={styles.divider}> | </span>
+          <span className={styles.authorName}>{authorName}</span>
+          <span className={styles.authorRole}>{authorRole}</span>
+          <span className={styles.divider}>|</span>
           <span className={styles.timeAgo}>{timeAgoString}</span>
         </div>
-        <Link href={`/community/${slug}`} className={styles.viewButton}>
+        <Link href="/market-analysis" className={styles.viewButton}>
           VIEW MARKET ANALYSIS 
           <svg width="10" height="10" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1 5.5L5.5 1M5.5 1H2M5.5 1V5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>

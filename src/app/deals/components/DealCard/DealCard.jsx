@@ -44,7 +44,13 @@ export default function DealCard({
 
     const isSeriesA = deal?.deal_type?.toLowerCase() === 'series-a';
     const isPrivateDeal = deal?.deal_type?.toLowerCase() === 'private' || isSeriesA;
-    const statusKey = deal?.status?.toLowerCase() || 'live';
+    
+    const statusRaw = (deal?.hidden_status || '').toLowerCase();
+    let statusKey = 'upcoming';
+    if (statusRaw === 'live') statusKey = 'live';
+    else if (statusRaw === 'closed') statusKey = 'closed';
+    else if (statusRaw === 'upcoming' || statusRaw === 'up comming' || statusRaw === 'draft') statusKey = 'upcoming';
+
     const statusMap = {
         live: isSeriesA ? 'Round Open' : 'Live',
         upcoming: 'Upcoming',

@@ -24,7 +24,7 @@
 
 .mainDiv {
     width: 100%;
-    max-width: 1440px;
+    max-width:  1560px;
     margin: 0 auto;
     padding: 10px 60px;
     box-sizing: border-box;
@@ -47,17 +47,17 @@
 } */
 
 .leftclm {
-    max-width: 23.86vw;
+    max-width: 28.56vw;
 }
 
 @media (max-width: 1500px) {
     .rightclm {
-        max-width: 62.75vw;
-        min-width: 62.75vw;
+        max-width: 59.75vw;
+        min-width: 59.75vw;
     }
 
     .leftclm {
-        max-width: 27.86vw;
+        max-width: 28.86vw;
     }
 }
 
@@ -91,12 +91,12 @@
 
 @media (max-width: 1040px) {
     .rightclm {
-        max-width: 51.15vw;
-        min-width: 51.15vw;
+        max-width: 53.15vw;
+        min-width: 53.15vw;
     }
 
     .leftclm {
-        max-width: 38.86vw;
+        max-width: 38.19vw;
     }
 }
 

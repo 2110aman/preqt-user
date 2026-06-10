@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 
 import React from "react";
 import Image from "next/image";
-import { ArrowUpRight, ChevronDown, Lock, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Lock, SlidersHorizontal, X } from "lucide-react";
 import SignupFormPopup from "@/app/signup-form/SignupFormPopup";
 import SignupTypePopup from "@/app/signup/SignupTypePopup";
 import OtpPopup from "@/app/otp/OtpPopup";
@@ -595,17 +595,22 @@ function AllDealsContent() {
                         </div>
 
                         <div className={stylesdeals.filterBarRow}>
-                            {/* Static Pill Tabs for Deal Types */}
-                            <div className={stylesdeals.dealTypeTabs}>
-                                {dealTypeTabs.map(tab => (
-                                    <div
-                                        key={tab.value}
-                                        className={`${stylesdeals.tabItem} ${selectedDealType === tab.value ? stylesdeals.activeTab : ""}`}
-                                        onClick={() => setSelectedDealType(tab.value)}
-                                    >
-                                        {tab.label}
-                                    </div>
-                                ))}
+                            <div className={stylesdeals.desktopFilterContainer}>
+                                <button className={stylesdeals.desktopFilterBtn} onClick={() => setShowFilterPopup(!showFilterPopup)}>
+                                    <SlidersHorizontal size={18} />
+                                </button>
+                                {/* Static Pill Tabs for Deal Types */}
+                                <div className={stylesdeals.dealTypeTabs}>
+                                    {dealTypeTabs.map(tab => (
+                                        <div
+                                            key={tab.value}
+                                            className={`${stylesdeals.tabItem} ${selectedDealType === tab.value ? stylesdeals.activeTab : ""}`}
+                                            onClick={() => setSelectedDealType(tab.value)}
+                                        >
+                                            {tab.label}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className={stylesdeals.headerActions} ref={dropdownRef}>

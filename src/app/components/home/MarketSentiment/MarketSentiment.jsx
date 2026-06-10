@@ -128,7 +128,7 @@ export default function MarketSentiment() {
                     </div>
                 </div>}
                 <div style={{ background: 'white', borderRadius: '20px' }}>
-                    <PostSection limit={true} resetSpace={false} />
+                    <PostSection limit={true} resetSpace={false} isMarketSentiment={true} />
                 </div>
                 <div className={styles.exploreCommunityContainer}>
                     <Link href="/community" style={{ textDecoration: 'none' }}>
