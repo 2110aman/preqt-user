@@ -138,7 +138,7 @@ const MarketPulse = () => {
 
       <div className={styles.middleRow}>
         <div className={styles.scoreSection}>
-          <span className={styles.scoreLabel}>PR.QTY INDEX SCORE</span>
+          <span className={styles.scoreLabel}>PR.EQT INDEX SCORE</span>
           <div className={styles.scoreValueContainer}>
             <span className={styles.scoreValue}>{indexScore}</span>
             <span className={styles.scoreMax}>/ 10</span>
@@ -159,8 +159,8 @@ const MarketPulse = () => {
         </div>
         <Link href={`/community/${slug}`} className={styles.viewButton}>
           VIEW MARKET ANALYSIS 
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2.5 11.5L11.5 2.5M11.5 2.5H4.5M11.5 2.5V9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg width="10" height="10" viewBox="0 0 7 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 5.5L5.5 1M5.5 1H2M5.5 1V5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </Link>
       </div>
