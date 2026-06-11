@@ -41,9 +41,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
 
     return (
         <div className={`${isPrivateDeal ? styles.privateipo : ''} ${styles.ipocllapseWrapper || ''}`}>
-            <button
-                onClick={() => setOpen(!open)}
-                aria-expanded={open}
+            <div
                 className={styles.ipocollapseBtn}
             >
                 <div className={styles.ipocollapseleft}>
@@ -197,10 +195,21 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                         )}
 
                     </div>
-                    {!isofs && (open ? <ChevronUp color={isPrivateDeal ? "white" : "black"} /> : <ChevronDown color={isPrivateDeal ? "white" : "black"} />)}
+                    {!isofs && (
+                        <div 
+                            onClick={() => setOpen(!open)} 
+                            style={{ cursor: "pointer", display: "flex", alignItems: "center" }}
+                        >
+                            {open ? (
+                                <ChevronUp color={isPrivateDeal ? "white" : "black"} />
+                            ) : (
+                                <ChevronDown color={isPrivateDeal ? "white" : "black"} />
+                            )}
+                        </div>
+                    )}
                 </div>
 
-            </button>
+            </div>
 
             <Collapse in={!isofs && open}>
                 <div>

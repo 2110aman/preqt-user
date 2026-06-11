@@ -11,7 +11,7 @@
   display: flex;
   /* width: 50%; */
   flex-direction: column;
-  padding: 0px 15px;
+  /* padding: 0px 15px; */
 }
 
 .seperator {
@@ -226,9 +226,17 @@
 
 .custom-tooltip-wrapper {
   position: relative;
-  display: unset !important;
+  /* display: unset !important; */
   justify-content: center;
+  width: 16px;
+  /* margin-left: 4px; */
+  height: 14px;
   align-items: center;
+}
+
+.custom-tooltip-wrapper img{
+  width: 100%;
+  height: 100%;
 }
 
 .label-with-tooltip {
@@ -241,8 +249,15 @@
   display: inline-flex;
   align-items: center;
   margin-left: 6px;
+  width: 16px;
+  height: 14px;
   cursor: pointer;
 
+}
+
+.tooltip-icon img{
+  width: 100%;
+  height: 100%;
 }
 
 .custom-tooltip-box {
@@ -282,6 +297,31 @@
   background-size: contain;
   border: none;
 }
+
+.custom-tooltip-wrapper.left-side .custom-tooltip-box {
+  right: 4px;
+  left: auto;
+  border-radius: 8px 8px 0 8px;
+}
+
+.custom-tooltip-wrapper.left-side .custom-tooltip-box::after {
+  right: 0px;
+  left: auto;
+  transform: none;
+}
+
+.custom-tooltip-wrapper.right-side .custom-tooltip-box {
+  right: auto;
+  left: 16px;
+  border-radius: 8px 8px 8px 0;
+}
+
+.custom-tooltip-wrapper.right-side .custom-tooltip-box::after {
+  right: auto;
+  left: 0px;
+  transform: scaleX(-1);
+}
+
 
 /* Hover Effect */
 .custom-tooltip-wrapper:hover .custom-tooltip-box {

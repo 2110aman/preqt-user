@@ -477,7 +477,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                           <span className="data">{(isofs ? 'Market Cap' : 'Valuation')}</span>
                           {shouldShowTooltip(dealData?.valuation_in_cr?.tool_tip) && (
-                            <div className="custom-tooltip-wrapper main-other">
+                            <div className="custom-tooltip-wrapper left-side">
                               <span className="tooltip-icon">
                                 <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                               </span>
@@ -502,7 +502,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                           <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                             <span className="data">{"Revenue"}</span>
                             {shouldShowTooltip(dealData?.revenue_fy25_in_cr?.tool_tip) && (
-                              <div className="custom-tooltip-wrapper">
+                              <div className="custom-tooltip-wrapper right-side">
                                 <span className="tooltip-icon">
                                   <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                                 </span>
@@ -531,7 +531,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                           <span className="data">{"PAT (FY'25)"}</span>
                           {shouldShowTooltip(dealData?.pat_fy25_in_cr?.tool_tip) && (
-                            <div className="custom-tooltip-wrapper main-other">
+                            <div className="custom-tooltip-wrapper left-side">
                               <span className="tooltip-icon">
                                 <img src={isDarkTheme ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                               </span>
@@ -688,7 +688,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"Valuation"}</span>
                       {shouldShowTooltip(dealData?.valuation_in_cr?.tool_tip) && (
-                        <div className="custom-tooltip-wrapper main-other">
+                        <div className="custom-tooltip-wrapper left-side">
                           <span className="tooltip-icon">
                             <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                           </span>
@@ -709,7 +709,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"Revenue"}</span>
                       {shouldShowTooltip(dealData?.revenue_fy25_in_cr?.tool_tip) && (
-                        <div className="custom-tooltip-wrapper">
+                        <div className="custom-tooltip-wrapper right-side">
                           <span className="tooltip-icon">
                             <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                           </span>
@@ -730,7 +730,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"PAT"}</span>
                       {shouldShowTooltip(dealData?.pat_fy25_in_cr?.tool_tip) && (
-                        <div className="custom-tooltip-wrapper main-other">
+                        <div className="custom-tooltip-wrapper left-side">
                           <span className="tooltip-icon">
                             <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                           </span>
@@ -751,7 +751,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"Issue Size"}</span>
                       {shouldShowTooltip(dealData?.issue_size?.tool_tip) && (
-                        <div className="custom-tooltip-wrapper">
+                        <div className="custom-tooltip-wrapper right-side">
                           <span className="tooltip-icon">
                             <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                           </span>

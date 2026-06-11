@@ -761,19 +761,22 @@ const Namedetailsection = ({ slug }) => {
 
 
 
-              <div className={hideForReferral ? "hideCardUI private-qualities" : isDarkTheme ? "private-qualities" : "qualities"}>
-                {dealData?.key_highlights?.status &&
-                  dealData?.key_highlights?.data?.map((item, index) => (
-                    <span key={index}>{item}</span>
-                  ))}
-                {!isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
-                  <PreqtSummarySection 
-                    isPrivateLike={false} 
-                    summaryData={dealData?.preqt_summary?.data} 
-                    labelName={dealData?.preqt_summary?.label_name} 
-                  />
-                )}
-              </div>
+              {((dealData?.key_highlights?.status && dealData?.key_highlights?.data && dealData?.key_highlights?.data?.length > 0) ||
+                (!isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status)) && (
+                <div className={hideForReferral ? "hideCardUI private-qualities" : isDarkTheme ? "private-qualities" : "qualities"}>
+                  {dealData?.key_highlights?.status &&
+                    dealData?.key_highlights?.data?.map((item, index) => (
+                      <span key={index}>{item}</span>
+                    ))}
+                  {!isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
+                    <PreqtSummarySection 
+                      isPrivateLike={false} 
+                      summaryData={dealData?.preqt_summary?.data} 
+                      labelName={dealData?.preqt_summary?.label_name} 
+                    />
+                  )}
+                </div>
+              )}
               {!isDarkTheme && !hideForReferral && (dealData?.ipo_review_rating?.status === true || dealData?.ipo_review_rating?.status === "true") && <IPOReviewAndRating reviewData={dealData?.ipo_review_rating?.data} />}
               {isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
                 <PreqtSummarySection 
