@@ -276,6 +276,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: auto 0;
   justify-content: center;
   gap: 10px;
   padding: 24px;
@@ -341,7 +342,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding-right: 15px;
+  padding: 24px 15px 24px 0px;
   flex: 1;
 }
 
@@ -541,16 +542,48 @@
   font-weight: 500;
 }
 
+
 /* Media Queries (Grouped at the bottom) */
+
+
+@media (max-width: 1200px){
+    
+    .indicesGrid{
+        gap: 10px;
+    }
+    .indexCard{
+      padding: 14px 10px;
+    }
+}
+
+@media (max-width: 1024px){
+    .headerSection{
+        padding: 24px 40px;
+    }
+    .contentSection{
+      padding: 50px 40px;
+    }
+    .indicesGrid{
+        gap: 10px;
+    }
+    .indexCard{
+      padding: 14px 10px;
+    }
+}
 @media (max-width: 991px) {
   .headerSection {
-    flex-direction: column;
+    /* flex-direction: column; */
     gap: 20px;
+    padding: 20px 20px;
     align-items: flex-start;
   }
   
-  .headerLeft {
-    /* max-width: 100%; */
+  .contentSection{
+    padding: 30px 20px
+  }
+  
+  .priceContainer{
+    flex-direction: column;
   }
 
   .headerRight {
@@ -564,13 +597,10 @@
     font-size: 26px;
   }
 
-  .indicesGrid {
-    /* grid-template-columns: 1fr; */
-    gap: 14px;
-  }
+  
   
   .scoreBanner {
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: flex-start;
     gap: 20px;
   }
@@ -580,7 +610,7 @@
     border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
     padding-right: 0;
     padding-bottom: 20px;
-    width: 100%;
+    /* width: 100%; */
     align-items: flex-start;
   }
   
@@ -590,14 +620,84 @@
 }
 
 @media (max-width: 768px) {
-  .analysisTable th,
-  .analysisTable td {
-    padding: 12px 14px;
-    font-size: 12px;
-  }
+.headerSection{
+  padding: 20px 10px;
+}
+.contentSection{
+  padding: 20px 10px;
+}
   
-  .particularsTitle {
+  .analysisTable {
+    table-layout: fixed;
+    width: 880px;
+    min-width: 880px;
+  }
+
+  .analysisTable th:nth-child(1),
+  .analysisTable td:nth-child(1) {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .analysisTable th:nth-child(2),
+  .analysisTable td:nth-child(2) {
+    width: 130px;
+    min-width: 130px;
+  }
+
+  .analysisTable th:nth-child(3),
+  .analysisTable td:nth-child(3) {
+    width: 130px;
+    min-width: 130px;
+  }
+
+  .analysisTable th:nth-child(4),
+  .analysisTable td:nth-child(4) {
+    width: 120px;
+    min-width: 120px;
+  }
+
+  .analysisTable th:nth-child(5),
+  .analysisTable td:nth-child(5) {
+    width: 300px;
+    min-width: 300px;
+  }
+
+  .analysisTable th {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #475569;
+  border-bottom: 1px solid #E2E8F0;
+  background-color: #FFFFFF;
+  letter-spacing: 0.05em;
+}
+
+.analysisTable td {
+  padding: 8px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid #F1F5F9;
+  background-color: #FFFFFF;
+}
+  
+  /* .particularsTitle {
     font-size: 12px;
+  } */
+
+  .indicesGrid {
+    grid-template-columns: repeat(2,1fr);
+    gap: 13px;
+  }
+  .indexCard:last-child {
+  grid-column: 1 / -1;
+}
+   .scoreBox{
+    padding: 18px 0px 18px 18px;
+   }
+
+  .interpretationBox{
+    padding: 18px 18px 18px 0px;
   }
 }
 
@@ -605,4 +705,105 @@
   .mainHeading {
     font-size: 20px;
   }
+  .headerSection{
+    flex-direction: column;
+    
+  }
+  .headerLeft{
+    width: 100%;
+  }
+
+  .headerRight{
+    padding-top: 0px;
+    
+  }
+  
+
+    .analysisTable {
+    table-layout: fixed;
+    width: 520px;
+    min-width: 520px;
+  }
+
+  .analysisTable th:nth-child(1),
+  .analysisTable td:nth-child(1) {
+    width: 125px;
+    min-width: 125px;
+  }
+
+  .analysisTable th:nth-child(2),
+  .analysisTable td:nth-child(2) {
+    width: 100px;
+    min-width: 100px;
+  }
+
+  .analysisTable th:nth-child(3),
+  .analysisTable td:nth-child(3) {
+    width: 104px;
+    min-width: 100px;
+  }
+
+  .analysisTable th:nth-child(4),
+  .analysisTable td:nth-child(4) {
+    width: 90px;
+    min-width: 90px;
+  }
+
+  .analysisTable th:nth-child(5),
+  .analysisTable td:nth-child(5) {
+    width: 300px;
+    min-width: 300px;
+  }
+
+  .priceContainer{
+    flex-direction: row;
+  }
+
+  .indicesGrid{
+    grid-template-columns: 1fr;
+  }
+   .indexCard:last-child {
+  grid-column: auto;
+}
+
+
+.scoreBanner{
+  flex-direction: column;
+  gap: 0px;
+}
+.scoreBox{
+  display: grid;
+  grid-template-areas:
+    "label badge"
+    "score .";
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.scoreLabel {
+  grid-area: label;
+}
+.scoreValueRow {
+  grid-area: score;
+}
+.bullishBadge {
+  grid-area: badge;
+  margin: 0;
+  width: 129px;
+  display: inline-flex;
+  /* justify-content: center; */
+}
+
+.interpretationBox{
+  border-top: 1px dashed rgba(212, 175, 55, 0.2);
+  padding: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.headerLeft{
+  max-width: 100%;
+}
 }
