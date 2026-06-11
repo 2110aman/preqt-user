@@ -789,7 +789,9 @@ const Namedetailsection = ({ slug }) => {
 
                 <Valuation isPrivateDeal={isPrivateDeal} isccps={isccps}  isofs={isofs}/>
 
-                <Shares isPrivateDeal={isPrivateLike} isccps={isccps}  isofs={isofs}/>
+                {(!isMobile || isPrivateLike) && (
+                  <Shares isPrivateDeal={isPrivateLike} isccps={isccps}  isofs={isofs}/>
+                )}
               </div>}
               {/* <div className="ipo-timeline-section mobile-ipo-timeline-section">
                 <h3>IPO Timeline</h3>

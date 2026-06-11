@@ -95,7 +95,7 @@
   color: #6B7280;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 10px;
   /* justify-content: space-between; */
   width: 30% !important;
   background-color: #F3F4F6;
@@ -110,13 +110,14 @@
 
 .subs1-topp {
   background-color: #1D1D1D;
-  width: 50% !important;
+  /* width: 50% !important; */
 }
 
 .smallcard-section-subcontainer {
   color: #6B7280;
   display: flex;
   gap: 16px;
+  margin-bottom: 24px;
 }
 
 .subs1-top div,
@@ -126,7 +127,7 @@
   /* gap: 16px; */
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
 }
 
 .smallcard-section-subcontainer-div {
@@ -143,7 +144,12 @@
   line-height: 25px;
   font-style: normal;
   font-weight: 500;
+  /* margin-top: 20px; */
   margin-bottom: 0;
+}
+
+.nomargin{
+  margin-top:30%;
 }
 
 .data {
@@ -285,6 +291,28 @@
 }
 
 
+.public-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 16px;
+  width: 100%;
+}
+
+.public-grid .subs1-top {
+  width: 100% !important;
+  margin: 0 !important;
+  height: 100%;
+}
+
+.card-start-date { order: 1; }
+.card-valuation { order: 2; }
+.card-revenue { order: 3; }
+.card-end-date { order: 4; }
+.card-pat { order: 5; }
+.card-issue-size { order: 6; }
+
+
+
 
 
 @media(max-width:1115px) {
@@ -319,7 +347,7 @@
 
   .smallcard-section-subcontainer-div {
     width: 100%;
-    gap: 10px;
+    gap: 12px;
   }
 
   .subs {
@@ -331,6 +359,14 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
+  }
+
+  .offer-day{
+    margin-top:auto;
+  }
+
+  .smallcard-section-subcontainer{
+    gap: 12px;
   }
 
   .subs1-top {
@@ -360,6 +396,10 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+  }
+
+  .offer-day {
+    font-size: 16px;
   }
 
 
@@ -435,6 +475,41 @@
   }
 }
 
+@media(max-width:1024px) {
+
+  .valuation-bg {
+
+    height: 24px;
+    width: 24px;
+
+  }
+
+  .valuation-bg svg {
+    height: 12px;
+    width: 12px;
+  }
+
+  .valuation-bg-light {
+
+    height: 24px;
+    width: 24px;
+
+  }
+
+  .valuation-bg-light svg {
+    height: 18px;
+    width: 18px;
+  }
+
+  .data {
+    font-size: 13px;
+  }
+
+  .top section div {
+    gap: 10px;
+  }
+}
+
 @media(max-width:920px) {
   .ipo-dropdownButton {
     display: flex;
@@ -467,6 +542,157 @@
     margin: 0;
     padding: 8px;
 
+  }
+
+
+/* Collapse toggle below 920px */
+  .main-other.collapsed {
+    position: relative;
+  }
+
+  .main-other.collapsed.public-collapsed > *:nth-child(n+5):not(.ipo-overview-blur-overlay) {
+    display: none;
+  }
+  .main-other.collapsed.public-collapsed .others:nth-child(4) {
+    pointer-events: none;
+  }
+
+  .main-other.collapsed.private-collapsed > *:nth-child(n+6):not(.ipo-overview-blur-overlay) {
+    display: none;
+  }
+  .main-other.collapsed.private-collapsed .others:nth-child(5) {
+    pointer-events: none;
+  }
+
+  .ipo-overview-blur-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.95) 65%, #ffffff 100%);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .ipo-overview-blur-overlay.dark {
+    background: linear-gradient(180deg, rgba(29, 29, 29, 0) 0%, rgba(29, 29, 29, 0.95) 65%, #1d1d1d 100%);
+  }
+
+  .expand-toggle-btn-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .expand-toggle-icon {
+    width: 24px;
+    height: 24px;
+    color: #000000;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+  }
+
+  .expand-toggle-btn-wrapper.collapsed .expand-toggle-icon {
+    animation: bounceDown 2s infinite ease-in-out;
+  }
+
+  .expand-toggle-btn-wrapper.expanded .expand-toggle-icon {
+    animation: bounceUp 2s infinite ease-in-out;
+  }
+
+  .expand-toggle-btn-wrapper:hover .expand-toggle-icon {
+    animation: none;
+  }
+
+  .expand-toggle-btn-wrapper.collapsed:hover .expand-toggle-icon {
+    transform: translateY(4px);
+    color: #4B5563;
+  }
+
+  .expand-toggle-btn-wrapper.expanded:hover .expand-toggle-icon {
+    transform: translateY(-4px);
+    color: #4B5563;
+  }
+
+  .expand-toggle-btn-wrapper.dark .expand-toggle-icon {
+    color: #FFFFFF;
+  }
+
+  .expand-toggle-btn-wrapper.dark.collapsed:hover .expand-toggle-icon {
+    transform: translateY(4px);
+    color: #E5E7EB;
+  }
+
+  .expand-toggle-btn-wrapper.dark.expanded:hover .expand-toggle-icon {
+    transform: translateY(-4px);
+    color: #E5E7EB;
+  }
+
+  @keyframes bounceDown {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(6px);
+    }
+  }
+
+  @keyframes bounceUp {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+}
+
+@media(max-width: 768px) {
+  .public-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+
+  .card-range-date {
+    grid-column: span 2;
+    order: 1;
+  }
+  .card-issue-size { order: 2; }
+  .card-valuation { order: 3; }
+  .card-revenue { order: 4; }
+  .card-pat { order: 5; }
+  
+
+  .valuation-bg-light{
+    height: 30px;
+    width: 30px;
+  }
+  .valuation-bg-light svg{
+    height: 18px;
+    width: 18px;
+  }
+
+  .valuation-bg {
+
+    height: 24px;
+    width: 24px;
+
+  }
+
+  .valuation-bg svg {
+    height: 12px;
+    width: 12px;
+  }
+  .data {
+    font-size: 14px;
+  }
+
+  .top section div {
+    gap: 10px;
   }
 }
 
@@ -515,12 +741,16 @@
     text-align: left;
   }
 
+  .subs1-top div{
+    margin-bottom: 0px;
+  }
+
   .offer-day {
     font-size: 16px;
   }
 
   .ipo-dropdown {
-    margin-bottom: 10px;
+    margin-bottom: 0px;
   }
 
   .seperator {
@@ -533,39 +763,14 @@
     gap: 16px;
     padding: 0;
   }
+
+  .others h6,
+  .others span,
+  .others a {
+    font-size: 12px !important;
+  }
 }
 
-@media (max-width: 1024px) {
-  .valuation-bg {
 
-    height: 24px;
-    width: 24px;
 
-  }
 
-  .valuation-bg svg {
-    height: 12px;
-    width: 12px;
-  }
-
-  .valuation-bg-light {
-
-    height: 24px;
-    width: 24px;
-
-  }
-
-  .valuation-bg-light svg {
-    height: 12px;
-    width: 12px;
-  }
-
-  .data {
-    font-size: 13px;
-  }
-
-  .top section div {
-    gap: 10px;
-  }
-
-}

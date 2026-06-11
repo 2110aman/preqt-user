@@ -351,7 +351,7 @@
 }
 
 .valuation-container .progress-fill {
-  background: linear-gradient(45deg, #ffd89e, #b88609);
+  /* background: linear-gradient(45deg, #ffd89e, #b88609); */
 
   height: 100%;
   transition: width 0.3s ease;
@@ -396,7 +396,7 @@
 .smallcards-section {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  /* gap: 24px; */
 }
 
 .smallcards-section section {
@@ -408,7 +408,7 @@
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 24px 8px;
   width: 100%;
-  margin-bottom: 24px;
+  /* margin-bottom: 24px; */
 }
 
 
@@ -466,7 +466,7 @@
   border-radius: 12px;
   background: var(--Gray-50, #F9FAFB);
   /* solid inside */
-  box-shadow: 0 4px 6px -4px rgba(100, 78, 229, 0.10);
+  box-shadow: 0px 4px 6px -4px #644EE51A;
   padding: 12px;
   display: flex;
   flex-direction: column;
@@ -478,6 +478,8 @@
 .shares-card::after {
   content: '';
   position: absolute;
+  box-shadow: 0px 4px 6px -4px #644EE51A;
+
   inset: 0;
   /* shorthand for top/left/right/bottom:0 */
   border-radius: 12px;
@@ -577,7 +579,7 @@
 }
 
 .labels>div {
-  flex: 1;
+  /* flex: 1; */
 }
 
 .label-item {
@@ -2281,7 +2283,7 @@
     }
 
     .smallcards-section span {
-      font-size: 10px;
+      font-size: 14px;
     }
 
     .smallcards-section svg {
@@ -2307,7 +2309,7 @@
     }
 
     .shares-section svg {
-      width: 75px;
+      width: 100%;
     }
 
     .why-section h2 {
@@ -2329,7 +2331,7 @@
       padding: 30px 0px;
     }
 
-    .top section {
+    .top section ,.subs1-topp{
       padding: 8px 12px;
     }
 
@@ -2492,7 +2494,7 @@
       padding: 30px 0px;
     }
 
-    .top section {
+    .top section, .subs1-topp{
       padding: 8px 12px;
     }
 
@@ -2643,7 +2645,8 @@
     }
 
     .firsthalf {
-      padding: 20px 15px;
+      padding: 16px 15px;
+      gap:15px;
     }
 
     .topbar {
@@ -2726,6 +2729,15 @@
     .share-button svg path {
       stroke: #8E6B0F !important;
     }
+    .qualities{
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+
+    .labels{
+     gap:30px ;
+     justify-content: flex-start;
+    }
 
   }
 
@@ -2761,11 +2773,11 @@
   }
 
   .smallcards-section {
-    gap: 8px;
+    /* gap: 8px; */
   }
 
   .smallcards-section span {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .smallcards-section svg {
@@ -2816,7 +2828,7 @@
   }
 
   .shares-section svg {
-    width: 75px;
+    width: 100%;
   }
 
   .why-section h2 {
@@ -2841,7 +2853,11 @@
     padding: 30px 0px;
   }
 
-  .top section {
+  .top section , .subs1-topp {
+    padding: 8px 12px !important;
+  }
+
+  .subs1-topp{
     padding: 8px 12px;
   }
 
@@ -3008,6 +3024,9 @@
     padding: 0 14px;
     ;
   } */
+}
+@media (max-width:480px){
+  
 }
 
 @media (max-width:450px) {

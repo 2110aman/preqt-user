@@ -3,9 +3,10 @@ import "./ai-ipo-overview.css";
 import Image from "next/image";
 import { OfferDateIcon, PatIcon, PeMultiple, RevenueIcon, Valuation } from "../../name-section/svgicon";
 import { Collapse } from "react-bootstrap";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronsDown, ChevronsUp } from "lucide-react";
 import { useDealStore } from "@/store/dealStore";
 import Link from "next/link";
+import Shares from "../../shares-section/shares";
 
 
 // Local-only utility to normalize deal payloads for different deal types
@@ -13,6 +14,8 @@ import Link from "next/link";
 
 const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [isBelow920, setIsBelow920] = useState(false);
+  const [expandedFields, setExpandedFields] = useState(true);
   const [open, setOpen] = useState(false);
   const dealDetails = useDealStore((state) => state.dealDetails);
   const dealData = dealDetails?.data?.deal_setpData;
@@ -22,6 +25,12 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
   // OFS and CCPS deals behave exactly like private deals
   const isPrivateLike = isPrivateDeal || isofs || isccps || isunlisted;
   const isDarkTheme = isPrivateDeal || isofs || isccps; // Excludes unlisted
+  
+  const hasFromAndTo = dealData?.offer_date?.status &&
+    dealData?.offer_date?.data &&
+    typeof dealData.offer_date.data === "object" &&
+    dealData.offer_date.data.from &&
+    dealData.offer_date.data.to;
 
   const minLots = Number(dealData?.min_investment?.data?.lot_size) || 1;
   const lotSize = Number(dealData?.lot_size?.data) || 1;
@@ -146,7 +155,8 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 920);
+      setIsMobile(window.innerWidth <= 768);
+      setIsBelow920(window.innerWidth < 920);
     };
 
     handleResize(); // initial check
@@ -240,7 +250,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 <g clipPath="url(#clip0_2198_15260)">
                   <path d="M9 16.5C13.1421 16.5 16.5 13.1421 16.5 9C16.5 4.85786 13.1421 1.5 9 1.5C4.85786 1.5 1.5 4.85786 1.5 9C1.5 13.1421 4.85786 16.5 9 16.5Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M9 1.5C7.07418 3.52212 6 6.20756 6 9C6 11.7924 7.07418 14.4779 9 16.5C10.9258 14.4779 12 11.7924 12 9C12 6.20756 10.9258 3.52212 9 1.5Z" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M1.5 9H16.5" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M1.5 9H16.5" stroke="black" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                 </g>
                 <defs>
                   <clipPath id="clip0_2198_15260">
@@ -408,14 +418,14 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
 
       <section className="smallcards-section">
-        <div className="smallcard-section-subcontainer">
+        <div className={`smallcard-section-subcontainer ${!isPrivateLike ? "public-grid" : ""}`}>
           {isPrivateLike ? (
             <>
               {dealData?.listing_timeline?.status && (
                 <section className="subs1-topp" style={{ backgroundColor: isDarkTheme ? "#1D1D1D" : "#F3F4F6" }}>
                   <div className="label-with-tooltip">
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <p>{"Listing Timeline"}</p>
+                      <span className="data" >{"Listing Timeline"}</span>
                       {shouldShowTooltip(dealData?.listing_timeline?.tool_tip) && (
                         <div className={`custom-tooltip-wrapper ${isMobile ? "main-other" : ""}`}>
                           <span className="tooltip-icon">
@@ -429,7 +439,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                       <PeMultiple />
                     </span>
                   </div>
-                  <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
+                  <span className="offer-day nomargin" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                     {(() => {
                       const dl = dealData?.listing_timeline?.data;
                       if (!dl) return "TBD";
@@ -458,133 +468,8 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                   </span>
                 </section>
               )}
-            </>
 
-          ) : (
-            <section className="subs1-top">
-              {isMobile ? (
-                <>
-                  {/* Dropdown Header */}
-                  <div
-                    className="ipo-dropdownButton"
-                    onClick={() => setOpen(!open)}
-                  >
-                    {
-                      dealData?.offer_date?.status && (
-                        <>
-                          <div className="ipo-dropdown">
-                            <div className="label-with-tooltip" style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-                              <p>{"Offer Date"}</p>
-                              {shouldShowTooltip(dealData?.offer_date?.tool_tip) && (
-                                <div className={`custom-tooltip-wrapper ${isMobile ? "main-other" : ""}`}>
-                                  <span className="tooltip-icon">
-                                    <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginBottom: "17px", cursor: "pointer", width: "12px", height: "12px" }} />
-                                  </span>
-                                  <div className="custom-tooltip-box">{typeof dealData.offer_date.tool_tip === 'string' ? dealData.offer_date.tool_tip : dealData.offer_date.tool_tip?.data}</div>
-                                </div>
-                              )}
-                            </div>
-                            <span className={isPrivateLike ? "valuation-bg" : "valuation-bg-light"}><OfferDateIcon /></span>
-                          </div>
-                          <div className="ipo-dropdown">
-                            <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)} to {formatDateForIPO(dealData?.offer_date?.data?.to)}</h6>
-                            {/* <span className="dropDown">{open ? <ChevronUp /> : <ChevronDown />}</span> */}
-                          </div>
-                        </>
-                      )
-                    }
-
-
-                  </div>
-
-                  {/* Collapsible Content */}
-                  {/* <Collapse in={open}>
-                    <div>
-                      <div className="timeline">
-                        {stepsWithStatus.map((step, index) => (
-                          <div key={index} className="timeline-step">
-                            <div
-                              className={`timeline-icon ${step.completed ? "completed" : ""}`}
-                            >
-                              {step.completed ? (
-                                <svg
-                                  className="completed"
-                                  width="26"
-                                  height="27"
-                                  viewBox="0 0 26 27"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <g clipPath="url(#clip0_3818_3279)">
-                                    <circle
-                                      cx="12.8029"
-                                      cy="13.4182"
-                                      r="12.0028"
-                                      fill="#B59131"
-                                      stroke="#B59131"
-                                      strokeWidth="1.60037"
-                                    />
-                                  </g>
-                                  <path
-                                    d="M10.0645 16.3326L17.7799 8.61719L18.8043 9.64162L10.0645 18.3814L6.00098 14.3191L7.02541 13.2947L10.0645 16.3326Z"
-                                    fill="white"
-                                  />
-                                  <defs>
-                                    <clipPath id="clip0_3818_3279">
-                                      <rect
-                                        width="25.6059"
-                                        height="25.6059"
-                                        fill="white"
-                                        transform="translate(0 0.615234)"
-                                      />
-                                    </clipPath>
-                                  </defs>
-                                </svg>
-                              ) : (
-                                <span className="step-num">{step.number}</span>
-                              )}
-                            </div>
-                            <div className="timeline-content">
-                              <div className="label">{step.label}</div>
-                              <div className="date">{step.date}</div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Collapse> */}
-
-                </>
-              ) : (
-                <>
-                  {dealData?.offer_date?.status && (
-                    <>
-                      <div>
-                        <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                          <p>{"Offer Date"}</p>
-                          {shouldShowTooltip(dealData?.offer_date?.tool_tip) && (
-                            <div className={`custom-tooltip-wrapper ${isMobile ? "main-other" : ""}`}>
-                              <span className="tooltip-icon">
-                                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", marginBottom: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
-                              </span>
-                              <div className="custom-tooltip-box">{typeof dealData.offer_date.tool_tip === 'string' ? dealData.offer_date.tool_tip : dealData.offer_date.tool_tip?.data}</div>
-                            </div>
-                          )}
-                        </div>
-                        <span className={isPrivateLike ? "valuation-bg" : "valuation-bg-light"}><OfferDateIcon /></span>
-                      </div>
-                      <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)} to {formatDateForIPO(dealData?.offer_date?.data?.to)}</h6>
-                    </>
-                  )}
-
-                </>
-              )}
-            </section>
-          )}
-          <div className="smallcard-section-subcontainer-div">
-
-            {isPrivateLike ? (
-              <>
+              <div className="smallcard-section-subcontainer-div">
                 {dealData?.valuation_in_cr?.status && (
                   <section className="subs top">
                     <section>
@@ -694,108 +579,197 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     </section>
                   )}
                 </section>
-              </>
-            ) : (
-              <>
-                {dealData?.valuation_in_cr?.status && (
-                  <section className="subs top">
-                    <section>
-                      <div>
-                        <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                          <span className="data">{dealData?.valuation_in_cr?.label_name || (isofs ? 'Valuation' : 'Valuation')}</span>
-                          {shouldShowTooltip(dealData?.valuation_in_cr?.tool_tip) && (
-                            <div className="custom-tooltip-wrapper main-other">
-                              <span className="tooltip-icon">
-                                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
-                              </span>
-                              <div className="custom-tooltip-box">{typeof dealData.valuation_in_cr.tool_tip === 'string' ? dealData.valuation_in_cr.tool_tip : dealData.valuation_in_cr.tool_tip?.data}</div>
-                            </div>
-                          )}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Card 1: Offer Start Date (Desktop only) */}
+              {!isMobile && hasFromAndTo && (
+                <section className="subs1-top card-start-date">
+                  <div>
+                    <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
+                      <span className="data">{"Offer Start Date"}</span>
+                      {shouldShowTooltip(dealData?.offer_date?.tool_tip) && (
+                        <div className="custom-tooltip-wrapper">
+                          <span className="tooltip-icon">
+                            <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", marginBottom: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                          </span>
+                          <div className="custom-tooltip-box">{typeof dealData.offer_date.tool_tip === 'string' ? dealData.offer_date.tool_tip : dealData.offer_date.tool_tip?.data}</div>
                         </div>
-                        <span className="valuation-bg-light"><Valuation /></span>
-                      </div>
-                      <span className="offer-day" style={{ color: "#000000" }}>₹{formatNumber(dealData?.valuation_in_cr?.data)} Cr</span>
-                    </section>
+                      )}
+                    </div>
+                    <span className="valuation-bg-light"><OfferDateIcon /></span>
+                  </div>
+                  <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)}</h6>
+                </section>
+              )}
 
-                    {dealData?.revenue_fy25_in_cr?.status && (
-                      <section>
-                        <div>
-                          <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                            <span className="data">{dealData?.revenue_fy25_in_cr?.label_name || "Revenue"}</span>
-                            {shouldShowTooltip(dealData?.revenue_fy25_in_cr?.tool_tip) && (
-                              <div className="custom-tooltip-wrapper">
-                                <span className="tooltip-icon">
-                                  <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
-                                </span>
-                                <div className="custom-tooltip-box">{typeof dealData.revenue_fy25_in_cr.tool_tip === 'string' ? dealData.revenue_fy25_in_cr.tool_tip : dealData.revenue_fy25_in_cr.tool_tip?.data}</div>
+              {/* Card 2: Offer End Date (Desktop only) */}
+              {!isMobile && hasFromAndTo && (
+                <section className="subs1-top card-end-date">
+                  <div>
+                    <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
+                      <span className="data">{"Offer End Date"}</span>
+                      {shouldShowTooltip(dealData?.offer_date?.tool_tip) && (
+                        <div className="custom-tooltip-wrapper">
+                          <span className="tooltip-icon">
+                            <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", marginBottom: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                          </span>
+                          <div className="custom-tooltip-box">{typeof dealData.offer_date.tool_tip === 'string' ? dealData.offer_date.tool_tip : dealData.offer_date.tool_tip?.data}</div>
+                        </div>
+                      )}
+                    </div>
+                    <span className="valuation-bg-light"><OfferDateIcon /></span>
+                  </div>
+                  <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.to)}</h6>
+                </section>
+              )}
+
+              {/* Card 3: Offer Date Range (Mobile only or if single date) */}
+              {(isMobile || !hasFromAndTo) && dealData?.offer_date?.status && (
+                <section className="subs1-top card-range-date">
+                  {isMobile && hasFromAndTo ? (
+                    <div className="ipo-dropdownButton" onClick={() => setOpen(!open)}>
+                      {
+                        dealData?.offer_date?.status && (
+                          <>
+                            <div className="ipo-dropdown">
+                              <div className="label-with-tooltip" style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+                                <span className="data">{"Offer Date"}</span>
+                                {shouldShowTooltip(dealData?.offer_date?.tool_tip) && (
+                                  <div className={`custom-tooltip-wrapper ${isMobile ? "main-other" : ""}`}>
+                                    <span className="tooltip-icon">
+                                      <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginBottom: "17px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                    </span>
+                                    <div className="custom-tooltip-box">{typeof dealData.offer_date.tool_tip === 'string' ? dealData.offer_date.tool_tip : dealData.offer_date.tool_tip?.data}</div>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                          <span className="valuation-bg-light"><RevenueIcon /></span>
-                        </div>
-                        <span className="offer-day" style={{ color: "#000000" }}>₹{formatNumber(dealData?.revenue_fy25_in_cr?.data)} Cr</span>
-                      </section>
-                    )}
-                  </section>
-                )}
-
-                <section className="subs top">
-                  {dealData?.pat_fy25_in_cr?.status && (
-                    <section>
-                      <div>
-                        <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                          <span className="data">{dealData?.pat_fy25_in_cr?.label_name || "PAT"}</span>
-                          {shouldShowTooltip(dealData?.pat_fy25_in_cr?.tool_tip) && (
-                            <div className="custom-tooltip-wrapper main-other">
-                              <span className="tooltip-icon">
-                                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
-                              </span>
-                              <div className="custom-tooltip-box">{typeof dealData.pat_fy25_in_cr.tool_tip === 'string' ? dealData.pat_fy25_in_cr.tool_tip : dealData.pat_fy25_in_cr.tool_tip?.data}</div>
+                              <span className={isPrivateLike ? "valuation-bg" : "valuation-bg-light"}><OfferDateIcon /></span>
                             </div>
-                          )}
-                        </div>
-                        <span className="valuation-bg-light"><PatIcon /></span>
-                      </div>
-                      <span className="offer-day" style={{ color: "#000000" }}>
-                        ₹{formatNumber(dealData?.pat_fy25_in_cr?.data)} Cr
-                      </span>
-                    </section>
-                  )}
-
-                  {/* Non-Private Deal → Issue Size */}
-                  {dealData?.issue_size?.status && (
-                    <section>
+                            <div className="ipo-dropdown">
+                              <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)} to {formatDateForIPO(dealData?.offer_date?.data?.to)}</h6>
+                              {/* <span className="dropDown">{open ? <ChevronUp /> : <ChevronDown />}</span> */}
+                            </div>
+                          </>
+                        )
+                      }
+                    </div>
+                  ) : (
+                    <>
                       <div>
                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                          <span className="data">{dealData?.issue_size?.label_name || "Issue Size"}</span>
-                          {shouldShowTooltip(dealData?.issue_size?.tool_tip) && (
+                          <p>{"Offer Date"}</p>
+                          {shouldShowTooltip(dealData?.offer_date?.tool_tip) && (
                             <div className="custom-tooltip-wrapper">
                               <span className="tooltip-icon">
-                                <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", marginBottom: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
                               </span>
-                              <div className="custom-tooltip-box">{typeof dealData.issue_size.tool_tip === 'string' ? dealData.issue_size.tool_tip : dealData.issue_size.tool_tip?.data}</div>
+                              <div className="custom-tooltip-box">{typeof dealData.offer_date.tool_tip === 'string' ? dealData.offer_date.tool_tip : dealData.offer_date.tool_tip?.data}</div>
                             </div>
                           )}
                         </div>
-                        <span className="valuation-bg-light">
-                          <PeMultiple />
-                        </span>
+                        <span className="valuation-bg-light"><OfferDateIcon /></span>
                       </div>
-
-                      <span className="offer-day" style={{ color: "#000000" }}>
-                        ₹{formatNumber(dealData?.issue_size?.data?.overall)} Cr
-                      </span>
-                    </section>
+                      <h6 className="offer-day">
+                        {hasFromAndTo 
+                          ? `${formatDateForIPO(dealData.offer_date.data.from)} to ${formatDateForIPO(dealData.offer_date.data.to)}` 
+                          : formatDateForIPO(dealData?.offer_date?.data)}
+                      </h6>
+                    </>
                   )}
                 </section>
-              </>
-            )}
+              )}
 
-          </div>
+              {/* Card 4: Valuation */}
+              {dealData?.valuation_in_cr?.status && (
+                <section className="subs1-top card-valuation">
+                  <div>
+                    <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
+                      <span className="data">{"Valuation"}</span>
+                      {shouldShowTooltip(dealData?.valuation_in_cr?.tool_tip) && (
+                        <div className="custom-tooltip-wrapper main-other">
+                          <span className="tooltip-icon">
+                            <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                          </span>
+                          <div className="custom-tooltip-box">{typeof dealData.valuation_in_cr.tool_tip === 'string' ? dealData.valuation_in_cr.tool_tip : dealData.valuation_in_cr.tool_tip?.data}</div>
+                        </div>
+                      )}
+                    </div>
+                    <span className="valuation-bg-light"><Valuation /></span>
+                  </div>
+                  <h6 className="offer-day">₹{formatNumber(dealData?.valuation_in_cr?.data)} Cr</h6>
+                </section>
+              )}
+
+              {/* Card 5: Revenue */}
+              {dealData?.revenue_fy25_in_cr?.status && (
+                <section className="subs1-top card-revenue">
+                  <div>
+                    <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
+                      <span className="data">{"Revenue"}</span>
+                      {shouldShowTooltip(dealData?.revenue_fy25_in_cr?.tool_tip) && (
+                        <div className="custom-tooltip-wrapper">
+                          <span className="tooltip-icon">
+                            <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                          </span>
+                          <div className="custom-tooltip-box">{typeof dealData.revenue_fy25_in_cr.tool_tip === 'string' ? dealData.revenue_fy25_in_cr.tool_tip : dealData.revenue_fy25_in_cr.tool_tip?.data}</div>
+                        </div>
+                      )}
+                    </div>
+                    <span className="valuation-bg-light"><RevenueIcon /></span>
+                  </div>
+                  <h6 className="offer-day">₹{formatNumber(dealData?.revenue_fy25_in_cr?.data)} Cr</h6>
+                </section>
+              )}
+
+              {/* Card 6: PAT */}
+              {dealData?.pat_fy25_in_cr?.status && (
+                <section className="subs1-top card-pat">
+                  <div>
+                    <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
+                      <span className="data">{"PAT"}</span>
+                      {shouldShowTooltip(dealData?.pat_fy25_in_cr?.tool_tip) && (
+                        <div className="custom-tooltip-wrapper main-other">
+                          <span className="tooltip-icon">
+                            <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                          </span>
+                          <div className="custom-tooltip-box">{typeof dealData.pat_fy25_in_cr.tool_tip === 'string' ? dealData.pat_fy25_in_cr.tool_tip : dealData.pat_fy25_in_cr.tool_tip?.data}</div>
+                        </div>
+                      )}
+                    </div>
+                    <span className="valuation-bg-light"><PatIcon /></span>
+                  </div>
+                  <h6 className="offer-day">₹{formatNumber(dealData?.pat_fy25_in_cr?.data)} Cr</h6>
+                </section>
+              )}
+
+              {/* Card 7: Issue Size */}
+              {dealData?.issue_size?.status && (
+                <section className="subs1-top card-issue-size">
+                  <div>
+                    <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
+                      <span className="data">{"Issue Size"}</span>
+                      {shouldShowTooltip(dealData?.issue_size?.tool_tip) && (
+                        <div className="custom-tooltip-wrapper">
+                          <span className="tooltip-icon">
+                            <img src="/toolTippublic.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                          </span>
+                          <div className="custom-tooltip-box">{typeof dealData.issue_size.tool_tip === 'string' ? dealData.issue_size.tool_tip : dealData.issue_size.tool_tip?.data}</div>
+                        </div>
+                      )}
+                    </div>
+                    <span className="valuation-bg-light"><PeMultiple /></span>
+                  </div>
+                  <h6 className="offer-day">₹{formatNumber(dealData?.issue_size?.data?.overall || dealData?.issue_size?.data)} Cr</h6>
+                </section>
+              )}
+            </>
+          )}
         </div>
         {isPrivateLike ?
           <>
-            <section className="main-other">
+            <section className={`main-other ${isBelow920 && !expandedFields ? 'collapsed private-collapsed' : ''}`}>
               {renderField("round_size")}
               {renderField("face_value")}
               {renderField("offer_price")}
@@ -812,12 +786,15 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               {renderField("expecting_listing_date", true)}
               {!isofs && !isccps && !isunlisted && renderField("target_valuation")}
               {renderField("company_website", false, false, true)}
+              {isBelow920 && !expandedFields && (
+                <div className={`ipo-overview-blur-overlay ${isDarkTheme ? 'dark' : ''}`} />
+              )}
             </section>
           </>
 
           :
           <>
-            <section className="main-other">
+            <section className={`main-other ${isBelow920 && !expandedFields ? 'collapsed public-collapsed' : ''}`}>
               {renderField("face_value")}
               {renderField("offer_price")}
               {renderField("lot_size")}
@@ -831,10 +808,26 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               {renderField("roce_fy25_percent")}
               {renderField("price_to_book_ratio")}
               {renderField("debt_to_equity_fy25")}
+              {isBelow920 && dealData?.share_allocation?.status && (
+                <Shares isPrivateDeal={isPrivateLike} isccps={isccps} />
+              )}
               {renderField("company_website", false, false, true)}
+              {isBelow920 && !expandedFields && (
+                <div className={`ipo-overview-blur-overlay ${isDarkTheme ? 'dark' : ''}`} />
+              )}
             </section>
           </>
         }
+
+        {isBelow920 && (
+          <div className={`expand-toggle-btn-wrapper ${isDarkTheme ? "dark" : ""} ${expandedFields ? "expanded" : "collapsed"}`} onClick={() => setExpandedFields(!expandedFields)}>
+            {expandedFields ? (
+              <ChevronsUp className="expand-toggle-icon" strokeWidth={2.5} />
+            ) : (
+              <ChevronsDown className="expand-toggle-icon" strokeWidth={2.5} />
+            )}
+          </div>
+        )}
 
       </section >
     </div >
