@@ -639,7 +639,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                                 {shouldShowTooltip(dealData?.offer_date?.tool_tip) && (
                                   <div className={`custom-tooltip-wrapper ${isMobile ? "main-other" : ""}`}>
                                     <span className="tooltip-icon">
-                                      <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginBottom: "17px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                      <img src={isPrivateLike ? "/tooltip.svg" : "/toolTippublic.svg"} alt="info" style={{ marginBottom: "4px", cursor: "pointer", width: "12px", height: "12px" }} />
                                     </span>
                                     <div className="custom-tooltip-box">{typeof dealData.offer_date.tool_tip === 'string' ? dealData.offer_date.tool_tip : dealData.offer_date.tool_tip?.data}</div>
                                   </div>

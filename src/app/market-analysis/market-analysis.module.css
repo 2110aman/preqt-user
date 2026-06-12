@@ -460,20 +460,20 @@
   color: #0f172a;
   font-size: 13px;
   line-height: 16px;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .prevCell {
   font-weight: 500;
   color: #64748B;
   font-size: 13px;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .changeCell {
   font-weight: 700;
   font-size: 13px;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .changePositive {
@@ -733,13 +733,13 @@
 
   .analysisTable th:nth-child(2),
   .analysisTable td:nth-child(2) {
-    width: 100px;
+    width: 110px;
     min-width: 100px;
   }
 
   .analysisTable th:nth-child(3),
   .analysisTable td:nth-child(3) {
-    width: 104px;
+    width: 110px;
     min-width: 100px;
   }
 

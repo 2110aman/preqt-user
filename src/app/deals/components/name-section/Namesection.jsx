@@ -459,13 +459,13 @@ const Namedetailsection = ({ slug }) => {
 
   useEffect(() => {
     if (searchParams?.get("qna") === "true") {
-      if (isPrivateLike) {
+      if (isDarkTheme) {
         setShowPrivateQna(true);
       } else {
         setShowQnA(true);
       }
     }
-  }, [searchParams, isPrivateLike]);
+  }, [searchParams, isDarkTheme]);
 
   const dealData = dealDetails?.data?.deal_setpData;
 
@@ -855,7 +855,7 @@ const Namedetailsection = ({ slug }) => {
             </div>
 
             {authToken && <button className={`${isDarkTheme ? " private-qna-btn" : "qna-mob-btn"}`}
-              onClick={() => { isPrivateLike ? setShowPrivateQna(true) : setShowQnA(true) }}
+              onClick={() => { isDarkTheme ? setShowPrivateQna(true) : setShowQnA(true) }}
             >
               <>
                 <div className="initialsContainer">
@@ -919,7 +919,7 @@ const Namedetailsection = ({ slug }) => {
           >
             <div className="qnaSlider" onClick={(e) => e.stopPropagation()}>
               <PrivateQuestion
-                onBack={() => setShowQnA(false)}
+                onBack={() => setShowPrivateQna(false)}
                 qaCount={qaCount}
                 replies={replies}
               />
@@ -938,7 +938,7 @@ const Namedetailsection = ({ slug }) => {
               className="qnaSlider"
               onClick={(e) => e.stopPropagation()}
             >
-              <QuestionAnswer qaCount={qaCount} onBack={() => setShowPrivateQna(false)} />
+              <QuestionAnswer qaCount={qaCount} handleQuesAns={() => setShowQnA(false)} />
             </div>
           </div>
         )

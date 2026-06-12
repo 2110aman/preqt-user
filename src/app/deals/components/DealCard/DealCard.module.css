@@ -234,9 +234,9 @@
 }
 
 .listView .companyLogo {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
 }
 
 .companyLogo {
@@ -450,18 +450,18 @@
 /* Tags */
 .tagChips {
     display: flex;
-    width: 300px;
+    /* width: 300px; */
     overflow: hidden;
     flex-wrap: wrap;
     gap: 10px;
-    max-height: 23px;
+    max-height: 28px;
     margin-top: 4PX;
     /* Limits rendering to exactly one row of tags */
     margin-bottom: auto;
 }
 
 .tagChip {
-    padding: 7px 9px 4px 9px;
+    padding: 9px 9px 7px 9px;
     border: 1px solid #EBEBE3;
     border-radius: 8px;
     font-size: 10px;
@@ -1075,7 +1075,7 @@
     }
 
     .tagChips {
-        width: 250px;
+        width: 100%;
         justify-content: flex-end;
     }
 }
@@ -1091,9 +1091,6 @@
         /* max-width: 100% !important; */
     }
 
-    .tagChips {
-        width: 230px;
-    }
 
     .listView .metricsGrid {
         column-gap: 10px;
@@ -1178,8 +1175,9 @@
     }
 
     .listView .companyLogo {
-        width: 24px;
-        height: 24px;
+        width: 36px;
+        height: 36px;
+        margin-top: 0px;
         border-radius: 8px;
     }
 
@@ -1283,7 +1281,7 @@
 
     /* Replace empty QA text with inline tag chips */
     .qaEmpty {
-        display: none !important;
+        /* display: none !important; */
     }
 
     .mobileFooterTags {
@@ -1355,6 +1353,11 @@
     .cardContainer {
         margin: 0 auto !important;
         max-width: 100%;
+        gap:14px;
+    }
+
+    .metricsGrid{
+    row-gap: 14px !important;
     }
 }
 
