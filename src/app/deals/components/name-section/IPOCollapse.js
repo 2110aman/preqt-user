@@ -195,7 +195,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                         )}
 
                     </div>
-                    {!isofs && (
+                    {!isofs && dealData?.issue_size?.status && (
                         <div 
                             onClick={() => setOpen(!open)} 
                             style={{ cursor: "pointer", display: "flex", alignItems: "center" }}
@@ -211,7 +211,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
 
             </div>
 
-            <Collapse in={!isofs && open}>
+            <Collapse in={!isofs && open && dealData?.issue_size?.status}>
                 <div>
                     {dealData?.issue_size?.status && (
                         <Table className={`${styles.ipoCollapsetable} ${isPrivateDeal ? styles.privateTable : ""}`} borderless>
