@@ -47,7 +47,14 @@
 } */
 
 .leftclm {
-    max-width: 28.56vw;
+    width: 100%;
+    max-width: 30vw;
+}
+
+@media (max-width: 1550px) {
+    .leftclm {
+        max-width: 27vw;
+    }
 }
 
 @media (max-width: 1500px) {

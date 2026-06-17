@@ -238,7 +238,7 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
             {/* If on hero section, show the header clearly on top of the teaser container */}
             {!isAllDeals && (
                 <div className={styles.heroHeader}>
-                    <p className={styles.headerTitle} style={{ marginBottom: '0px' }}>Exclusive</p>
+                    <p className={styles.headerTitle} style={{ marginBottom: '0px', paddingBottom: '0px' }}>Exclusive</p>
                     <h2 className={styles.headerTitle}>
                         <span className={styles.privateHighlight}>Private</span> Assets
                     </h2>
