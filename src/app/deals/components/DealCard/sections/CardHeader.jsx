@@ -39,16 +39,16 @@ export default function CardHeader({ deal, layout, isListView }) {
                         {deal.tags[0]}
                     </Badge>
                 )}
-                
+
                 {deal.deal_type?.toLowerCase() === 'public' && (
                     <Badge color="sme" variant="pill">
-                        {deal.tags?.[0] || 'IPO'}
+                        {deal.tags?.[0]}
                     </Badge>
                 )}
 
                 {isPrivateDeal && (
                     <Badge color="preIpoSme" variant="pill">
-                        {deal.stage || 'Pre IPO- SME'}
+                        {deal.stage}
                     </Badge>
                 )}
             </div>
