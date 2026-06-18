@@ -2,80 +2,102 @@ import { NextResponse } from "next/server";
 
 export function middleware(request) {
   const { pathname, origin } = request.nextUrl;
-  const token = request.cookies.get("accessToken")?.value;
-  const isAuthenticated = Boolean(token);
-  const verifyOtp = request.cookies.get("verifyOtp")?.value == "true"; 
 
-  const securePaths = [
-    // "/", comment
-    "/account",
-    "/account/:path*",
-    "/private-deals",
-    "/private-deals/:path*",
-    "/transaction-page",
-    "/transaction-page/:path*",
-    "/events",
-  ];
-  // Debug authentication status
+  // 1. Detect if this is a staging environment using the host header or env variables
+  const host = request.headers.get("host") || "";
+  const isStaging = 
+    host.includes("staging") || 
+    host.includes("vercel.app") || 
+    process.env.NEXT_PUBLIC_SITE_URL?.includes("apistaging") ||
+    process.env.NEXT_PUBLIC_USER_BASE?.includes("apistaging") ||
+    process.env.NEXT_PUBLIC_USER_BASE?.includes("staging");
 
-  // Public paths (always accessible)
-  const publicPaths = [
+  // 2. Identify if the current path requires the legacy authentication check
+  const isTargetedAuthRoute = [
     "/sign-in",
     "/signup",
-    "/forget-password",
     "/reset-password",
-  ];
+    "/forget-password",
+    "/account",
+    "/deals",
+    "/private-deals",
+    "/transaction-page",
+    "/events",
+    "/otp"
+  ].some(prefix => pathname === prefix || pathname.startsWith(prefix + "/"));
 
-  if (!verifyOtp && pathname == "/otp") {
-    return NextResponse.redirect(new URL("/", origin));
-  }
-  if (
-    isAuthenticated &&
-    (pathname === "/sign-in" ||
-      pathname === "/signup" ||
-      pathname.startsWith("/forget-password") ||
-      pathname.startsWith("/reset-password"))
-  ) {
-    return NextResponse.redirect(new URL("/deals", origin));
-  }
+  if (isTargetedAuthRoute) {
+    const token = request.cookies.get("accessToken")?.value;
+    const isAuthenticated = Boolean(token);
+    const verifyOtp = request.cookies.get("verifyOtp")?.value == "true"; 
 
-  if (
-    isAuthenticated &&
-    (pathname === "/")
-  ) {
-    return NextResponse.redirect(new URL("/deals", origin));
-  }
+    const securePaths = [
+      "/account",
+      "/account/:path*",
+      "/private-deals",
+      "/private-deals/:path*",
+      "/transaction-page",
+      "/transaction-page/:path*",
+      "/events",
+    ];
 
-
-  // Rule 2: If NOT authenticated and trying to access secure paths → redirect to /signin
-  const isAccessingSecurePath = securePaths.some((path) => {
-    if (path.endsWith("/:path*")) {
-      const base = path.replace("/:path*", "");
-      return pathname.startsWith(base);
+    if (!verifyOtp && pathname == "/otp") {
+      const response = NextResponse.redirect(new URL("/", origin));
+      if (isStaging) {
+        response.headers.set("X-Robots-Tag", "noindex, nofollow");
+      }
+      return response;
     }
-    return pathname === path;
-  });
 
-  if (!isAuthenticated && isAccessingSecurePath) {
-    return NextResponse.redirect(new URL("/", origin));
+    if (
+      isAuthenticated &&
+      (pathname === "/sign-in" ||
+        pathname === "/signup" ||
+        pathname.startsWith("/forget-password") ||
+        pathname.startsWith("/reset-password"))
+    ) {
+      const response = NextResponse.redirect(new URL("/deals", origin));
+      if (isStaging) {
+        response.headers.set("X-Robots-Tag", "noindex, nofollow");
+      }
+      return response;
+    }
+
+    // Rule 2: If NOT authenticated and trying to access secure paths → redirect to /signin
+    const isAccessingSecurePath = securePaths.some((path) => {
+      if (path.endsWith("/:path*")) {
+        const base = path.replace("/:path*", "");
+        return pathname.startsWith(base);
+      }
+      return pathname === path;
+    });
+
+    if (!isAuthenticated && isAccessingSecurePath) {
+      const response = NextResponse.redirect(new URL("/", origin));
+      if (isStaging) {
+        response.headers.set("X-Robots-Tag", "noindex, nofollow");
+      }
+      return response;
+    }
   }
 
-  // Otherwise → allow
-  return NextResponse.next();
+  // 3. Set X-Robots-Tag header on staging requests
+  const response = NextResponse.next();
+  if (isStaging) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+  return response;
 }
 
 export const config = {
   matcher: [
-    // "/",
-    "/sign-in",
-    "/signup",
-    "/reset-password/:path*",
-    "/forget-password",
-    "/account/:path*",
-    "/deals/:path*",
-    "/private-deals/:path*",
-    "/transaction-page/:path*",
-    "/events",
-    "/otp"
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
