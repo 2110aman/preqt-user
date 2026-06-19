@@ -636,7 +636,7 @@ function DealsTalkContent() {
                                     </article>
                                     <article className={styles.card2Stat}>
                                         <p className={styles.card2StatHeading}>Expected listing</p>
-                                        <p className={styles.card2StatValue}> {formatDate(deal?.listing_timeline)}</p>
+                                        <p className={styles.card2StatValue}> {formatDate(deal?.listing_timeline) || "TBD"}</p>
                                     </article>
                                     <article className={styles.card2Stat}>
                                         <p className={styles.card2StatHeading}>CAGR (3Yrs)</p>

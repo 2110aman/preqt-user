@@ -899,6 +899,25 @@
   padding: 0 !important;
 }
 
+.observations-html-content h1 {
+  font-size: 18px;
+}
+
+.observations-html-content h2 {
+  font-size: 14px;
+}
+
+.observations-html-content p {
+  font-size: 13px;
+}
+
+.observations-html-content li,
+.observations-html-content ul,
+.observations-html-content ol {
+  margin-bottom: 10px;
+}
+
+
 .observations-title {
   color: var(--Gray-800, #1F2937);
   font-size: 14px;
