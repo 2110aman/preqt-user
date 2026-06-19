@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./ai-ipo-overview.css";
 import Image from "next/image";
 import { OfferDateIcon, PatIcon, PeMultiple, RevenueIcon, Valuation } from "../../name-section/svgicon";
@@ -25,6 +25,27 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
   // OFS and CCPS deals behave exactly like private deals
   const isPrivateLike = isPrivateDeal || isofs || isccps || isunlisted;
   const isDarkTheme = isPrivateDeal || isofs || isccps; // Excludes unlisted
+  
+  const contentRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState("600px");
+
+  useEffect(() => {
+    if (contentRef.current) {
+      const measure = () => {
+        if (contentRef.current) {
+          setContentHeight(`${contentRef.current.scrollHeight}px`);
+        }
+      };
+      measure();
+      const timer = setTimeout(measure, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [dealData, isBelow920]);
+
+  const collapsedHeight = isPrivateLike ? "165px" : "130px";
+  const inlineMaxHeight = isBelow920
+    ? (expandedFields ? contentHeight : collapsedHeight)
+    : "none";
   
   const hasFromAndTo = dealData?.offer_date?.status &&
     dealData?.offer_date?.data &&
@@ -177,6 +198,10 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
   const renderField = (fieldKey, isDate = false, isCurrency = false, isLink = false) => {
     const field = dealData?.[fieldKey];
     const isMappedAndActive = field && field.status;
+
+    if (!isMappedAndActive) {
+      return null;
+    }
 
     const staticLabel = fieldLabelMap[fieldKey];
     // For CCPS/OFS/Private deals, prefer our static maps as labels coming from API might actually be values
@@ -421,7 +446,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
         <div className={`smallcard-section-subcontainer ${!isPrivateLike ? "public-grid" : ""}`}>
           {isPrivateLike ? (
             <>
-              {dealData?.listing_timeline?.status && (
+              {dealData?.listing_timeline?.status && dealData?.listing_timeline?.data && (
                 <section className="subs1-topp" style={{ backgroundColor: isDarkTheme ? "#1D1D1D" : "#F3F4F6" }}>
                   <div className="label-with-tooltip">
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -469,7 +494,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 </section>
               )}
 
-              <div className="smallcard-section-subcontainer-div">
+              <div className="smallcard-section-subcontainer-div" style={!(dealData?.listing_timeline?.status && dealData?.listing_timeline?.data) ? { width: "100%" } : {}}>
                 {dealData?.valuation_in_cr?.status && (
                   <section className="subs top">
                     <section>
@@ -769,7 +794,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
         </div>
         {isPrivateLike ?
           <>
-            <section className={`main-other ${isBelow920 && !expandedFields ? 'collapsed private-collapsed' : ''}`}>
+            <section ref={contentRef} className={`main-other ${isBelow920 && !expandedFields ? 'collapsed private-collapsed' : ''}`} style={isBelow920 && inlineMaxHeight !== "none" ? { maxHeight: inlineMaxHeight } : {}}>
               {renderField("round_size")}
               {renderField("face_value")}
               {renderField("offer_price")}
@@ -786,7 +811,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               {renderField("expecting_listing_date", true)}
               {!isofs && !isccps && !isunlisted && renderField("target_valuation")}
               {renderField("company_website", false, false, true)}
-              {isBelow920 && !expandedFields && (
+              {isBelow920 && (
                 <div className={`ipo-overview-blur-overlay ${isDarkTheme ? 'dark' : ''}`} />
               )}
             </section>
@@ -794,7 +819,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
           :
           <>
-            <section className={`main-other ${isBelow920 && !expandedFields ? 'collapsed public-collapsed' : ''}`}>
+            <section ref={contentRef} className={`main-other ${isBelow920 && !expandedFields ? 'collapsed public-collapsed' : ''}`} style={isBelow920 && inlineMaxHeight !== "none" ? { maxHeight: inlineMaxHeight } : {}}>
               {renderField("face_value")}
               {renderField("offer_price")}
               {renderField("lot_size")}
@@ -812,7 +837,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 <Shares isPrivateDeal={isPrivateLike} isccps={isccps} />
               )}
               {renderField("company_website", false, false, true)}
-              {isBelow920 && !expandedFields && (
+              {isBelow920 && (
                 <div className={`ipo-overview-blur-overlay ${isDarkTheme ? 'dark' : ''}`} />
               )}
             </section>

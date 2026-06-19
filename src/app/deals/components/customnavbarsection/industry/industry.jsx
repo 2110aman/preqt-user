@@ -4,6 +4,26 @@ import styles from "./industry.module.css";
 import { useDealStore } from "@/store/dealStore";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+// ✅ Reusable SafeImage component
+const SafeImage = ({ src, alt, className, style }) => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  if (!isVisible || !src) return null;
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={(e) => {
+        e.target.onerror = null;
+        setIsVisible(false);
+      }}
+    />
+  );
+};
+
 // 🔹 UNIVERSAL SAFE DATA EXTRACTOR
 const getValue = (value) => {
   // ✅ Case 1 — object with {status,data}
@@ -74,6 +94,50 @@ const Industry = ({ isPrivateDeal }) => {
   const dealDetails = useDealStore((state) => state.dealDetails);
   const overview = dealDetails?.data?.industry_overview ?? {};
   const isOfs = dealDetails?.data?.deal_type === "ofs";
+  const companyName = dealDetails?.data?.deal_setpData?.company_name || "Company";
+
+  const renderFiles = (files) => {
+    if (!files || !Array.isArray(files) || files.length === 0) return null;
+
+    return (
+      <div className={styles.clients} style={{ marginTop: "16px", marginBottom: "16px" }}>
+        {files.map((file, idx) => {
+          const isImage = file?.mimeType?.startsWith("image/");
+          const isVideo = file?.mimeType?.startsWith("video/");
+          
+          const cleanedPath = file?.path ? file.path.replace(/^\/+/, "").replace(/^public\//, "") : "";
+          const baseUrl = process.env.NEXT_PUBLIC_USER_BASE || "";
+          const baseAdmin = baseUrl.endsWith("/") ? `${baseUrl}admin` : `${baseUrl}/admin`;
+          const normalizedPath = cleanedPath.startsWith("/") ? cleanedPath : `/${cleanedPath}`;
+          const fileUrl = `${baseAdmin}${normalizedPath}`;
+
+          const altText = `${file.fileName || "Media"} - ${companyName}`;
+
+          return (
+            <div key={idx} className={styles.card} style={{ height: "150px" }}>
+              <div className={styles.imageWrapper}>
+                {isImage ? (
+                  <SafeImage
+                    src={fileUrl}
+                    alt={altText}
+                    className={styles.cardImage}
+                  />
+                ) : isVideo ? (
+                  <video
+                    src={fileUrl}
+                    controls
+                    className={styles.cardImage}
+                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                  />
+                ) : null}
+                <div className={styles.overlay}></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   // ----- INDUSTRY DRIVERS -----
   const industryDriver = getValue(overview?.industry_drivers?.data) || [];
@@ -161,6 +225,7 @@ const Industry = ({ isPrivateDeal }) => {
                         className={styles.p}
                         dangerouslySetInnerHTML={{ __html: getValue(item.description) }}
                       />
+                      {renderFiles(item.files)}
                     </div>
                   ))
                 ) : (
@@ -178,17 +243,22 @@ const Industry = ({ isPrivateDeal }) => {
         <>
           <section className={styles.growthSection}>
             <h2 className={styles.growthHeading} onClick={() => setShowPolicy(!showPolicy)}>
-              {overview?.government_policy_support?.label_name}
+              {overview?.government_policy_support?.label_name || "Government Policy Support"}
               <div>{showPolicy ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</div>
             </h2>
 
             {showPolicy && (
               <div>
-                {governmentPolicy ? (
-                  <div
-                    className={styles.growthItem}
-                    dangerouslySetInnerHTML={{ __html: governmentPolicy }}
-                  />
+                {(governmentPolicy && governmentPolicy !== "-") || (overview?.government_policy_support?.files && overview.government_policy_support.files.length > 0) ? (
+                  <div className={styles.growthItem}>
+                    {governmentPolicy && governmentPolicy !== "-" && (
+                      <div
+                        className={styles.p}
+                        dangerouslySetInnerHTML={{ __html: governmentPolicy }}
+                      />
+                    )}
+                    {renderFiles(overview?.government_policy_support?.files)}
+                  </div>
                 ) : (
                   <p className={styles.noData}>No data available</p>
                 )}

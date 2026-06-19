@@ -18,11 +18,13 @@ const PeerComparison = ({ isPrivateDeal }) => {
   const dealStepData = dealDetails?.data?.deal_setpData;
   const peerComparison = dealOverview?.peer_comparison || dealStepData?.peer_comparison;
 
-  if (!peerComparison?.status || !peerComparison?.data || peerComparison.data.length === 0) {
+  const companies = (peerComparison?.data || []).filter(
+    (company) => company?.company_name?.status === true
+  );
+
+  if (!peerComparison?.status || companies.length === 0) {
     return null;
   }
-
-  const companies = peerComparison.data;
   const themeClass = isPrivateDeal ? styles.dark : styles.light;
 
   const formatNumber = (value) => {
@@ -50,6 +52,10 @@ const PeerComparison = ({ isPrivateDeal }) => {
     { label: "P/E", key: "pe_ratio", format: (v) => `${v}x` },
     { label: "EPS", key: "eps", format: (v) => `₹${formatNumber(v)}` },
   ];
+
+  const activeMetrics = metricsConfig.filter((metric) =>
+    companies.some((company) => company[metric.key]?.status === true)
+  );
 
   const getLogoUrl = (logoData) => {
     const path = logoData?.data?.[0]?.path;
@@ -104,12 +110,12 @@ const PeerComparison = ({ isPrivateDeal }) => {
             </tr>
           </thead>
           <tbody>
-            {metricsConfig.map((metric, idx) => (
+            {activeMetrics.map((metric, idx) => (
               <tr key={idx}>
                 <td className={styles.metricCell}>{metric.label}</td>
                 {companies.map((company, i) => {
                   const field = company[metric.key];
-                  const value = field?.status ? field.data : "-";
+                  const value = (field?.status && field.data !== null && field.data !== undefined && field.data !== "") ? field.data : "-";
                   return (
                     <td key={i} className={styles.dataCell}>
                       {value !== "-" ? metric.format(value) : "-"}

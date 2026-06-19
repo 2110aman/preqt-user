@@ -132,6 +132,65 @@
   width: 100%;
 }
 
+.dropdown-body .bg-content {
+  color: var(--Gray-500, #6B7280);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  margin-bottom: 16px;
+}
+
+.dropdown-body .bg-content p {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.dropdown-body .bg-content h1,
+.dropdown-body .bg-content h2,
+.dropdown-body .bg-content h3,
+.dropdown-body .bg-content h4,
+.dropdown-body .bg-content h5,
+.dropdown-body .bg-content h6 {
+  color: var(--Gray-800, #1F2937);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.dropdown-body .bg-content ol,
+.dropdown-body .bg-content ul {
+  padding-left: 20px;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.dropdown-body .bg-content ol {
+  list-style-type: decimal;
+}
+
+.dropdown-body .bg-content ul {
+  list-style-type: disc;
+}
+
+.dropdown-body .bg-content li {
+  margin-bottom: 4px;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.dropdown-body .bg-content li p {
+  margin-bottom: 0;
+}
+
 
 /* =============================================================================Private deal css   ============================================================ */
 
@@ -149,6 +208,23 @@
 
 .private-bod-section .bg-head {
   color: #FFF;
+}
+
+.private-bod-section .dropdown-body .bg-content {
+  color: #D1D5DB;
+}
+
+.private-bod-section .dropdown-body .bg-content p {
+  color: inherit;
+}
+
+.private-bod-section .dropdown-body .bg-content h1,
+.private-bod-section .dropdown-body .bg-content h2,
+.private-bod-section .dropdown-body .bg-content h3,
+.private-bod-section .dropdown-body .bg-content h4,
+.private-bod-section .dropdown-body .bg-content h5,
+.private-bod-section .dropdown-body .bg-content h6 {
+  color: #FFFFFF;
 }
 
 @media (max-width:480px) {

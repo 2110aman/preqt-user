@@ -16,6 +16,7 @@ import GetInvite from "./GetInvite";
 const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, limit, qaCount, replies, isccps, authToken, isShowInterest, fetchDealDetails }) => {
 
   const isunlisted = dealDetails?.deal_type === "unlisted";
+  const isMinInvestmentStatusFalse = isunlisted && dealDetails?.deal_setpData?.min_investment?.status === false;
   const isPrivateLike = (isPrivateDeal || isccps) && !isunlisted;
   const isDarkTheme = (isPrivateDeal || isccps) && !isunlisted;
   console.log("The Details i got here", dealDetails);
@@ -180,85 +181,87 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
     <>
       {/* Minimum Investment */}
 
-      {isShowInterest == false ?
-        (
-          <>
-            <div className={styles.minInvestment}>
-              <div className={styles.div}>
-                <p>Minimum Investment</p>
-                <span>
-                  ₹{formatCommaseparated(pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
-                </span>
+      {!isMinInvestmentStatusFalse && (
+        isShowInterest == false ?
+          (
+            <>
+              <div className={styles.minInvestment}>
+                <div className={styles.div}>
+                  <p>Minimum Investment</p>
+                  <span>
+                    ₹{formatCommaseparated(pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
+                  </span>
+                </div>
+                {isDarkTheme ? (
+                  <img src="/assets/pictures/private-calculator-logo.svg" alt="private-calculator-logo" />
+                ) : (
+                  <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="30" height="30" rx="15" fill="#B59131" />
+                    <path d="M14.25 15H15.75C16.1478 15 16.5294 14.842 16.8107 14.5607C17.092 14.2794 17.25 13.8978 17.25 13.5C17.25 13.1022 17.092 12.7206 16.8107 12.4393C16.5294 12.158 16.1478 12 15.75 12H13.5C13.05 12 12.675 12.15 12.45 12.45L8.25 16.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M11.25 19.4997L12.45 18.4497C12.675 18.1497 13.05 17.9997 13.5 17.9997H16.5C17.325 17.9997 18.075 17.6997 18.6 17.0997L22.05 13.7997C22.3394 13.5262 22.5083 13.1489 22.5196 12.7509C22.5308 12.3528 22.3835 11.9666 22.11 11.6772C21.8365 11.3878 21.4592 11.2189 21.0612 11.2076C20.6631 11.1964 20.2769 11.3437 19.9875 11.6172L16.8375 14.5422" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7.5 15.75L12 20.25" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
               </div>
-              {isDarkTheme ? (
-                <img src="/assets/pictures/private-calculator-logo.svg" alt="private-calculator-logo" />
-              ) : (
-                <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="30" height="30" rx="15" fill="#B59131" />
-                  <path d="M14.25 15H15.75C16.1478 15 16.5294 14.842 16.8107 14.5607C17.092 14.2794 17.25 13.8978 17.25 13.5C17.25 13.1022 17.092 12.7206 16.8107 12.4393C16.5294 12.158 16.1478 12 15.75 12H13.5C13.05 12 12.675 12.15 12.45 12.45L8.25 16.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M11.25 19.4997L12.45 18.4497C12.675 18.1497 13.05 17.9997 13.5 17.9997H16.5C17.325 17.9997 18.075 17.6997 18.6 17.0997L22.05 13.7997C22.3394 13.5262 22.5083 13.1489 22.5196 12.7509C22.5308 12.3528 22.3835 11.9666 22.11 11.6772C21.8365 11.3878 21.4592 11.2189 21.0612 11.2076C20.6631 11.1964 20.2769 11.3437 19.9875 11.6172L16.8375 14.5422" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M7.5 15.75L12 20.25" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </div>
 
-            {/* Shares Lot Section */}
-            <div className={styles.lotContainer}>
-              <p>
-                Shares Lot {sharesPerLot} X {lots}
-              </p>
-              <div className={styles.counter}>
-                <button onClick={handleDecrement} className={styles.btn}>
-                  <CircleMinus />
-                </button>
-                <input
-                  className={styles.valueInput}
-                  value={lots}
-                  onChange={handleLotsChange}
-                  onBlur={handleLotsBlur}
-                  inputMode="numeric"
-                  min={minLots}
-                  max={maxLots}
-                />
-                <button onClick={handleIncrement} className={styles.btn}>
-                  <CirclePlus />
-                </button>
+              {/* Shares Lot Section */}
+              <div className={styles.lotContainer}>
+                <p>
+                  Shares Lot {sharesPerLot} X {lots}
+                </p>
+                <div className={styles.counter}>
+                  <button onClick={handleDecrement} className={styles.btn}>
+                    <CircleMinus />
+                  </button>
+                  <input
+                    className={styles.valueInput}
+                    value={lots}
+                    onChange={handleLotsChange}
+                    onBlur={handleLotsBlur}
+                    inputMode="numeric"
+                    min={minLots}
+                    max={maxLots}
+                  />
+                  <button onClick={handleIncrement} className={styles.btn}>
+                    <CirclePlus />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Investment amount */}
-            <div className={styles.amount}>
-              <p>Investment amount </p>
-              <h2>₹{((lots * pricePerLot) / minLots).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</h2>
-            </div>
+              {/* Investment amount */}
+              <div className={styles.amount}>
+                <p>Investment amount </p>
+                <h2>₹{((lots * pricePerLot) / minLots).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</h2>
+              </div>
 
-            <button
-              className={styles.showBtn}
-              onClick={() => {
-                setShowSlider(false);
-                if (lots < minLots) {
-                  showErrorToast(`Minimum lot should be ${minLots}.`);
-                  return;
-                }
-                if (!isOfs && !isunlisted && lots > maxLots) {
-                  if (limit && !isNaN(limit) && limit > 0) {
-                    showErrorToast(`You can invest up to ₹${limit.toLocaleString("en-IN")} only.`);
+              <button
+                className={styles.showBtn}
+                onClick={() => {
+                  setShowSlider(false);
+                  if (lots < minLots) {
+                    showErrorToast(`Minimum lot should be ${minLots}.`);
+                    return;
                   }
-                  return;
-                }
-                if (isOfs || isunlisted || lots <= maxLots) {
-                  setShowInterestModal(true);
-                }
-              }}
-              style={{ border: "unset" }}
-            >
-              Show Interest
-            </button>
-          </>
-        ) :
-        (
-          <Link href={`/account/transation?id=${dealDetails?.user_interest?.transaction_id}`} className={styles.transactionBtn}> Transaction</Link>
-        )}
+                  if (!isOfs && !isunlisted && lots > maxLots) {
+                    if (limit && !isNaN(limit) && limit > 0) {
+                      showErrorToast(`You can invest up to ₹${limit.toLocaleString("en-IN")} only.`);
+                    }
+                    return;
+                  }
+                  if (isOfs || isunlisted || lots <= maxLots) {
+                    setShowInterestModal(true);
+                  }
+                }}
+                style={{ border: "unset" }}
+              >
+                Show Interest
+              </button>
+            </>
+          ) :
+          (
+            <Link href={`/account/transation?id=${dealDetails?.user_interest?.transaction_id}`} className={styles.transactionBtn}> Transaction</Link>
+          )
+      )}
       {/* Optional Ask AI button only when chatbot is supported */}
       {!isMobile && dealDetails?.chat_bot_supported && <button
         className={styles.askAiButton}
@@ -365,7 +368,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
       {authToken && isMobile && (
         <>
           {/* FIXED BOTTOM SHOW INTEREST BUTTON */}
-          {isPrivateDeal && (
+          {isPrivateDeal && !isMinInvestmentStatusFalse && (
             <div className={`${styles.fixedBottomBtn} ${isDarkTheme ? "" : styles.lightCard}`}>
               <button onClick={() => setShowSlider(true)}>Show Interest</button>
             </div>

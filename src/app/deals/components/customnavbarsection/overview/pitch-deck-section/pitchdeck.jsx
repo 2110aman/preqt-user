@@ -49,6 +49,8 @@ const Pitchdeck = ({ isPrivateDeal, pdfUrl }) => {
   const ipoOpenDate =
     dealDetails?.data?.deal_setpData?.ipo_timeline?.data?.ipo_open_date;
 
+  const isPdf = resolvedPdfUrl?.toLowerCase().split('?')[0].endsWith('.pdf');
+  const showFallback = imgError || isPdf;
 
   const formattedDate = ipoOpenDate ? new Date(ipoOpenDate).toLocaleDateString("en-US", {
     month: "long",
@@ -70,7 +72,7 @@ const Pitchdeck = ({ isPrivateDeal, pdfUrl }) => {
     <section className="pitch-deck">
       <div className="pitch-deck-header">
         <h4>Pitch Deck </h4>
-        <a href={pdfUrl}
+        <a href={resolvedPdfUrl}
           target="_blank"
           rel="noopener noreferrer"
           style={{ textDecoration: "none" }}>
@@ -98,7 +100,7 @@ const Pitchdeck = ({ isPrivateDeal, pdfUrl }) => {
 
       <div className="image-container">
         {/* ✅ Pitch deck image */}
-        {!imgError ? (
+        {!showFallback ? (
           <img src={imageSrc || null} alt="Pitch Deck" onError={() => setImgError(true)} />
         ) : (
           <div className="fallback-container">
@@ -147,7 +149,7 @@ const Pitchdeck = ({ isPrivateDeal, pdfUrl }) => {
         {/* ✅ Overlay with open button */}
         <div className="overlay">
           <a
-            href={pdfUrl}
+            href={resolvedPdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             style={{ textDecoration: "none" }}

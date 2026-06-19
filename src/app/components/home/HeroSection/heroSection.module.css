@@ -40,14 +40,15 @@
     gap: 42px;
 }
 
-/* .rightclm {
-    max-width: 68.75vw;
-    min-width: 68.75vw;
+.rightclm {
+    max-width: 70vw;
+    /* min-width: 68.75vw; */
     ;
-} */
+}
 
 .leftclm {
     width: 100%;
+    margin-left: auto;
     max-width: 30vw;
 }
 

@@ -44,59 +44,61 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
             <div
                 className={styles.ipocollapseBtn}
             >
-                <div className={styles.ipocollapseleft}>
-                    <small className={styles.smallText}>
-                        {isccps && dealData?.price_per_ccps?.status
-                            ? (dealData?.price_per_ccps?.label_name || "Price per CCPS")
-                            : (dealData?.issue_price_per_share?.label_name || "Issue Price")
-                        }
-                        {shouldShowTooltip(isccps && dealData?.price_per_ccps?.status ? dealData?.price_per_ccps?.tool_tip : dealData?.issue_price_per_share?.tool_tip) && (
-                            <OverlayTrigger
-                                placement="top-start"
-                                container={document.body}
-                                delay={{ show: 250, hide: 400 }}
-                                overlay={renderTooltip(isccps && dealData?.price_per_ccps?.status ? dealData?.price_per_ccps?.tool_tip : dealData.issue_price_per_share.tool_tip)}
-                            >
-                                <img src={isPrivateDeal ? "/tooltip.svg" : "/toolTippublic.svg"} alt="tip" className={styles.tooltipIcon} />
-                            </OverlayTrigger>
-                        )}
-                    </small>
+                {(dealData?.issue_price_per_share?.status || dealData?.price_per_ccps?.status || dealData?.per_share_price?.status) && (
+                    <div className={styles.ipocollapseleft}>
+                        <small className={styles.smallText}>
+                            {isccps && dealData?.price_per_ccps?.status
+                                ? (dealData?.price_per_ccps?.label_name || "Price per CCPS")
+                                : (dealData?.issue_price_per_share?.label_name || "Issue Price")
+                            }
+                            {shouldShowTooltip(isccps && dealData?.price_per_ccps?.status ? dealData?.price_per_ccps?.tool_tip : dealData?.issue_price_per_share?.tool_tip) && (
+                                <OverlayTrigger
+                                    placement="top-start"
+                                    container={document.body}
+                                    delay={{ show: 250, hide: 400 }}
+                                    overlay={renderTooltip(isccps && dealData?.price_per_ccps?.status ? dealData?.price_per_ccps?.tool_tip : dealData.issue_price_per_share.tool_tip)}
+                                >
+                                    <img src={isPrivateDeal ? "/tooltip.svg" : "/toolTippublic.svg"} alt="tip" className={styles.tooltipIcon} />
+                                </OverlayTrigger>
+                            )}
+                        </small>
 
-                    {dealData?.issue_price_per_share?.status ? (
-                        <h5 className={styles.largeText}>
-                            {dealData.issue_price_per_share.data?.from === 0 && dealData.issue_price_per_share.data?.to === 0 ? (
-                                "TBD"
-                            ) : (
-                                <>
-                                    ₹{Number(dealData.issue_price_per_share.data?.from || 0).toFixed(1)} to ₹{Number(dealData.issue_price_per_share.data?.to || 0).toFixed(1)}
-                                </>
-                            )}
-                        </h5>
-                    ) : isPrivateDeal && dealData?.price_per_ccps?.status ? (
-                        <h5 className={styles.largeText}>
-                            {isccps && dealData?.price_per_ccps?.data === 0 ? (
-                                "TBD"
-                            ) : (
-                                <>
-                                    ₹{formatNumber(dealData?.price_per_ccps?.data)}
-                                    <small className={styles.smll}> per CCPS</small>
-                                </>
-                            )}
-                        </h5>
-                    ) : (
-                        dealData?.per_share_price?.status && (
+                        {dealData?.issue_price_per_share?.status ? (
                             <h5 className={styles.largeText}>
-                                {dealData?.per_share_price?.data === "0" ? (
+                                {dealData.issue_price_per_share.data?.from === 0 && dealData.issue_price_per_share.data?.to === 0 ? (
                                     "TBD"
                                 ) : (
                                     <>
-                                        ₹{dealData?.per_share_price?.data}
+                                        ₹{Number(dealData.issue_price_per_share.data?.from || 0).toFixed(1)} to ₹{Number(dealData.issue_price_per_share.data?.to || 0).toFixed(1)}
                                     </>
                                 )}
                             </h5>
-                        )
-                    )}
-                </div>
+                        ) : isPrivateDeal && dealData?.price_per_ccps?.status ? (
+                            <h5 className={styles.largeText}>
+                                {isccps && dealData?.price_per_ccps?.data === 0 ? (
+                                    "TBD"
+                                ) : (
+                                    <>
+                                        ₹{formatNumber(dealData?.price_per_ccps?.data)}
+                                        <small className={styles.smll}> per CCPS</small>
+                                    </>
+                                )}
+                            </h5>
+                        ) : (
+                            dealData?.per_share_price?.status && (
+                                <h5 className={styles.largeText}>
+                                    {dealData?.per_share_price?.data === "0" ? (
+                                        "TBD"
+                                    ) : (
+                                        <>
+                                            ₹{dealData?.per_share_price?.data}
+                                        </>
+                                    )}
+                                </h5>
+                            )
+                        )}
+                    </div>
+                )}
 
                 {!isPrivateDeal && !isUnlisted && (
                     <>
@@ -172,29 +174,28 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                 )}
 
                 <div className={styles.ipocollapseright}>
-                    <div className={styles.ipocollapserightInner}>
-                        <small className={styles.smallText}>
-                            {dealData?.lot_size?.label_name || "Lot Size"}
-                            {shouldShowTooltip(dealData?.lot_size?.tool_tip) && (
-                                <OverlayTrigger
-                                    placement={isSmallScreen ? "top-start" : "top-end"}
-                                    container={document.body}
-                                    delay={{ show: 250, hide: 400 }}
-                                    overlay={renderTooltip(dealData.lot_size.tool_tip)}
-                                >
-                                    <img src={isPrivateDeal ? "/tooltip.svg" : "/toolTippublic.svg"} alt="tip" className={styles.tooltipIcon} />
-                                </OverlayTrigger>
-                            )}
-                        </small>
-                        {dealData?.lot_size?.status && (
+                    {dealData?.lot_size?.status && (
+                        <div className={styles.ipocollapserightInner}>
+                            <small className={styles.smallText}>
+                                {dealData?.lot_size?.label_name || "Lot Size"}
+                                {shouldShowTooltip(dealData?.lot_size?.tool_tip) && (
+                                    <OverlayTrigger
+                                        placement={isSmallScreen ? "top-start" : "top-end"}
+                                        container={document.body}
+                                        delay={{ show: 250, hide: 400 }}
+                                        overlay={renderTooltip(dealData.lot_size.tool_tip)}
+                                    >
+                                        <img src={isPrivateDeal ? "/tooltip.svg" : "/toolTippublic.svg"} alt="tip" className={styles.tooltipIcon} />
+                                    </OverlayTrigger>
+                                )}
+                            </small>
                             <h5 className={styles.largeText}>
                                 {formatNumber(dealData?.lot_size?.data) == 0
                                     ? "TBD"
                                     : `${formatNumber(dealData?.lot_size?.data)} Shares`}
                             </h5>
-                        )}
-
-                    </div>
+                        </div>
+                    )}
                     {!isofs && dealData?.issue_size?.status && (
                         <div 
                             onClick={() => setOpen(!open)} 

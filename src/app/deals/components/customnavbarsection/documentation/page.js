@@ -31,7 +31,7 @@ export default function Documentation({ isPrivateDeal }) {
         if (Array.isArray(doc.data) && doc.data.length > 0) {
           docsList.push({ ...doc.data[0], type: doc.data[0].type || "ipo-doc" });
         } else {
-          docsList.push(doc);
+          docsList.push({ ...doc, type: doc.type || "ipo-doc" });
         }
       }
 
@@ -41,7 +41,7 @@ export default function Documentation({ isPrivateDeal }) {
         if (Array.isArray(doc.data) && doc.data.length > 0) {
           docsList.push({ ...doc.data[0], type: doc.data[0].type || "pitch-deck" });
         } else {
-          docsList.push(doc);
+          docsList.push({ ...doc, type: doc.type || "pitch-deck" });
         }
       }
 
@@ -85,11 +85,15 @@ export default function Documentation({ isPrivateDeal }) {
   const documents = getDocumentsFromAPI();
 
   // ✅ Extract pitch deck URL
-  const pitchDeckDoc = documents.find((doc) => doc.type === "pitch-deck");
+  const pitchDeckDoc = documents.find((doc) => doc.type === "pitch-deck" || (doc.name && doc.name.toLowerCase().trim() === "pitch deck"));
   const pitchDeckFileUrl = pitchDeckDoc?.fileUrl || null;
 
   // ✅ Exclude pitch deck from the document list
-  const filteredDocuments = documents.filter((doc) => doc.type !== "pitch-deck");
+  const filteredDocuments = documents.filter((doc) => {
+    const isPitchDeckType = doc.type === "pitch-deck";
+    const isPitchDeckName = doc.name && doc.name.toLowerCase().trim() === "pitch deck";
+    return !isPitchDeckType && !isPitchDeckName;
+  });
 
   return (
     <div className={styles.docWrapper}>

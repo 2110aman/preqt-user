@@ -168,35 +168,37 @@ const CcpsDealsData = () => {
             <section className="smallcards-section">
                 {/* ---- TOP BOX SECTION ---- */}
                 <div className="smallcard-section-subcontainer">
-                    <section className="subs1-topp">
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                            <div style={{ display: "flex", alignItems: "center" }}>
-                                <p>{"Listing Timeline"}</p>
-                                {dealData?.listing_timeline?.tool_tip?.status === true && !!dealData?.listing_timeline?.tool_tip?.data?.trim() && (
-                                    <div className="custom-tooltip-wrapper">
-                                        <span className="tooltip-icon">
-                                            <img src="/tooltip.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
-                                        </span>
-                                        <div className="custom-tooltip-box">{dealData?.listing_timeline?.tool_tip?.data}</div>
-                                    </div>
-                                )}
+                    {dealData?.listing_timeline?.status && dealData?.listing_timeline?.data && (
+                        <section className="subs1-topp">
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                                <div style={{ display: "flex", alignItems: "center" }}>
+                                    <p>{"Listing Timeline"}</p>
+                                    {dealData?.listing_timeline?.tool_tip?.status === true && !!dealData?.listing_timeline?.tool_tip?.data?.trim() && (
+                                        <div className="custom-tooltip-wrapper">
+                                            <span className="tooltip-icon">
+                                                <img src="/tooltip.svg" alt="info" style={{ marginLeft: "5px", cursor: "pointer", width: "12px", height: "12px" }} />
+                                            </span>
+                                            <div className="custom-tooltip-box">{dealData?.listing_timeline?.tool_tip?.data}</div>
+                                        </div>
+                                    )}
+                                </div>
+                                <Image
+                                    src={"/assets/pictures/listing-timeline.svg"}
+                                    height={40}
+                                    width={40}
+                                    alt="timeline"
+                                />
                             </div>
-                            <Image
-                                src={"/assets/pictures/listing-timeline.svg"}
-                                height={40}
-                                width={40}
-                                alt="timeline"
-                            />
-                        </div>
-                        <span className="offer-day">
-                            {renderValueWithTooltip(
-                                dealData?.listing_timeline,
-                                formatDate(dealData?.listing_timeline?.data)
-                            )}
-                        </span>
-                    </section>
+                            <span className="offer-day">
+                                {renderValueWithTooltip(
+                                    dealData?.listing_timeline,
+                                    formatDate(dealData?.listing_timeline?.data)
+                                )}
+                            </span>
+                        </section>
+                    )}
 
-                    <div className="smallcard-section-subcontainer-div">
+                    <div className="smallcard-section-subcontainer-div" style={!(dealData?.listing_timeline?.status && dealData?.listing_timeline?.data) ? { width: "100%" } : {}}>
 
                         <section className="subs top">
                             {dealData?.pre_money_valuation?.status && (

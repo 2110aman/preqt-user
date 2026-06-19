@@ -62,6 +62,15 @@ export default function Shareholding({ isPrivateDeal}) {
     return null;
   }
 
+  const hasShareholdingData = promoters.length > 0 || additionalShareholders.length > 0;
+
+  if (!hasShareholdingData) {
+    if (!isPrivateDeal) {
+      return <Fundamentals isPrivateDeal={isPrivateDeal} />;
+    }
+    return null;
+  }
+
   return (
     <div className={isPrivateDeal ? styles.privateContainer : styles.container}>
       <div
@@ -212,7 +221,7 @@ export default function Shareholding({ isPrivateDeal}) {
         </>
       )}
 
-      {!isPrivateDeal && <Fundamentals />}
+      {!isPrivateDeal && <Fundamentals isPrivateDeal={isPrivateDeal} />}
     </div>
   );
 }

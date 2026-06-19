@@ -32,8 +32,87 @@ export default function PrivateDealDetails({ isPrivateDeal }) {
   // ✅ Filter only valid sections based on API response
   const sections = useMemo(() => {
     const data = dealDetails?.data || {};
+
+    const hasOverviewData = () => {
+      const dealOverview = data?.deal_overview;
+      if (!dealOverview || dealOverview.status === false) {
+        return false;
+      }
+      return Object.keys(dealOverview).some((key) => {
+        if (key === "status") return false;
+        const item = dealOverview[key];
+        return (
+          item &&
+          typeof item === "object" &&
+          item.status === true &&
+          item.data !== null &&
+          item.data !== undefined
+        );
+      });
+    };
+
+    const hasFundraiseData = () => {
+      const fundraise = data?.fundraise_future_plans;
+      if (!fundraise || fundraise.status === false) return false;
+
+      // 1. Shareholding Pattern check
+      const shareholding = fundraise.shareholding_pattern;
+      let hasShareholding = false;
+      if (shareholding && shareholding.status !== false) {
+        const promoters = shareholding?.data?.promoters?.data || shareholding?.promoters?.data;
+        const additionals = shareholding?.data?.additional_shareholders?.data || shareholding?.additional_shareholders?.data;
+        
+        const hasPromoters = Array.isArray(promoters) && promoters.length > 0 && promoters.some(p => p && (p.promoter_name || p.pre_issue_share || p.post_issue_share));
+        const hasAdditionals = Array.isArray(additionals) && additionals.length > 0 && additionals.some(a => a && (a.shareholder_name || a.pre_issue_share || a.post_issue_share));
+        hasShareholding = hasPromoters || hasAdditionals;
+      }
+
+      if (isPrivateDeal) {
+        return hasShareholding;
+      }
+
+      // 2. IPO Key Highlights check
+      const ipoHighlights = fundraise.ipo_key_highlights;
+      let hasHighlights = false;
+      if (ipoHighlights && ipoHighlights.status !== false) {
+        const highlightsData = ipoHighlights.data;
+        hasHighlights = Array.isArray(highlightsData) && highlightsData.length > 0 && highlightsData.some(item => {
+          const key = Object.keys(item)[0];
+          const val = item[key]?.value;
+          const desc = item[key]?.description;
+          return (val?.status && val?.data != null && val?.data !== "") || (desc?.status && desc?.data != null && desc?.data !== "");
+        });
+      }
+
+      // 3. IPO Objective check
+      const ipoObjective = fundraise.ipo_objective;
+      const hasObjective = !!(
+        ipoObjective &&
+        ipoObjective.status !== false && (
+          (ipoObjective.business_expansion?.status && ipoObjective.business_expansion?.data != null && ipoObjective.business_expansion?.data !== "") ||
+          (ipoObjective.utilization_of_proceeds?.status && ipoObjective.utilization_of_proceeds?.data != null && ipoObjective.utilization_of_proceeds?.data !== "") ||
+          (ipoObjective.capital_expenditure?.status && ipoObjective.capital_expenditure?.data != null && ipoObjective.capital_expenditure?.data !== "") ||
+          (ipoObjective.credit_rating_outlook?.status && ipoObjective.credit_rating_outlook?.data != null && ipoObjective.credit_rating_outlook?.data !== "")
+        )
+      );
+
+      // 4. IPO Notes check
+      const ipoNotes = fundraise.ipo_notes;
+      const hasNotes = !!(
+        ipoNotes &&
+        ipoNotes.status !== false && (
+          (ipoNotes.risk_factor?.status && ipoNotes.risk_factor?.data != null && ipoNotes.risk_factor?.data !== "") ||
+          (ipoNotes.additional_activities?.status && ipoNotes.additional_activities?.data != null && ipoNotes.additional_activities?.data !== "") ||
+          (ipoNotes.important_dates?.status && ipoNotes.important_dates?.data != null && ipoNotes.important_dates?.data !== "") ||
+          (ipoNotes.additional_notes?.status && ipoNotes.additional_notes?.data != null && ipoNotes.additional_notes?.data !== "")
+        )
+      );
+
+      return hasShareholding || hasHighlights || hasObjective || hasNotes;
+    };
+
     return [
-      data.deal_overview?.status && { id: "overview", label: "Overview" },
+      hasOverviewData() && { id: "overview", label: "Overview" },
       data.business?.status && { id: "business", label: "Business" },
       data.financial_highlights?.status && {
         id: "financial",
@@ -43,7 +122,7 @@ export default function PrivateDealDetails({ isPrivateDeal }) {
         id: "industry",
         label: "Industry Overview"
       },
-      data.fundraise_future_plans?.status && {
+      hasFundraiseData() && {
         id: "fundraise",
         label: "Fundraise/Future Plans"
       },
@@ -52,7 +131,7 @@ export default function PrivateDealDetails({ isPrivateDeal }) {
         label: "Documentation"
       }
     ].filter(Boolean); // remove false or undefined sections
-  }, [dealDetails]);
+  }, [dealDetails, isPrivateDeal]);
 
   // Initialize first active section when sections are ready
   useEffect(() => {

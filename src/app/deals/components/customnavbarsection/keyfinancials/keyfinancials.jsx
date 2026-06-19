@@ -101,6 +101,57 @@ const extractObservationHtml = (sectionNode, dataArray) => {
   return null;
 };
 
+const shouldShowSectionObservations = (sectionNode, dataArray) => {
+  if (sectionNode) {
+    const obsObj = sectionNode.observation_and_insights;
+    if (obsObj) {
+      if (obsObj.status === true && obsObj.data !== null && obsObj.data !== undefined && String(obsObj.data).trim() !== "") {
+        return true;
+      }
+      if (obsObj.status === false || obsObj.data === null || obsObj.data === undefined) {
+        return false;
+      }
+    }
+    const obsPlural = sectionNode.observations_and_insights;
+    if (obsPlural && typeof obsPlural === "object") {
+      if (obsPlural.status === true && obsPlural.data !== null && obsPlural.data !== undefined && String(obsPlural.data).trim() !== "") {
+        return true;
+      }
+      if (obsPlural.status === false || obsPlural.data === null || obsPlural.data === undefined) {
+        return false;
+      }
+    }
+  }
+
+  const arr = Array.isArray(dataArray) ? dataArray : (Array.isArray(sectionNode?.data) ? sectionNode.data : []);
+  for (const item of arr) {
+    if (!item) continue;
+    
+    const obsObj = item.observation_and_insights;
+    if (obsObj) {
+      if (obsObj.status === true && obsObj.data !== null && obsObj.data !== undefined && String(obsObj.data).trim() !== "") {
+        return true;
+      }
+      if (obsObj.status === false || obsObj.data === null || obsObj.data === undefined) {
+        return false;
+      }
+    }
+
+    const obsPlural = item.observations_and_insights;
+    if (obsPlural && typeof obsPlural === "object") {
+      if (obsPlural.status === true && obsPlural.data !== null && obsPlural.data !== undefined && String(obsPlural.data).trim() !== "") {
+        return true;
+      }
+      if (obsPlural.status === false || obsPlural.data === null || obsPlural.data === undefined) {
+        return false;
+      }
+    }
+  }
+
+  const html = extractObservationHtml(sectionNode, dataArray);
+  return !!(html && String(html).trim() !== "");
+};
+
 const dummyPerfData = [
   // { isCategory: true, label: "Revenue & Growth" },
   // { label: "Revenue (₹Cr)", values: ["120.0", "120.0", { val: "120.0", color: "#16A34A" }] },
@@ -155,7 +206,7 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
     return {
       year: yearStr,
       revenue: apiItem?.revenue_in_cr ?? apiItem?.revenue ?? defaultItem.revenue,
-      growth: apiItem?.topline_growth_percent ?? apiItem?.growth ?? defaultItem.growth,
+      growth: apiItem?.growth_percent ?? apiItem?.growth ?? defaultItem.growth,
       ebitda: apiItem?.ebitda_in_cr ?? apiItem?.ebitda ?? defaultItem.ebitda,
       ebitdaMargin: apiItem?.ebitda_percent ?? apiItem?.ebitdaMargin ?? defaultItem.ebitdaMargin,
       pat: apiItem?.pat_in_cr ?? apiItem?.pat ?? defaultItem.pat,
@@ -166,6 +217,7 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
   const dealDetails = useDealStore((state) => state.dealDetails);
   const financialHighlights = dealDetails?.data?.financial_highlights;
   const observationHtml = extractObservationHtml(financialHighlights?.financial_trends, rawApiData);
+  const showObservations = shouldShowSectionObservations(financialHighlights?.financial_trends, rawApiData);
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
@@ -309,22 +361,24 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
         </div>
       </div>
 
-      <div className="observations-container">
-        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        {observationHtml ? (
-          <div 
-            className="observations-html-content"
-            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
-            dangerouslySetInnerHTML={{ __html: observationHtml }}
-          />
-        ) : (
-          <ul className="observations-list">
-            {observationsList.map((bullet, idx) => (
-              <li key={idx}>{bullet}</li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {showObservations && (
+        <div className="observations-container">
+          <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+          {observationHtml ? (
+            <div 
+              className="observations-html-content"
+              style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+              dangerouslySetInnerHTML={{ __html: observationHtml }}
+            />
+          ) : (
+            <ul className="observations-list">
+              {observationsList.map((bullet, idx) => (
+                <li key={idx}>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -572,6 +626,9 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
     ? (obsNode.observation_and_insights.status ? obsNode.observation_and_insights.data : null)
     : (extractObservationHtml(financialHighlights?.balance_sheet, rawApiData) 
        || extractObservationHtml(financialHighlights?.financial_performance, financialHighlights?.financial_performance?.data));
+  const showObservations = (isNewBSDynamicShape && obsNode?.observation_and_insights)
+    ? (obsNode.observation_and_insights.status === true && obsNode.observation_and_insights.data !== null && obsNode.observation_and_insights.data !== undefined && String(obsNode.observation_and_insights.data).trim() !== "")
+    : shouldShowSectionObservations(financialHighlights?.balance_sheet, rawApiData);
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
@@ -727,22 +784,24 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
       </div>
 
 
-      <div className="observations-container">
-        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        {observationHtml ? (
-          <div 
-            className="observations-html-content"
-            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
-            dangerouslySetInnerHTML={{ __html: observationHtml }}
-          />
-        ) : (
-          <ul className="observations-list">
-            {observationsList.map((bullet, idx) => (
-              <li key={idx}>{bullet}</li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {showObservations && (
+        <div className="observations-container">
+          <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+          {observationHtml ? (
+            <div 
+              className="observations-html-content"
+              style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+              dangerouslySetInnerHTML={{ __html: observationHtml }}
+            />
+          ) : (
+            <ul className="observations-list">
+              {observationsList.map((bullet, idx) => (
+                <li key={idx}>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -832,6 +891,8 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
 
   const observationHtml = extractObservationHtml(financialHighlights?.cash_flow_analysis, rawApiData)
     || extractObservationHtml(financialHighlights?.cash_flow, rawApiData);
+  const showObservations = shouldShowSectionObservations(financialHighlights?.cash_flow_analysis, rawApiData)
+    || shouldShowSectionObservations(financialHighlights?.cash_flow, rawApiData);
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
@@ -976,22 +1037,24 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
         </div>
       </div>
 
-      <div className="observations-container">
-        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        {observationHtml ? (
-          <div 
-            className="observations-html-content"
-            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
-            dangerouslySetInnerHTML={{ __html: observationHtml }}
-          />
-        ) : (
-          <ul className="observations-list">
-            {observationsList.map((bullet, idx) => (
-              <li key={idx}>{bullet}</li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {showObservations && (
+        <div className="observations-container">
+          <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+          {observationHtml ? (
+            <div 
+              className="observations-html-content"
+              style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+              dangerouslySetInnerHTML={{ __html: observationHtml }}
+            />
+          ) : (
+            <ul className="observations-list">
+              {observationsList.map((bullet, idx) => (
+                <li key={idx}>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -1072,6 +1135,8 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
 
   const observationHtml = extractObservationHtml(financialHighlights?.financial_performance, financialHighlights?.financial_performance?.data)
     || extractObservationHtml(financialHighlights?.working_capital, rawApiData);
+  const showObservations = shouldShowSectionObservations(financialHighlights?.financial_performance, financialHighlights?.financial_performance?.data)
+    || shouldShowSectionObservations(financialHighlights?.working_capital, rawApiData);
 
   const apiObservations = rawApiData?.[0]?.observations || defaultObservations;
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
@@ -1221,22 +1286,24 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
         </div>
       </div>
 
-      <div className="observations-container">
-        <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-        {observationHtml ? (
-          <div 
-            className="observations-html-content"
-            style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
-            dangerouslySetInnerHTML={{ __html: observationHtml }}
-          />
-        ) : (
-          <ul className="observations-list">
-            {observationsList.map((bullet, idx) => (
-              <li key={idx}>{bullet}</li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {showObservations && (
+        <div className="observations-container">
+          <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+          {observationHtml ? (
+            <div 
+              className="observations-html-content"
+              style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+              dangerouslySetInnerHTML={{ __html: observationHtml }}
+            />
+          ) : (
+            <ul className="observations-list">
+              {observationsList.map((bullet, idx) => (
+                <li key={idx}>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -1411,6 +1478,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
   const ratiosNode = dealDetails?.data?.financial_highlights?.financial_ratio;
   const rawRatiosData = ratiosNode?.data || [];
   const ratiosObservationHtml = extractObservationHtml(ratiosNode, rawRatiosData);
+  const showRatiosObservations = shouldShowSectionObservations(ratiosNode, rawRatiosData);
 
   const defaultRatiosObservations = [];
   const apiRatiosObservations = rawRatiosData?.[0]?.observations || defaultRatiosObservations;
@@ -1716,22 +1784,24 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
                 </div>
 
                 {/* Observations & Insights for Financial Ratios */}
-                <div className="observations-container" style={{ marginTop: "24px" }}>
-                  <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
-                  {ratiosObservationHtml ? (
-                    <div 
-                      className="observations-html-content"
-                      style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
-                      dangerouslySetInnerHTML={{ __html: ratiosObservationHtml }}
-                    />
-                  ) : (
-                    <ul className="observations-list">
-                      {ratiosObservationsList.map((bullet, idx) => (
-                        <li key={idx}>{bullet}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+                {showRatiosObservations && (
+                  <div className="observations-container" style={{ marginTop: "24px" }}>
+                    <h4 className="observations-title">OBSERVATIONS & INSIGHTS</h4>
+                    {ratiosObservationHtml ? (
+                      <div 
+                        className="observations-html-content"
+                        style={{ fontSize: "14px", lineHeight: "1.6", color: isPrivateDeal ? "#fff" : "#1F2937" }}
+                        dangerouslySetInnerHTML={{ __html: ratiosObservationHtml }}
+                      />
+                    ) : (
+                      <ul className="observations-list">
+                        {ratiosObservationsList.map((bullet, idx) => (
+                          <li key={idx}>{bullet}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
 
               </div>
             </div>

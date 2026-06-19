@@ -47,7 +47,10 @@ const Bod = ({ isPrivateDeal }) => {
             <Collapse in={openItems.includes(index)}>
               <div className="dropdown-body">
                 <h6 className="bg-head">Background</h6>
-                <p>{director.background}</p>
+                <div 
+                  className="bg-content"
+                  dangerouslySetInnerHTML={{ __html: director.background || "" }} 
+                />
                 {director.linkedin &&
                   director.linkedin.trim() !== "" &&
                   director.linkedin.toLowerCase() !== "n.a" && (
@@ -55,7 +58,7 @@ const Bod = ({ isPrivateDeal }) => {
                     <Link
                       href={director.linkedin}
                       target="_blank"
-                      style={{ color: "white", display: "flex", gap: "10px" }}
+                      style={{ color: "white", display: "flex", gap: "10px" , textDecoration: "none" }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                         <g clipPath="url(#clip0_18822_11319)">

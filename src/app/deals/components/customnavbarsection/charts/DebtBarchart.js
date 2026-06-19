@@ -69,15 +69,7 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
     const { ticks, domain } = React.useMemo(() => {
         const maxVal = Math.max(...chartData.map(d => d.value), 0) || 1.28;
         
-        // For small ratio values, use exact screenshot ticks
-        if (maxVal <= 1.5) {
-            return {
-                ticks: [0.00, 0.35, 0.70, 1.05, 1.40],
-                domain: [0, 1.40]
-            };
-        }
-        
-        // We want 4 intervals. Let's find an interval such that 4 * interval is just above maxVal.
+        // Calculate nice intervals dynamically for all values
         const rawInterval = maxVal / 3.5;
         const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
         const normalized = rawInterval / magnitude;
@@ -87,11 +79,17 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
         const step = niceSteps.find(s => s >= normalized) || 10;
         
         const interval = step * magnitude;
-        const generatedTicks = [0, interval, 2 * interval, 3 * interval, 4 * interval];
+        const generatedTicks = [
+            0,
+            Number(interval.toFixed(4)),
+            Number((2 * interval).toFixed(4)),
+            Number((3 * interval).toFixed(4)),
+            Number((4 * interval).toFixed(4))
+        ];
         
         return {
             ticks: generatedTicks,
-            domain: [0, 4 * interval]
+            domain: [0, Number((4 * interval).toFixed(4))]
         };
     }, [chartData]);
 

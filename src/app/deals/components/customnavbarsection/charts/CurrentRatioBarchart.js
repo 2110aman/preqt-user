@@ -68,15 +68,7 @@ const CurrentRatioBarchart = ({ isPrivate, data: apiData }) => {
     const { ticks, domain } = React.useMemo(() => {
         const maxVal = Math.max(...chartData.map(d => d.value), 0) || 2.1;
         
-        // For screenshot range, use exact ticks matching [0.00, 1.0, 1.5, 2.0, 2.5]
-        if (maxVal <= 2.5) {
-            return {
-                ticks: [0, 1.0, 1.5, 2.0, 2.5],
-                domain: [0, 2.5]
-            };
-        }
-        
-        // Calculate nice intervals dynamically for larger values
+        // Calculate nice intervals dynamically for all values
         const rawInterval = maxVal / 3.5;
         const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
         const normalized = rawInterval / magnitude;
@@ -85,11 +77,17 @@ const CurrentRatioBarchart = ({ isPrivate, data: apiData }) => {
         const step = niceSteps.find(s => s >= normalized) || 10;
         
         const interval = step * magnitude;
-        const generatedTicks = [0, interval, 2 * interval, 3 * interval, 4 * interval];
+        const generatedTicks = [
+            0,
+            Number(interval.toFixed(4)),
+            Number((2 * interval).toFixed(4)),
+            Number((3 * interval).toFixed(4)),
+            Number((4 * interval).toFixed(4))
+        ];
         
         return {
             ticks: generatedTicks,
-            domain: [0, 4 * interval]
+            domain: [0, Number((4 * interval).toFixed(4))]
         };
     }, [chartData]);
 

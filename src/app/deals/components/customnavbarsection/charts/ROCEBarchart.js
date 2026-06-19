@@ -68,15 +68,7 @@ const ROCEBarchart = ({ isPrivate, data: apiData }) => {
     const { ticks, domain } = React.useMemo(() => {
         const maxVal = Math.max(...chartData.map(d => d.value), 0) || 31.6;
         
-        // For standard screenshot range, use exact ticks matching [0.00, 10.0%, 20.0%, 30.0%, 40.0%]
-        if (maxVal <= 40.0) {
-            return {
-                ticks: [0, 10, 20, 30, 40],
-                domain: [0, 40]
-            };
-        }
-        
-        // Calculate nice intervals dynamically for larger values
+        // Calculate nice intervals dynamically for all values
         const rawInterval = maxVal / 3.5;
         const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
         const normalized = rawInterval / magnitude;
@@ -85,11 +77,17 @@ const ROCEBarchart = ({ isPrivate, data: apiData }) => {
         const step = niceSteps.find(s => s >= normalized) || 10;
         
         const interval = step * magnitude;
-        const generatedTicks = [0, interval, 2 * interval, 3 * interval, 4 * interval];
+        const generatedTicks = [
+            0,
+            Number(interval.toFixed(4)),
+            Number((2 * interval).toFixed(4)),
+            Number((3 * interval).toFixed(4)),
+            Number((4 * interval).toFixed(4))
+        ];
         
         return {
             ticks: generatedTicks,
-            domain: [0, 4 * interval]
+            domain: [0, Number((4 * interval).toFixed(4))]
         };
     }, [chartData]);
 

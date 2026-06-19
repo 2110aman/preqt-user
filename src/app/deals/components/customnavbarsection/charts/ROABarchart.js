@@ -98,15 +98,7 @@ const ROABarchart = ({ isPrivate, data: apiData }) => {
         if (hasNegative) {
             const maxAbsVal = Math.max(...chartData.map(d => Math.abs(d.value)), 0) || 31.8;
             
-            // For standard mockup range, use exact screenshot ticks matching [-40, -20, 0, 20, 40]
-            if (maxAbsVal <= 40.0) {
-                return {
-                    ticks: [-40, -20, 0, 20, 40],
-                    domain: [-40, 40]
-                };
-            }
-            
-            // Nice steps for larger ranges
+            // Nice steps for ranges with negative values
             const rawInterval = maxAbsVal / 2.0;
             const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
             const normalized = rawInterval / magnitude;
@@ -115,19 +107,20 @@ const ROABarchart = ({ isPrivate, data: apiData }) => {
             const step = niceSteps.find(s => s >= normalized) || 10;
             const interval = step * magnitude;
             
+            const generatedTicks = [
+                Number((-2 * interval).toFixed(4)),
+                Number((-interval).toFixed(4)),
+                0,
+                Number(interval.toFixed(4)),
+                Number((2 * interval).toFixed(4))
+            ];
+            
             return {
-                ticks: [-2 * interval, -interval, 0, interval, 2 * interval],
-                domain: [-2 * interval, 2 * interval]
+                ticks: generatedTicks,
+                domain: [Number((-2 * interval).toFixed(4)), Number((2 * interval).toFixed(4))]
             };
         } else {
             const maxVal = Math.max(...chartData.map(d => d.value), 0) || 31.8;
-            
-            if (maxVal <= 40.0) {
-                return {
-                    ticks: [0, 10, 20, 30, 40],
-                    domain: [0, 40]
-                };
-            }
             
             const rawInterval = maxVal / 3.5;
             const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
@@ -137,9 +130,17 @@ const ROABarchart = ({ isPrivate, data: apiData }) => {
             const step = niceSteps.find(s => s >= normalized) || 10;
             const interval = step * magnitude;
             
+            const generatedTicks = [
+                0,
+                Number(interval.toFixed(4)),
+                Number((2 * interval).toFixed(4)),
+                Number((3 * interval).toFixed(4)),
+                Number((4 * interval).toFixed(4))
+            ];
+            
             return {
-                ticks: [0, interval, 2 * interval, 3 * interval, 4 * interval],
-                domain: [0, 4 * interval]
+                ticks: generatedTicks,
+                domain: [0, Number((4 * interval).toFixed(4))]
             };
         }
     }, [chartData]);
