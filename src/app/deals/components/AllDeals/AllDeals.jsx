@@ -800,6 +800,7 @@ function AllDealsContent() {
                 <OtpPopup
                     {...otpPayload}
                     show
+                    redirectTo={redirectPath}
                     handleClose={closeOtp}
                     handleBack={() => {
                         const flow = otpPayload.flow;

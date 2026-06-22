@@ -2,25 +2,118 @@
 import React, { useState } from "react";
 import styles from "./industry.module.css";
 import { useDealStore } from "@/store/dealStore";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 // ✅ Reusable SafeImage component
 const SafeImage = ({ src, alt, className, style }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (!isVisible || !src) return null;
 
+  const handleImageClick = (e) => {
+    e.stopPropagation();
+    setIsModalOpen(true);
+  };
+
+  const handleClose = (e) => {
+    e.stopPropagation();
+    setIsModalOpen(false);
+  };
+
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      style={style}
-      onError={(e) => {
-        e.target.onerror = null;
-        setIsVisible(false);
-      }}
-    />
+    <>
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        style={{ ...style, cursor: "pointer" }}
+        onClick={handleImageClick}
+        onError={(e) => {
+          e.target.onerror = null;
+          setIsVisible(false);
+        }}
+      />
+      {isModalOpen && (
+        <div 
+          onClick={handleClose}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 99999,
+            cursor: "zoom-out"
+          }}
+        >
+          <button
+            onClick={handleClose}
+            style={{
+              position: "absolute",
+              top: "24px",
+              right: "24px",
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.25)",
+              color: "#fff",
+              cursor: "pointer",
+              width: "44px",
+              height: "44px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 100000,
+              transition: "background-color 0.2s, transform 0.2s, border-color 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
+              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.5)";
+              e.currentTarget.style.transform = "scale(1.05)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+              e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.25)";
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            <X size={24} strokeWidth={2} />
+          </button>
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              maxWidth: "80%",
+              maxHeight: "80%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "default"
+            }}
+          >
+            <img
+              src={src}
+              alt={alt}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "80vh",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
+                borderRadius: "8px",
+                backgroundColor: "#fff",
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.6)",
+                padding: "8px"
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
