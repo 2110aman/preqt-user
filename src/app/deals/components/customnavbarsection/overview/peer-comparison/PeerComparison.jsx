@@ -58,7 +58,50 @@ const PeerComparison = ({ isPrivateDeal }) => {
   );
 
   const getLogoUrl = (logoData) => {
-    const path = logoData?.data?.[0]?.path;
+    let data = logoData?.data;
+    if (!data) return null;
+
+    const parseData = (val) => {
+      if (typeof val === 'string') {
+        try {
+          return JSON.parse(val);
+        } catch (e) {
+          return null;
+        }
+      }
+      return val;
+    };
+
+    let attempts = 0;
+    while (typeof data === 'string' && attempts < 5) {
+      const parsed = parseData(data);
+      if (parsed === null) break;
+      data = parsed;
+      attempts++;
+    }
+
+    let path = null;
+    if (Array.isArray(data)) {
+      if (data.length > 0) {
+        let firstElement = data[0];
+        attempts = 0;
+        while (typeof firstElement === 'string' && attempts < 5) {
+          const parsed = parseData(firstElement);
+          if (parsed === null) break;
+          firstElement = parsed;
+          attempts++;
+        }
+        
+        if (Array.isArray(firstElement)) {
+          path = firstElement[0]?.path;
+        } else if (firstElement && typeof firstElement === 'object') {
+          path = firstElement.path;
+        }
+      }
+    } else if (data && typeof data === 'object') {
+      path = data.path;
+    }
+
     if (!path) return null;
     return `${process.env.NEXT_PUBLIC_USER_BASE}admin/${path.replace("public/", "")}`;
   };
@@ -75,38 +118,41 @@ const PeerComparison = ({ isPrivateDeal }) => {
           <thead>
             <tr>
               <th className={styles.metricHeader}>Metric</th>
-              {companies.map((company, i) => (
-                <th key={i} className={styles.companyHeader}>
-                  <div className={styles.companyInfo}>
-                    <span className={styles.companyName}>
-                      {company.company_name?.data?.split("\n").map((line, idx) => (
-                        <React.Fragment key={idx}>
-                          {line}
-                          <br />
-                        </React.Fragment>
-                      ))}
-                    </span>
-                    {company.company_logo?.status && company.company_logo?.data?.length > 0 ? (
-                      <img
-                        src={getLogoUrl(company.company_logo)}
-                        alt={company.company_name?.data}
-                        className={styles.companyLogoImg || "companyLogoImg"}
-                        style={{ width: "28px", maxWidth: "28px", maxHeight: "28px",border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain"}}
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src="/logo-fallback.png"
-                        alt={company.company_name?.data || "Company Logo"}
-                        className={styles.companyLogoImg || "companyLogoImg"}
-                        style={{ width: "28px", maxWidth: "28px", maxHeight: "28px", border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain", marginTop: "5px", backgroundColor: "#fff" }}
-                      />
-                    )}
-                  </div>
-                </th>
-              ))}
+              {companies.map((company, i) => {
+                const logoUrl = company.company_logo?.status ? getLogoUrl(company.company_logo) : null;
+                return (
+                  <th key={i} className={styles.companyHeader}>
+                    <div className={styles.companyInfo}>
+                      <span className={styles.companyName}>
+                        {company.company_name?.data?.split("\n").map((line, idx) => (
+                          <React.Fragment key={idx}>
+                            {line}
+                            <br />
+                          </React.Fragment>
+                        ))}
+                      </span>
+                      {logoUrl ? (
+                        <img
+                          src={logoUrl}
+                          alt={company.company_name?.data}
+                          className={styles.companyLogoImg || "companyLogoImg"}
+                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px",border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain"}}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src="/logo-fallback.png"
+                          alt={company.company_name?.data || "Company Logo"}
+                          className={styles.companyLogoImg || "companyLogoImg"}
+                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px", border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain", marginTop: "5px", backgroundColor: "#fff" }}
+                        />
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

@@ -351,6 +351,36 @@
 .card-pat { order: 5; }
 .card-issue-size { order: 6; }
 
+/* Dynamic Layout Adjustments for Public Grid */
+@media (min-width: 769px) {
+  .public-grid .grid-span-2 {
+    grid-column: span 2 !important;
+  }
+
+  /* Case: Start/End dates are not present */
+  .public-grid.public-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .public-grid.public-grid-4 .card-valuation {
+    order: 1 !important;
+  }
+  .public-grid.public-grid-4 .card-revenue {
+    order: 2 !important;
+  }
+  .public-grid.public-grid-4 .card-pat {
+    order: 3 !important;
+  }
+  .public-grid.public-grid-4 .card-issue-size {
+    order: 4 !important;
+  }
+  .public-grid.public-grid-4 .card-range-date {
+    grid-column: span 2 !important;
+    order: 0 !important;
+  }
+}
+
+
+
 
 
 

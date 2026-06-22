@@ -243,7 +243,7 @@
     width: 36px;
     height: 36px;
     border-radius: 6px;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .companyName {
@@ -1406,7 +1406,7 @@
         max-width: 120px !important;
     }
     .listView .heroBoxes{
-        gap:5px !important;
+        gap:15px !important;
     }
 
     .listView {

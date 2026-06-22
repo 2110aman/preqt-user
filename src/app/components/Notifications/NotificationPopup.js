@@ -101,10 +101,22 @@ const NotificationPopup = ({ isOpen, onClose, allNotifications = [], fetchNotifi
     };
 
   const handleNotificationClick = (data) => {
-
     // 1. ROUTE FIRST (Immediate UI update)
     if (data.notification_type === "deal" && data.deal_slug) {
-        router.push(`/deals/${data.deal_slug}`);
+        const dealType = data.deal_type ? data.deal_type.toLowerCase() : "";
+        if (dealType === "public" || dealType === "unlisted") {
+            router.push(`/deals/${data.deal_slug}`);
+        } else {
+            const ua = navigator.userAgent.toLowerCase();
+            const isIOS = /iphone|ipad|ipod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const isMac = /macintosh|mac os x/.test(ua);
+
+            if (isIOS || isMac) {
+                window.open("https://apps.apple.com/in/app/preqt/id6751903472", "_blank");
+            } else {
+                window.open("https://play.google.com/store/apps/details?id=com.preqt.app", "_blank");
+            }
+        }
     } 
     else if (data.notification_type === "post" && data.post_slug) {
         router.push(`/community/${data.post_slug}`);

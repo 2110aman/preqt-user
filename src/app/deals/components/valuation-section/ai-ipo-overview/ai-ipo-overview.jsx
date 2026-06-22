@@ -349,6 +349,23 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
     number: (i + 1).toString().padStart(2, "0"),
   }));
 
+  const showStartDate = !isMobile && hasFromAndTo;
+  const showEndDate = !isMobile && hasFromAndTo;
+  const showValuation = !!dealData?.valuation_in_cr?.status;
+  const showRevenue = !!dealData?.revenue_fy25_in_cr?.status;
+  const showPat = !!dealData?.pat_fy25_in_cr?.status;
+  const showIssueSize = !!dealData?.issue_size?.status;
+
+  const spanValuation = !isMobile && showValuation && !showRevenue;
+  const spanRevenue = !isMobile && showRevenue && !showValuation;
+  const spanPat = !isMobile && showPat && !showIssueSize;
+  const spanIssueSize = !isMobile && showIssueSize && !showPat;
+
+  let gridLayoutClass = "";
+  if (!showStartDate && !showEndDate) {
+    gridLayoutClass = "public-grid-4";
+  }
+
 
   return (
     <div className="valuation-container">
@@ -443,7 +460,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
 
       <section className="smallcards-section">
-        <div className={`smallcard-section-subcontainer ${!isPrivateLike ? "public-grid" : ""}`}>
+        <div className={`smallcard-section-subcontainer ${!isPrivateLike ? `public-grid ${gridLayoutClass}`.trim() : ""}`}>
           {isPrivateLike ? (
             <>
               {dealData?.listing_timeline?.status && dealData?.listing_timeline?.data && (
@@ -708,7 +725,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
               {/* Card 4: Valuation */}
               {dealData?.valuation_in_cr?.status && (
-                <section className="subs1-top card-valuation">
+                <section className={`subs1-top card-valuation ${spanValuation ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"Valuation"}</span>
@@ -729,7 +746,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
               {/* Card 5: Revenue */}
               {dealData?.revenue_fy25_in_cr?.status && (
-                <section className="subs1-top card-revenue">
+                <section className={`subs1-top card-revenue ${spanRevenue ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"Revenue"}</span>
@@ -750,7 +767,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
               {/* Card 6: PAT */}
               {dealData?.pat_fy25_in_cr?.status && (
-                <section className="subs1-top card-pat">
+                <section className={`subs1-top card-pat ${spanPat ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"PAT"}</span>
@@ -771,7 +788,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
               {/* Card 7: Issue Size */}
               {dealData?.issue_size?.status && (
-                <section className="subs1-top card-issue-size">
+                <section className={`subs1-top card-issue-size ${spanIssueSize ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
                       <span className="data">{"Issue Size"}</span>
