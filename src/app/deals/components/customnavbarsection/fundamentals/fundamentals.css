@@ -5,8 +5,8 @@
 }
 .fundamentals-container{
       border-radius: 20px;
-      padding-top: 20px;
-    /* padding:  20px; */
+      padding: 20px 32px;
+      padding-bottom:  20px;
 }
 
 .title {
