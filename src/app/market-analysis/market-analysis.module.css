@@ -388,13 +388,121 @@
 }
 
 /* Analysis Table Styles */
+.tableWrapperRelative {
+  position: relative;
+  width: 100%;
+  margin-top: 12px;
+}
+
 .tableContainer {
   width: 100%;
   overflow-x: auto;
   border-radius: 16px;
   border: 1px solid #E2E8F0;
   background-color: #FFFFFF;
-  margin-top: 12px;
+  margin-top: 0;
+}
+
+/* Slim custom scrollbar for clean premium look */
+.tableContainer::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 3px;
+}
+
+.scrollShadowLeft {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 1px;
+  width: 50px;
+  pointer-events: none;
+  z-index: 30;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
+}
+
+.scrollShadowLeft.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scrollShadowRight {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  right: 1px;
+  width: 50px;
+  pointer-events: none;
+  z-index: 30;
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+.scrollShadowRight.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scrollHintBadge {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  transform: translate(-50%, -50%);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  color: #1F2937;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  animation: pulse-scroll-hint 2.5s infinite ease-in-out;
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.scrollHintBadge:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 12px 30px -3px rgba(181, 145, 49, 0.25);
+  border-color: rgba(181, 145, 49, 0.4);
+}
+
+.scrollHintIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #B59131;
+}
+
+@keyframes pulse-scroll-hint {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.03);
+    box-shadow: 0 15px 30px -3px rgba(181, 145, 49, 0.18);
+  }
 }
 
 .analysisTable {
@@ -702,6 +810,9 @@
 }
 
 @media (max-width: 480px) {
+  .tableWrapperRelative {
+    margin-top: 0px;
+  }
   .mainHeading {
     font-size: 20px;
   }

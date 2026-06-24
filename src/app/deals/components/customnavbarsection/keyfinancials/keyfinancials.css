@@ -895,7 +895,7 @@
 }
 
 .observations-html-content p {
-  margin: 0 !important;
+  /* margin: 0 !important; */
   padding: 0 !important;
 }
 
@@ -909,12 +909,13 @@
 
 .observations-html-content p {
   font-size: 13px;
+  margin-bottom: 5px;
 }
 
 .observations-html-content li,
 .observations-html-content ul,
 .observations-html-content ol {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 
 

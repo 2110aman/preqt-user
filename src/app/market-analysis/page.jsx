@@ -1,10 +1,58 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./market-analysis.module.css";
 
 export default function MarketAnalysisPage() {
   const [timeStr, setTimeStr] = useState("14:14:25 UTC | MAY 28, 2026");
+
+  const tableWrapperRef = useRef(null);
+  const [showLeftShadow, setShowLeftShadow] = useState(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  const checkScroll = () => {
+    if (tableWrapperRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tableWrapperRef.current;
+      const hasOverflow = scrollWidth > clientWidth;
+      setShowLeftShadow(hasOverflow && scrollLeft > 5);
+      setShowRightShadow(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+
+    if (tableWrapperRef.current) {
+      const { scrollWidth, clientWidth } = tableWrapperRef.current;
+      if (scrollWidth > clientWidth) {
+        setShowScrollHint(true);
+      } else {
+        setShowScrollHint(false);
+      }
+    }
+
+    const element = tableWrapperRef.current;
+    if (element) {
+      if (typeof window !== "undefined" && "ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(() => {
+          checkScroll();
+        });
+        resizeObserver.observe(element);
+        return () => resizeObserver.disconnect();
+      } else {
+        window.addEventListener("resize", checkScroll);
+        return () => window.removeEventListener("resize", checkScroll);
+      }
+    }
+  }, []);
+
+  const handleScroll = () => {
+    checkScroll();
+    if (showScrollHint) {
+      setShowScrollHint(false);
+    }
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -168,8 +216,29 @@ export default function MarketAnalysisPage() {
           </div>
 
           {/* Analysis Data Table */}
-          <div className={styles.tableContainer}>
-            <table className={styles.analysisTable}>
+          <div className={styles.tableWrapperRelative}>
+            <div className={`${styles.scrollShadowLeft} ${showLeftShadow ? styles.visible : ""}`} />
+            <div className={`${styles.scrollShadowRight} ${showRightShadow ? styles.visible : ""}`} />
+            
+            {showScrollHint && (
+              <div className={styles.scrollHintBadge} onClick={() => setShowScrollHint(false)}>
+                <span className={styles.scrollHintIconWrapper}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
+                    <path d="M18 8L22 12L18 16" />
+                    <path d="M6 8L2 12L6 16" />
+                    <path d="M2 12H22" />
+                  </svg>
+                </span>
+                <span>Scroll to view more</span>
+              </div>
+            )}
+
+            <div 
+              className={styles.tableContainer}
+              ref={tableWrapperRef}
+              onScroll={handleScroll}
+            >
+              <table className={styles.analysisTable}>
               <thead>
                 <tr>
                   <th>Particulars</th>
@@ -549,7 +618,8 @@ export default function MarketAnalysisPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
+      </section>
       </div>
     </div>
   );

@@ -136,7 +136,7 @@ const PeerComparison = ({ isPrivateDeal }) => {
                           src={logoUrl}
                           alt={company.company_name?.data}
                           className={styles.companyLogoImg || "companyLogoImg"}
-                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px",border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain"}}
+                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "contain", flexShrink: "0" }}
                           onError={(e) => {
                             e.target.style.display = 'none';
                           }}
@@ -146,7 +146,7 @@ const PeerComparison = ({ isPrivateDeal }) => {
                           src="/logo-fallback.png"
                           alt={company.company_name?.data || "Company Logo"}
                           className={styles.companyLogoImg || "companyLogoImg"}
-                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px", border:"1px solid #0000001A", borderRadius:"50%", objectFit: "contain", marginTop: "5px", backgroundColor: "#fff" }}
+                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "contain", marginTop: "5px", backgroundColor: "#fff", flexShrink: "0" }}
                         />
                       )}
                     </div>

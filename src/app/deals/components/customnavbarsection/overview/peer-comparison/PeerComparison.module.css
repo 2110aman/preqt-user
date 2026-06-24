@@ -97,6 +97,13 @@ border: 1px solid transparent;
   font-size: 13px;
   line-height: 1.4;
   color: #e2e8f0;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.companyLogoImg {
+  flex-shrink: 0;
 }
 
 .dummyLogo {

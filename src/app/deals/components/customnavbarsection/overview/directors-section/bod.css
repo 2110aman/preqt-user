@@ -151,7 +151,6 @@
 }
 
 .dropdown-body .bg-content h1,
-.dropdown-body .bg-content h2,
 .dropdown-body .bg-content h3,
 .dropdown-body .bg-content h4,
 .dropdown-body .bg-content h5,
@@ -161,6 +160,16 @@
   font-style: normal;
   font-weight: 600;
   line-height: 24px;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.dropdown-body .bg-content h2 {
+  color: var(--Gray-800, #1F2937);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
   margin-top: 16px;
   margin-bottom: 8px;
 }
