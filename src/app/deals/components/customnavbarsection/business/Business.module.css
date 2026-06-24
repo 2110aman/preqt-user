@@ -261,6 +261,7 @@
 font-style: normal;
 font-weight: 400;
 line-height: 20px;
+margin-bottom: 5px;
 }
 .businessModal strong{
   /* color: var(--Gray-400, #9CA3AF); */
@@ -287,6 +288,29 @@ line-height: 20px;
   padding-top: 15px;
   word-break: break-word;
   overflow-wrap: break-word;
+}
+
+.businessModal h1 {
+  color: var(--Gray-800, #1F2937);
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+.businessModal h2 {
+  color: var(--Gray-800, #1F2937);
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 5px;
+  margin-bottom: 2px;
+  line-height: 1.4;
+}
+
+.privateDeal .businessModal h1,
+.privateDeal .businessModal h2 {
+  color: #FFFFFF !important;
 }
 
 
