@@ -49,7 +49,10 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                         <small className={styles.smallText}>
                             {isccps && dealData?.price_per_ccps?.status
                                 ? (dealData?.price_per_ccps?.label_name || "Price per CCPS")
-                                : (dealData?.issue_price_per_share?.label_name || "Issue Price")
+                                : (isUnlisted && dealData?.per_share_price?.status
+                                    ? (dealData?.per_share_price?.label_name || "Per Share Price")
+                                    : (dealData?.issue_price_per_share?.label_name || "Issue Price")
+                                  )
                             }
                             {shouldShowTooltip(isccps && dealData?.price_per_ccps?.status ? dealData?.price_per_ccps?.tool_tip : dealData?.issue_price_per_share?.tool_tip) && (
                                 <OverlayTrigger

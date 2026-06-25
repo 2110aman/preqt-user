@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import styles from "./PeerComparison.module.css";
 import { useDealStore } from "@/store/dealStore";
 
@@ -18,14 +18,71 @@ const PeerComparison = ({ isPrivateDeal }) => {
   const dealStepData = dealDetails?.data?.deal_setpData;
   const peerComparison = dealOverview?.peer_comparison || dealStepData?.peer_comparison;
 
-  const companies = (peerComparison?.data || []).filter(
-    (company) => company?.company_name?.status === true
-  );
+  const companies = useMemo(() => {
+    return (peerComparison?.data || []).filter(
+      (company) => company?.company_name?.status === true
+    );
+  }, [peerComparison]);
 
   if (!peerComparison?.status || companies.length === 0) {
     return null;
   }
   const themeClass = isPrivateDeal ? styles.dark : styles.light;
+
+  const tableWrapperRef = useRef(null);
+  const hasDismissedRef = useRef(false);
+  const [showRightShadow, setShowRightShadow] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+
+  const checkScroll = () => {
+    if (tableWrapperRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tableWrapperRef.current;
+      const hasOverflow = scrollWidth > clientWidth;
+      setShowRightShadow(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+
+    if (hasDismissedRef.current) return;
+
+    if (tableWrapperRef.current) {
+      const { scrollWidth, clientWidth } = tableWrapperRef.current;
+      if (scrollWidth > clientWidth) {
+        setShowScrollHint(true);
+      } else {
+        setShowScrollHint(false);
+      }
+    }
+
+    const element = tableWrapperRef.current;
+    if (element) {
+      if (typeof window !== "undefined" && "ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(() => {
+          checkScroll();
+        });
+        resizeObserver.observe(element);
+        return () => resizeObserver.disconnect();
+      } else {
+        window.addEventListener("resize", checkScroll);
+        return () => window.removeEventListener("resize", checkScroll);
+      }
+    }
+  }, [companies]);
+
+
+
+  const handleScroll = () => {
+    checkScroll();
+    setShowScrollHint(false);
+    hasDismissedRef.current = true;
+  };
+
+  const handleContainerClick = () => {
+    setShowScrollHint(false);
+    hasDismissedRef.current = true;
+  };
 
   const formatNumber = (value) => {
     if (value === null || value === undefined || isNaN(Number(value))) return value ?? "-";
@@ -33,10 +90,13 @@ const PeerComparison = ({ isPrivateDeal }) => {
   };
 
   const getColumnDivisor = () => {
-    if (windowWidth < 550) return 1.5; // Show 1.5 company columns (1 full + 1 half)
-    if (windowWidth < 786) return 2.5; // Show 2.5 company columns (2 full + 1 half)
-    if (windowWidth < 1200) return 3.5; // Show 3.5 company columns (3 full + 1 half)
-    return 4.5; // Show 4.5 company columns (4 full + 1 half)
+    if (windowWidth < 480) return 1.25;
+    if (windowWidth < 600) return 1.5;
+    if (windowWidth < 800) return 2;
+    if (windowWidth < 920) return 3;
+    if (windowWidth < 1000) return 2;
+    if (windowWidth < 1100) return 2.5;
+    return 3;
   };
 
   const divisor = getColumnDivisor();
@@ -107,71 +167,95 @@ const PeerComparison = ({ isPrivateDeal }) => {
   };
 
   return (
-    <section className={`${styles.container} ${themeClass}`}>
+    <section 
+      className={`${styles.container} ${themeClass}`}
+      onClick={handleContainerClick}
+    >
       <h2 className={styles.title}>Peer Comparison</h2>
 
-      <div className={styles.tableWrapper}>
-        <table 
-          className={`${styles.peerTable} ${companies.length === 2 ? styles.twoColumns : ""}`}
-          style={companies.length > divisor ? { minWidth: `calc(${metricWidth}px + ${companies.length} * ((100% - ${metricWidth}px) / ${divisor}))` } : { width: '100%' }}
+      <div className={styles.wrapperRelative}>
+        <div className={`${styles.scrollShadowRight} ${showRightShadow ? styles.visible : ""}`} />
+        
+        {showScrollHint && (
+          <div className={styles.scrollHintBadge} onClick={() => setShowScrollHint(false)}>
+            <span className={styles.scrollHintIconWrapper}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" >
+                <path d="M18 8L22 12L18 16" />
+                <path d="M6 8L2 12L6 16" />
+                <path d="M2 12H22" />
+              </svg>
+            </span>
+            <span>Scroll to view more</span>
+          </div>
+        )}
+
+        <div 
+          className={styles.tableWrapper}
+          ref={tableWrapperRef}
+          onScroll={handleScroll}
         >
-          <thead>
-            <tr>
-              <th className={styles.metricHeader}>Metric</th>
-              {companies.map((company, i) => {
-                const logoUrl = company.company_logo?.status ? getLogoUrl(company.company_logo) : null;
-                return (
-                  <th key={i} className={styles.companyHeader}>
-                    <div className={styles.companyInfo}>
-                      <span className={styles.companyName}>
-                        {company.company_name?.data?.split("\n").map((line, idx) => (
-                          <React.Fragment key={idx}>
-                            {line}
-                            <br />
-                          </React.Fragment>
-                        ))}
-                      </span>
-                      {logoUrl ? (
-                        <img
-                          src={logoUrl}
-                          alt={company.company_name?.data}
-                          className={styles.companyLogoImg || "companyLogoImg"}
-                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "contain", flexShrink: "0" }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <img
-                          src="/logo-fallback.png"
-                          alt={company.company_name?.data || "Company Logo"}
-                          className={styles.companyLogoImg || "companyLogoImg"}
-                          style={{ width: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "contain", marginTop: "5px", backgroundColor: "#fff", flexShrink: "0" }}
-                        />
-                      )}
-                    </div>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {activeMetrics.map((metric, idx) => (
-              <tr key={idx}>
-                <td className={styles.metricCell}>{metric.label}</td>
+          <table 
+            className={`${styles.peerTable} ${companies.length === 2 ? styles.twoColumns : ""} ${companies.length === 1 ? styles.oneColumn : ""}`}
+            style={(companies.length > 1 && companies.length > divisor) ? { minWidth: `calc(${metricWidth}px + ${companies.length} * ((100% - ${metricWidth}px) / ${divisor}))` } : undefined}
+          >
+            <thead>
+              <tr>
+                <th className={styles.metricHeader}>Metric</th>
                 {companies.map((company, i) => {
-                  const field = company[metric.key];
-                  const value = (field?.status && field.data !== null && field.data !== undefined && field.data !== "") ? field.data : "-";
+                  const logoUrl = company.company_logo?.status ? getLogoUrl(company.company_logo) : null;
                   return (
-                    <td key={i} className={styles.dataCell}>
-                      {value !== "-" ? metric.format(value) : "-"}
-                    </td>
+                    <th key={i} className={styles.companyHeader}>
+                      <div className={styles.companyInfo}>
+                        <span className={styles.companyName}>
+                          {company.company_name?.data?.split("\n").map((line, idx) => (
+                            <React.Fragment key={idx}>
+                              {line}
+                              <br />
+                            </React.Fragment>
+                          ))}
+                        </span>
+                        {logoUrl ? (
+                          <img
+                            src={logoUrl}
+                            alt={company.company_name?.data}
+                            className={styles.companyLogoImg || "companyLogoImg"}
+                            style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <img
+                            src="/logo-fallback.png"
+                            alt={company.company_name?.data || "Company Logo"}
+                            className={styles.companyLogoImg || "companyLogoImg"}
+                            style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "cover", marginTop: "5px", backgroundColor: "#fff", flexShrink: 0 }}
+                          />
+                        )}
+                      </div>
+                    </th>
                   );
                 })}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {activeMetrics.map((metric, idx) => (
+                <tr key={idx}>
+                  <td className={styles.metricCell}>{metric.label}</td>
+                  {companies.map((company, i) => {
+                    const field = company[metric.key];
+                    const value = (field?.status && field.data !== null && field.data !== undefined && field.data !== "") ? field.data : "-";
+                    return (
+                      <td key={i} className={styles.dataCell}>
+                        {value !== "-" ? metric.format(value) : "-"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
   );

@@ -15,7 +15,8 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
   position: sticky;
-  top: env(safe-area-inset-top);
+  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 999;
   background-color: #fff;
   border-radius: 16px;
@@ -35,6 +36,13 @@
   border: none;
   box-shadow: none;
   --bs-nav-tabs-border-width: none;
+}
+
+/* Ensure buttons reset native styling and behave like links */
+.first-navbar .navigation-tabs li button.nav-link {
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 /* .first-navbar .navigation-tabs .nav-item:hover { background-color: transparent; } */
@@ -94,7 +102,35 @@
   background-color: #171717;
 }
 
+/* Spacing and divider styles for mobile stacked sections */
+.tab-section-mobile {
+  /* border-bottom: 1px solid #f3f4f6; */
+  /* padding: 24px 0; */
+  padding-top: 20px;
+  padding-bottom: 0px;
+}
 
+.private-deal-theme .tab-section-mobile {
+  border-bottom: 1px solid #262626;
+}
+
+.tab-section-mobile:last-child {
+  border-bottom: none;
+}
+
+.tab-section-title-mobile {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  padding: 0 15px 16px 15px;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.private-deal-theme .tab-section-title-mobile {
+  color: #ffffff;
+}
 
 @media(max-width: 920px) {
   .first-navbar{

@@ -281,7 +281,7 @@
 
 @media(max-width:480px) {
   .container {
-    padding: 0 8px;
+    padding: 0 15px;
   }
 
   .section {

@@ -866,7 +866,11 @@ const Namedetailsection = ({ slug }) => {
                   ))}
                 </div>
                 <span className="s1">
-                  {qaCount || "No"} Q&A answered in last {daysUntilLive(liveAt)} days
+                  {qaCount && Number(qaCount) > 0 ? (
+                    `${qaCount} Q&A answered in last ${daysUntilLive(liveAt)} days`
+                  ) : (
+                    "Do you have any question? Ask now"
+                  )}
                 </span>
                 <span className="s2">
                   <img src="/assets/pictures/8e3073ca31264b3cb0bd9cb1e07af102b937cb5c.gif" alt="gif" />

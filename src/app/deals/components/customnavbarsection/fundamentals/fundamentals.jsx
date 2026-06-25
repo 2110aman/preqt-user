@@ -135,7 +135,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
       const highlights = apiData.fundraise_future_plans.ipo_key_highlights.data;
 
       const fundamentalsMap = {
-        issue_price: { title: "Issue Price", key: "issue_price", format: { prefix: "₹" } },
+        issue_price: { title: "Issue Price", key: isUnlisted ? "per_share_price" : "issue_price", format: { prefix: "₹" } },
         total_issue_shares: { title: "Total Issue Shares", key: "total_issue_shares" },
         lot_size: { title: "Lot Size", key: "lot_size" },
         min_investment: { title: "Min. Investment", key: "min_investment", format: { prefix: "₹" } },
@@ -153,8 +153,22 @@ const Fundamentals = ({ isPrivateDeal }) => {
       const transformed = Object.values(fundamentalsMap)
         .map((item) => {
           const apiItem = highlights.find((h) => h[item.key]);
-          const valueData = apiItem?.[item.key]?.value;
-          const descriptionData = apiItem?.[item.key]?.description;
+          if (!apiItem) return null;
+
+          const dataObj = apiItem[item.key];
+          if (!dataObj) return null;
+
+          // Check if data is nested under 'value' (listed style) or is directly the status/data object (unlisted style)
+          const isNested = dataObj.value !== undefined || dataObj.description !== undefined;
+          const valueData = isNested ? dataObj.value : dataObj;
+          const descriptionData = isNested ? dataObj.description : null;
+
+          let displayTitle = item.title;
+          if (dataObj?.label_name) {
+            displayTitle = dataObj.label_name;
+          } else if (valueData?.label_name) {
+            displayTitle = valueData.label_name;
+          }
 
           const shouldShowKey =
             valueData?.status === true || descriptionData?.status === true;
@@ -188,7 +202,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
           }
 
           return {
-            title: item.title,
+            title: displayTitle,
             value: shouldShowValue
               ? formattedValue?.toString() || "-"
               : "-",
@@ -275,10 +289,10 @@ const Fundamentals = ({ isPrivateDeal }) => {
     <div
       className={`fundamentals-container ${isPrivateDeal ? "privateDeal" : ""}`}
     >
-      {dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights?.data && !isUnlisted && (
+      {dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights?.data && (
         <>
           <hr className="hr" />
-          <Dropdown title="IPO key Highlights">
+          <Dropdown title={dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights?.label_name || (isUnlisted ? "Key Highlights" : "IPO key Highlights")}>
             {" "}
             <div className="Fundamentals-body-div">
               {fundamentalsData.length > 0 ? (

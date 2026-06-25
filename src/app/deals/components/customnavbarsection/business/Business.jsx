@@ -185,7 +185,6 @@ const Business = ({ isPrivateDeal }) => {
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                 ) : null}
-                <div className={styles.overlay}></div>
               </div>
             </div>
           );

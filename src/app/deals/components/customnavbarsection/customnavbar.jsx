@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Tab, Tabs, Fade } from "react-bootstrap";
 import { useDealStore } from "@/store/dealStore";
 import Overview from "./overview/overview";
-import Fundamentals from "./fundamentals/fundamentals";
-import Keyfinancials from "./keyfinancials/keyfinancials";
-import Industry from "./industry/industry";
 import Business from "./business/Business";
+import Industry from "./industry/industry";
+import Keyfinancials from "./keyfinancials/keyfinancials";
 import Shareholding from "./fundraise/Shareholding";
 import Documentation from "./documentation/page";
 import "./customnavbar.css";
 
 const Customnavbar = ({ isPrivateDeal, isccps }) => {
   const dealDetails = useDealStore((state) => state.dealDetails);
-  const dealData = dealDetails?.data || {};
 
   const hasOverview = useMemo(() => {
     const dealOverview = dealDetails?.data?.deal_overview;
@@ -134,7 +131,8 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
   }, [availableTabs, key]);
 
   const tabsRef = useRef(null);
-  const [firstLoad, setFirstLoad] = useState(true);
+  const isManualScrolling = useRef(false);
+  const scrollTimeoutRef = useRef(null);
 
   const contentRefs = {
     Overview: useRef(null),
@@ -145,89 +143,165 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
     Documentation: useRef(null),
   };
 
+  const keyRef = useRef(key);
   useEffect(() => {
-    if (firstLoad) {
-      setFirstLoad(false);
-      return
-    }
-    const activeTab = tabsRef.current?.querySelector(".nav-link.active");
-    if (activeTab) {
-      activeTab.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
+    keyRef.current = key;
+  }, [key]);
+
+  const scrollHeaderActiveLink = (activeTabName) => {
+    const container = tabsRef.current;
+    const activeLink = container?.querySelector(`[data-tab-name="${activeTabName}"]`);
+    if (container && activeLink) {
+      const containerWidth = container.offsetWidth;
+      const linkOffsetLeft = activeLink.offsetLeft;
+      const linkWidth = activeLink.offsetWidth;
+      // Center the active tab in the horizontally scrollable bar
+      const targetScrollLeft = linkOffsetLeft - (containerWidth / 2) + (linkWidth / 2);
+      container.scrollTo({
+        left: targetScrollLeft,
+        behavior: "smooth"
       });
     }
+  };
 
-    const activeContent = contentRefs[key]?.current;
-    if (activeContent) {
+  const handleTabClick = (tabName) => {
+    isManualScrolling.current = true;
+    setKey(tabName);
+
+    const element = contentRefs[tabName]?.current;
+    if (element) {
       const navbarHeight = tabsRef.current?.offsetHeight || 0;
-      const topOffset =
-        activeContent.getBoundingClientRect().top +
-        window.scrollY -
-        navbarHeight;
+      // Scroll to target offset with a small buffer
+      const targetOffset = element.getBoundingClientRect().top + window.scrollY - navbarHeight + 2;
 
       window.scrollTo({
-        top: topOffset,
+        top: targetOffset,
         behavior: "smooth",
       });
+
+      scrollHeaderActiveLink(tabName);
     }
-  }, [key]);
+
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      isManualScrolling.current = false;
+    }, 1000);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isManualScrolling.current) return;
+
+      const navbarHeight = tabsRef.current?.offsetHeight || 0;
+      let activeTab = availableTabs[0];
+
+      // Check if user scrolled near the bottom of the page
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 150;
+      
+      if (isAtBottom && availableTabs.length > 0) {
+        activeTab = availableTabs[availableTabs.length - 1];
+      } else {
+        // Find the active section based on scroll offset
+        for (const tabName of availableTabs) {
+          const element = contentRefs[tabName]?.current;
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            // A section is considered active if its top edge is scrolled past the sticky navbar bottom
+            // Let's add a small offset buffer of 40px to make transition occur slightly before the heading hits the navbar
+            if (rect.top - navbarHeight - 40 <= 0) {
+              activeTab = tabName;
+            }
+          }
+        }
+      }
+
+      if (activeTab && activeTab !== keyRef.current) {
+        setKey(activeTab);
+        scrollHeaderActiveLink(activeTab);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Check initial active section on mount
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, [availableTabs]);
 
   return (
     <div className="first-navbar">
-      <Tabs
-        id="carousel-tabs"
-        ref={tabsRef}
-        activeKey={key}
-        onSelect={(k) => setKey(k)}
-        className="navigation-tabs"
-        transition={Fade}
-        mountOnEnter
-        unmountOnExit
-      >
+      <ul className="nav nav-tabs navigation-tabs" ref={tabsRef} role="tablist">
+        {availableTabs.map((tabName) => {
+          const isActive = key === tabName;
+          return (
+            <li key={tabName} className="nav-item" role="presentation">
+              <button
+                type="button"
+                className={`nav-link ${isActive ? "active" : ""}`}
+                role="tab"
+                aria-selected={isActive}
+                data-tab-name={tabName}
+                onClick={() => handleTabClick(tabName)}
+              >
+                {tabName}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="tab-contents-stacked">
         {hasOverview && (
-          <Tab eventKey="Overview" title="Overview">
-            <div ref={contentRefs["Overview"]} className="tab-content-wrapper" style={{ minHeight: 'calc(100vh - 150px)' }}>
+          <div ref={contentRefs["Overview"]} className="tab-section-mobile">
+            <h2 className="tab-section-title-mobile">Overview</h2>
+            <div className="tab-content-wrapper">
               <Overview isPrivateDeal={isPrivateDeal} />
             </div>
-          </Tab>
+          </div>
         )}
 
         {hasBusiness && (
-          <Tab eventKey="Business" title="Business">
-            <div ref={contentRefs["Business"]} className="tab-content-wrapper" style={{ minHeight: 'calc(100vh - 150px)' }}>
+          <div ref={contentRefs["Business"]} className="tab-section-mobile">
+            <h2 className="tab-section-title-mobile">Business</h2>
+            <div className="tab-content-wrapper">
               <Business isPrivateDeal={isPrivateDeal} />
             </div>
-          </Tab>
+          </div>
         )}
 
-        <Tab eventKey="Industry Overview" title="Industry Overview">
-          <div ref={contentRefs["Industry Overview"]} className="tab-content-wrapper" style={{ minHeight: 'calc(100vh - 150px)' }}>
+        <div ref={contentRefs["Industry Overview"]} className="tab-section-mobile">
+          <h2 className="tab-section-title-mobile">Industry Overview</h2>
+          <div className="tab-content-wrapper">
             <Industry isPrivateDeal={isPrivateDeal} />
           </div>
-        </Tab>
+        </div>
 
-        <Tab eventKey="Financial Highlights" title="Financial Highlights">
-          <div ref={contentRefs["Financial Highlights"]} className="tab-content-wrapper" style={{ minHeight: '100vh' }}>
+        <div ref={contentRefs["Financial Highlights"]} className="tab-section-mobile">
+          <h2 className="tab-section-title-mobile">Financial Highlights</h2>
+          <div className="tab-content-wrapper">
             <Keyfinancials isPrivateDeal={isPrivateDeal} />
           </div>
-        </Tab>
+        </div>
 
         {hasFundraise && (
-          <Tab eventKey="Fundraise/Future Plans" title="Fundraise/Future Plans">
-            <div ref={contentRefs["Fundraise/Future Plans"]} className="tab-content-wrapper" style={{ minHeight: 'calc(100vh - 150px)' }}>
-              <Shareholding isPrivateDeal={isPrivateDeal} isccps = {isccps}/>
+          <div ref={contentRefs["Fundraise/Future Plans"]} className="tab-section-mobile">
+            <h2 className="tab-section-title-mobile">Fundraise/Future Plans</h2>
+            <div className="tab-content-wrapper">
+              <Shareholding isPrivateDeal={isPrivateDeal} isccps={isccps} />
             </div>
-          </Tab>
+          </div>
         )}
 
-        <Tab eventKey="Documentation" title="Documentation">
-          <div ref={contentRefs["Documentation"]} className="tab-content-wrapper" style={{ minHeight: 'calc(100vh - 150px)' }}>
+        <div ref={contentRefs["Documentation"]} className="tab-section-mobile">
+          <h2 className="tab-section-title-mobile">Documentation</h2>
+          <div className="tab-content-wrapper">
             <Documentation isPrivateDeal={isPrivateDeal} />
           </div>
-        </Tab>
-      </Tabs>
+        </div>
+      </div>
     </div>
   );
 };

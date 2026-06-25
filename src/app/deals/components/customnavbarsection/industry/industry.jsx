@@ -223,7 +223,6 @@ const Industry = ({ isPrivateDeal }) => {
                     style={{ width: "100%", height: "100%", objectFit: "contain" }}
                   />
                 ) : null}
-                <div className={styles.overlay}></div>
               </div>
             </div>
           );
