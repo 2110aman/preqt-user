@@ -222,3 +222,10 @@ height: 6px;
   height: 340px;
   object-fit:  contain !important;
 }
+
+
+@media (max-width: 480px) {
+  .carousel-item{
+    height: 320px;
+  }
+}
