@@ -524,6 +524,6 @@ gap: 10px;
     gap: 8px;
   }
   .fundamentals-container{
-    padding: unset;
+    padding: 0px 15px;
   }
 }
