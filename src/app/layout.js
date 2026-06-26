@@ -66,11 +66,7 @@ export const metadata = {
     card: "summary",
     title: "PrEqt",
     images: [SITE_IMAGE],
-    itemprop: "name",
     description: "PrEqt - Private Equity Platform",
-    property: "og:description",
-
-
   },
 };
 
@@ -91,6 +87,7 @@ export default async function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
           rel="stylesheet"
         /> */}
+        <title>PrEqt</title>
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable}`}>

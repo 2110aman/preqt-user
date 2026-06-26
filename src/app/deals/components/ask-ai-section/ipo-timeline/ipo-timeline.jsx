@@ -56,10 +56,10 @@ const Ipotimeline = ({ handleAskAI, handleQuesAns, isPrivateDeal, qaCount }) => 
       if (!dealId) return;
 
       try {
-        const token = isPrivateDeal ? Cookies.get("token") : null;
+        const token = isPrivateDeal ? Cookies.get("accessToken") : null;
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/dashboard/replies-count/${dealId}`,
+          `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/dashboard/replies-count/${dealId}`,
           {
             method: "GET",
             headers: {

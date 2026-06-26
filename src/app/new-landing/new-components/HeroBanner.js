@@ -13,7 +13,7 @@ export default function HeroBanner() {
         playsInline
         poster="/thumbnailhero.webp"
         preload="auto"
-        fetchPriority="high"
+        // fetchPriority="high"
         className={styles.heroVideo}
       />
 
