@@ -454,7 +454,7 @@
     overflow: hidden;
     flex-wrap: wrap;
     gap: 10px;
-    max-height: 28px;
+    max-height: 30px;
     margin-top: 4PX;
     /* Limits rendering to exactly one row of tags */
     margin-bottom: auto;
