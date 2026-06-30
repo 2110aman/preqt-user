@@ -354,7 +354,7 @@ export default function NavBar({ onSigninClick, hasToken }) {
                     </svg>
                   </div>
                 </Link>
-                {accessToken && <Link className={styles.homeNavButton} href="/events" onClick={() => setMenuOpen(false)}>
+                {/* {accessToken && <Link className={styles.homeNavButton} href="/events" onClick={() => setMenuOpen(false)}>
                   <div className={styles.homebtn}>Events</div>
                   <div className={styles.arrow}>
                     <svg
@@ -373,7 +373,7 @@ export default function NavBar({ onSigninClick, hasToken }) {
                       />
                     </svg>
                   </div>
-                </Link>}
+                </Link>} */}
                 {accessToken && <Link className={styles.homeNavButton} href={"/account"} onClick={() => setMenuOpen(false)}>
                   <div className={styles.homebtn}>Account</div>
                   <div className={styles.arrow}>
@@ -491,14 +491,14 @@ export default function NavBar({ onSigninClick, hasToken }) {
 
                 <p className={styles.home}>Community</p>
               </Link>
-              {accessToken && <Link
+              {/* {accessToken && <Link
                 href="/events"
                 className={`${styles.HomeNavButton} ${pathname.includes("/events") ? styles.activeLink : ""
                   }`}
               >
 
                 <p className={styles.home}>Events</p>
-              </Link>}
+              </Link>} */}
             </div>
           </div>
         </div>

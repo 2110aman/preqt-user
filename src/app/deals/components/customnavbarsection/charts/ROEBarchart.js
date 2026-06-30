@@ -14,8 +14,8 @@ import {
 
 const CustomBar = (props) => {
     const { fill, x, y, width, height, value } = props;
-    if (width <= 0 || height <= 0) return null;
-    const r = Math.min(8, height, width / 2);
+    if (width <= 0 || height === 0) return null;
+    const r = Math.min(8, Math.abs(height), width / 2);
     
     let path = "";
     if (value >= 0) {
@@ -26,12 +26,12 @@ const CustomBar = (props) => {
                 A${r},${r} 0 0,1 ${x + width},${y + r} 
                 L${x + width},${y + height} Z`;
     } else {
-        path = `M${x},${y} 
-                L${x + width},${y} 
-                L${x + width},${y + height - r} 
-                A${r},${r} 0 0,1 ${x + width - r},${y + height} 
-                L${x + r},${y + height} 
-                A${r},${r} 0 0,1 ${x},${y + height - r} Z`;
+        path = `M${x},${y + height} 
+                L${x + width},${y + height} 
+                L${x + width},${y - r} 
+                A${r},${r} 0 0,1 ${x + width - r},${y} 
+                L${x + r},${y} 
+                A${r},${r} 0 0,1 ${x},${y - r} Z`;
     }
     
     return <path d={path} fill={fill} />;
@@ -57,7 +57,8 @@ const ROEBarchart = ({ isPrivate, data: apiData }) => {
                         value: Number(item.roe) || Number(item.roe_percent) || 0
                     };
                 })
-                .filter(item => item !== null);
+                .filter(item => item !== null)
+                .sort((a, b) => Number(a.year) - Number(b.year));
         } catch (error) {
             console.error('ROEBarchart: Error transforming data', error);
             return [];
@@ -71,24 +72,12 @@ const ROEBarchart = ({ isPrivate, data: apiData }) => {
                 const transformed = transformData(apiData);
                 // Make sure we have valid non-zero values to present
                 const validData = transformed.filter(item => item.value !== 0);
-                return validData.length > 0 ? validData : [
-                    { year: "2022", value: -21.8 },
-                    { year: "2023", value: 25.5 },
-                    { year: "2024", value: 31.8 }
-                ];
+                return validData;
             }
-            return [
-                { year: "2022", value: -21.8 },
-                { year: "2023", value: 25.5 },
-                { year: "2024", value: 31.8 }
-            ];
+            return [];
         } catch (error) {
             console.error('ROEBarchart: Error selecting chart data', error);
-            return [
-                { year: "2022", value: -21.8 },
-                { year: "2023", value: 25.5 },
-                { year: "2024", value: 31.8 }
-            ];
+            return [];
         }
     })();
 

@@ -105,8 +105,8 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
 
                 {!isPrivateDeal && !isUnlisted && (
                     <>
-                        <div className={styles.ipocollapseCenter}>
-                            {(dealData?.gmp?.status || true) && (
+                        {dealData?.gmp?.status && (
+                            <div className={styles.ipocollapseCenter}>
                                 <div className={styles.ipocollapseCenterInner}>
                                     <small className={styles.smallText}>
                                         {dealData?.gmp?.label_name || "Current GMP (Per share)"}
@@ -129,11 +129,11 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                         )}
                                     </h5>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
-                        <div className={styles.ipocollapseCenter}>
-                            {(dealData?.estimated_gain_loss?.status || true) && (
+                        {dealData?.estimated_gain_loss?.status && (
+                            <div className={styles.ipocollapseCenter}>
                                 <div className={styles.ipocollapseCenterInner}>
                                     <small className={styles.smallText}>
                                         {dealData?.estimated_gain_loss?.label_name || "Estimated Gain/Loss"}
@@ -170,8 +170,8 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                         )}
                                     </h5>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                     </>
                 )}

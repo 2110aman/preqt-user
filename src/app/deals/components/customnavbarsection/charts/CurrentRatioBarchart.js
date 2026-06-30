@@ -32,7 +32,8 @@ const CurrentRatioBarchart = ({ isPrivate, data: apiData }) => {
                         value: Number(item.current_ratio) || Number(item.currentratio) || 0
                     };
                 })
-                .filter(item => item !== null && item.value > 0);
+                .filter(item => item !== null && item.value > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
         } catch (error) {
             console.error('CurrentRatioBarchart: Error transforming data', error);
             return [];
@@ -44,24 +45,12 @@ const CurrentRatioBarchart = ({ isPrivate, data: apiData }) => {
         try {
             if (apiData) {
                 const transformed = transformData(apiData);
-                return transformed.length > 0 ? transformed : [
-                    { year: "2022", value: 1.4 },
-                    { year: "2023", value: 1.6 },
-                    { year: "2024", value: 2.1 }
-                ];
+                return transformed;
             }
-            return [
-                { year: "2022", value: 1.4 },
-                { year: "2023", value: 1.6 },
-                { year: "2024", value: 2.1 }
-            ];
+            return [];
         } catch (error) {
             console.error('CurrentRatioBarchart: Error selecting chart data', error);
-            return [
-                { year: "2022", value: 1.4 },
-                { year: "2023", value: 1.6 },
-                { year: "2024", value: 2.1 }
-            ];
+            return [];
         }
     })();
 

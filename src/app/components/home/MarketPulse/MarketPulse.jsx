@@ -95,7 +95,7 @@ const MarketPulse = () => {
 
   if (isLoading) {
     return (
-      <div className={styles.cardContainer} style={{ minHeight: '230px', width: '100%' }}>
+      <div className={styles.cardContainer} style={{ minHeight: '230px' }}>
         <div className={styles.headerRow}>
           <div className={styles.skeleton} style={{ width: '150px', height: '24px', borderRadius: '6px' }}></div>
           <div className={styles.skeleton} style={{ width: '180px', height: '20px', borderRadius: '4px' }}></div>

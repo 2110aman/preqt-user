@@ -600,18 +600,6 @@ const TopDeal = () => {
           )
         })}
 
-        {/* empty state */}
-        {!isLoading && filteredDeals.length === 0 && (
-          <div className={`${Styles.AnthemBanner} ${Styles.emptyState}`}>
-            <div className={Styles.emptyStateInner}>
-              <div className={Styles.emptyStateIcon}>
-                <PackageOpen size={28} color="#B8860B" />
-              </div>
-              <p className={Styles.emptyStateHeading}>No top deals available</p>
-              <p className={Styles.emptyStateDescription}>Please check back later.</p>
-            </div>
-          </div>
-        )}
 
         {/* 15+ deals section */}
         {filteredDeals.length > 0 && (

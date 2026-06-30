@@ -52,42 +52,12 @@ const transformData = (apiData) => {
     try {
       if (data) {
         const transformed = transformData(data);
-        return transformed.length > 0 ? transformed : (isPrivate ? [
-          { year: "FY'22", growth: 25.3 },
-          { year: "FY'23", growth: 21.4 },
-          { year: "FY'24", growth: 43.5},
-          { year: "FY'25", growth: 68.7},
-        ] : [
-          { year: "FY'22", growth: 14.8 },
-          { year: "FY'23", growth: 30.2 },
-          { year: "FY'24", growth: 15.8 },
-          { year: "FY'25", growth: 75.9 },
-        ]);
+        return transformed;
       }
-      return isPrivate ? [
-        { year: "FY'22", growth: 25.3 },
-        { year: "FY'23", growth: 21.4 },
-        { year: "FY'24", growth: 43.5},
-        { year: "FY'25", growth: 68.7},
-      ] : [
-        { year: "FY'22", growth: 14.8 },
-        { year: "FY'23", growth: 30.2 },
-        { year: "FY'24", growth: 15.8 },
-        { year: "FY'25", growth: 75.9 },
-      ];
+      return [];
     } catch (error) {
       console.error('PurpleBarchart: Error selecting chart data', error);
-      return isPrivate ? [
-        { year: "FY'22", growth: 25.3 },
-        { year: "FY'23", growth: 21.4 },
-        { year: "FY'24", growth: 43.5},
-        { year: "FY'25", growth: 68.7},
-      ] : [
-        { year: "FY'22", growth: 14.8 },
-        { year: "FY'23", growth: 30.2 },
-        { year: "FY'24", growth: 15.8 },
-        { year: "FY'25", growth: 75.9 },
-      ];
+      return [];
     }
   })();
   return (

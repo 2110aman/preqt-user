@@ -508,7 +508,7 @@ function DealsTalkContent() {
                     <div className={styles.bottomFooter}>
                         <p className={styles.qaGoldText}>
                             {qaCounts[deal.id] > 0 ? (
-                                `${qaCounts[deal.id]} Q&A Answered In Last ${daysUntilLive(deal?.createdAt)} Days`
+                                `${qaCounts[deal.id]} Q&A Answered In Last  ${daysUntilLive(deal?.createdAt)} Days`
                             ) : (
                                 <>
                                     Do you have any question?{" "}
@@ -725,7 +725,7 @@ function DealsTalkContent() {
                     <div className={styles.card2QandA}>
                         <div className={styles.card2QandAStats}>
                             {qaCounts[deal.id] > 0 ? (
-                                `${qaCounts[deal.id]} Q&A answered in last ${daysUntilLive(deal?.createdAt)} days`
+                                `${qaCounts[deal.id]} Q&A answered in  last ${daysUntilLive(deal?.createdAt)} days`
                             ) : (
                                 <>
                                     Do you have any question?{" "}

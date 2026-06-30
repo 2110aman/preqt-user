@@ -342,7 +342,7 @@
   .headerRow {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 8px;
   }
 
   .favorablePill {
@@ -438,7 +438,7 @@
 
   .viewButton {
     width: 100%;
-    max-width: 200px;
+    max-width: 197px;
   }
 
   .authorInfo {

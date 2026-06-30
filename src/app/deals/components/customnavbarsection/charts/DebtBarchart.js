@@ -12,6 +12,31 @@ import {
     LabelList,
 } from "recharts";
 
+const CustomBar = (props) => {
+    const { fill, x, y, width, height, value } = props;
+    if (width <= 0 || height === 0) return null;
+    const r = Math.min(8, Math.abs(height), width / 2);
+    
+    let path = "";
+    if (value >= 0) {
+        path = `M${x},${y + height} 
+                L${x},${y + r} 
+                A${r},${r} 0 0,1 ${x + r},${y} 
+                L${x + width - r},${y} 
+                A${r},${r} 0 0,1 ${x + width},${y + r} 
+                L${x + width},${y + height} Z`;
+    } else {
+        path = `M${x},${y + height} 
+                L${x + width},${y + height} 
+                L${x + width},${y - r} 
+                A${r},${r} 0 0,1 ${x + width - r},${y} 
+                L${x + r},${y} 
+                A${r},${r} 0 0,1 ${x},${y - r} Z`;
+    }
+    
+    return <path d={path} fill={fill} />;
+};
+
 const DebtBarChart = ({ isPrivate, data: apiData }) => {
     // Transform API data to chart format with error handling
     const transformData = (data) => {
@@ -33,7 +58,8 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
                         value: Number(item.debt_to_equity) || 0
                     };
                 })
-                .filter(item => item !== null);
+                .filter(item => item !== null)
+                .sort((a, b) => Number(a.year) - Number(b.year));
         } catch (error) {
             console.error('DebtBarChart: Error transforming data', error);
             return [];
@@ -45,57 +71,91 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
         try {
             if (apiData) {
                 const transformed = transformData(apiData);
-                return transformed.length > 0 ? transformed : [
-                    { year: "2022", value: 1.28 },
-                    { year: "2023", value: 0.88 },
-                    { year: "2024", value: 1.09 }
-                ];
+                return transformed;
             }
-            return [
-                { year: "2022", value: 1.28 },
-                { year: "2023", value: 0.88 },
-                { year: "2024", value: 1.09 }
-            ];
+            return [];
         } catch (error) {
             console.error('DebtBarChart: Error selecting chart data', error);
-            return [
-                { year: "2022", value: 1.28 },
-                { year: "2023", value: 0.88 },
-                { year: "2024", value: 1.09 }
-            ];
+            return [];
         }
     })();
 
     const { ticks, domain } = React.useMemo(() => {
-        const maxVal = Math.max(...chartData.map(d => d.value), 0) || 1.28;
+        const hasNegative = chartData.some(d => d.value < 0);
         
-        // Calculate nice intervals dynamically for all values
-        const rawInterval = maxVal / 3.5;
-        const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
-        const normalized = rawInterval / magnitude;
-        
-        // Finer nice steps for beautiful numbers
-        const niceSteps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
-        const step = niceSteps.find(s => s >= normalized) || 10;
-        
-        const interval = step * magnitude;
-        const generatedTicks = [
-            0,
-            Number(interval.toFixed(4)),
-            Number((2 * interval).toFixed(4)),
-            Number((3 * interval).toFixed(4)),
-            Number((4 * interval).toFixed(4))
-        ];
-        
-        return {
-            ticks: generatedTicks,
-            domain: [0, Number((4 * interval).toFixed(4))]
-        };
+        if (hasNegative) {
+            const maxAbsVal = Math.max(...chartData.map(d => Math.abs(d.value)), 0) || 1.28;
+            
+            // Nice steps for ranges with negative values
+            const rawInterval = maxAbsVal / 2.0;
+            const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
+            const normalized = rawInterval / magnitude;
+            
+            const niceSteps = [1, 2, 5, 10];
+            const step = niceSteps.find(s => s >= normalized) || 10;
+            const interval = step * magnitude;
+            
+            const generatedTicks = [
+                Number((-2 * interval).toFixed(4)),
+                Number((-interval).toFixed(4)),
+                0,
+                Number(interval.toFixed(4)),
+                Number((2 * interval).toFixed(4))
+            ];
+            
+            return {
+                ticks: generatedTicks,
+                domain: [Number((-2 * interval).toFixed(4)), Number((2 * interval).toFixed(4))]
+            };
+        } else {
+            const maxVal = Math.max(...chartData.map(d => d.value), 0) || 1.28;
+            
+            const rawInterval = maxVal / 3.5;
+            const magnitude = Math.pow(10, Math.floor(Math.log10(rawInterval)));
+            const normalized = rawInterval / magnitude;
+            
+            const niceSteps = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+            const step = niceSteps.find(s => s >= normalized) || 10;
+            const interval = step * magnitude;
+            
+            const generatedTicks = [
+                0,
+                Number(interval.toFixed(4)),
+                Number((2 * interval).toFixed(4)),
+                Number((3 * interval).toFixed(4)),
+                Number((4 * interval).toFixed(4))
+            ];
+            
+            return {
+                ticks: generatedTicks,
+                domain: [0, Number((4 * interval).toFixed(4))]
+            };
+        }
     }, [chartData]);
+
+    const renderCustomizedLabel = (props) => {
+        const { x, y, width, height, value } = props;
+        const isNegative = value < 0;
+        // Position below negative bars, above positive ones
+        const labelY = isNegative ? y + height + 18 : y - 8;
+        return (
+            <text
+                x={x + width / 2}
+                y={labelY}
+                fill="var(--Gray-500, #4B5563)"
+                fontSize="13px"
+                fontFamily="Helvetica Neue, Helvetica, sans-serif"
+                fontWeight={500}
+                textAnchor="middle"
+            >
+                {value.toFixed(2)}x
+            </text>
+        );
+    };
 
     return (
         <ResponsiveContainer width="100%" height={320}>
-            <BarChart key={JSON.stringify(chartData)} data={chartData} barSize={77} margin={{ top: 25, right: 10, left: 15, bottom: 5 }}>
+            <BarChart key={JSON.stringify(chartData)} data={chartData} barSize={77} margin={{ top: 25, right: 10, left: 15, bottom: 20 }}>
                 <defs>
                     <linearGradient id="debtLatestBarGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#E4C575" />
@@ -159,28 +219,25 @@ const DebtBarChart = ({ isPrivate, data: apiData }) => {
                 />
                 <Bar
                     dataKey="value"
-                    radius={[8, 8, 0, 0]} // rounded top corners
+                    shape={<CustomBar />}
                 >
                     {chartData.map((entry, index) => {
                         const isLatest = index === chartData.length - 1;
+                        let fillVal = isLatest ? "url(#debtLatestBarGradient)" : "#F5E3B2";
+                        // If negative, use a soft cool grey
+                        if (entry.value < 0) {
+                            fillVal = "#E2E8F0";
+                        }
                         return (
                             <Cell
                                 key={`cell-${index}`}
-                                fill={isLatest ? "url(#debtLatestBarGradient)" : "#F5E3B2"}
+                                fill={fillVal}
                             />
                         );
                     })}
                     <LabelList
                         dataKey="value"
-                        position="top"
-                        formatter={(val) => `${Number(val).toFixed(2)} x`}
-                        style={{
-                            fill: "var(--Gray-500, #4B5563)",
-                            fontSize: "13px",
-                            fontFamily: "Helvetica Neue, Helvetica, sans-serif",
-                            fontWeight: 500
-                        }}
-                        offset={10}
+                        content={renderCustomizedLabel}
                     />
                 </Bar>
             </BarChart>

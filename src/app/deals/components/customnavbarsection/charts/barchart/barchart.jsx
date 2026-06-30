@@ -68,12 +68,12 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
     try {
       if (apiData) {
         const transformed = transformData(apiData);
-        return transformed.length > 0 ? transformed : (isPrivateDeal ? privateData : publicData);
+        return transformed;
       }
-      return isPrivateDeal ? privateData : publicData;
+      return [];
     } catch (error) {
       console.error('Barchart: Error selecting chart data', error);
-      return isPrivateDeal ? privateData : publicData;
+      return [];
     }
   })();
   const isMobile = useMediaQuery({ maxWidth: 768 });

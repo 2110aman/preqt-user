@@ -32,7 +32,8 @@ const InterestCoverageBarchart = ({ isPrivate, data: apiData }) => {
                         value: Number(item.interest_coverage) || Number(item.interest_coverage_ratio) || 0
                     };
                 })
-                .filter(item => item !== null && item.value > 0);
+                .filter(item => item !== null && item.value > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
         } catch (error) {
             console.error('InterestCoverageBarchart: Error transforming data', error);
             return [];
@@ -44,24 +45,12 @@ const InterestCoverageBarchart = ({ isPrivate, data: apiData }) => {
         try {
             if (apiData) {
                 const transformed = transformData(apiData);
-                return transformed.length > 0 ? transformed : [
-                    { year: "2022", value: 18.5 },
-                    { year: "2023", value: 20.1 },
-                    { year: "2024", value: 31.6 }
-                ];
+                return transformed;
             }
-            return [
-                { year: "2022", value: 18.5 },
-                { year: "2023", value: 20.1 },
-                { year: "2024", value: 31.6 }
-            ];
+            return [];
         } catch (error) {
             console.error('InterestCoverageBarchart: Error selecting chart data', error);
-            return [
-                { year: "2022", value: 18.5 },
-                { year: "2023", value: 20.1 },
-                { year: "2024", value: 31.6 }
-            ];
+            return [];
         }
     })();
 
@@ -161,17 +150,7 @@ const InterestCoverageBarchart = ({ isPrivate, data: apiData }) => {
                 >
                     {chartData.map((entry, index) => {
                         const isLatest = index === chartData.length - 1;
-                        // First bar (2022) -> light grey (#CBD5E1)
-                        // Second bar (2023) -> medium grey (#9CA3AF)
-                        // Latest bar (2024) -> Gold gradient
-                        let fillVal = "url(#interestLatestBarGradient)";
-                        if (index === 0) {
-                            fillVal = "#CBD5E1";
-                        } else if (index === 1 && chartData.length > 2) {
-                            fillVal = "#9CA3AF";
-                        } else if (!isLatest) {
-                            fillVal = "#CBD5E1";
-                        }
+                        const fillVal = isLatest ? "url(#interestLatestBarGradient)" : "#F5E3B2";
 
                         return (
                             <Cell

@@ -609,15 +609,15 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
 
     yearsToUse = Array.from(allYears).sort((a, b) => Number(a) - Number(b));
     if (yearsToUse.length === 0) {
-      yearsToUse = ["2023", "2024", "2025"];
+      yearsToUse = [];
     }
     finalRows = flatRows;
   } else {
     // Fallback to legacy static rows structure
     yearsToUse = rawApiData.length > 0
       ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
-      : ["2023", "2024", "2025"];
-    finalRows = balanceSheetRows;
+      : [];
+    finalRows = rawApiData.length > 0 ? balanceSheetRows : [];
   }
 
   // Parse observations correctly checking status
@@ -884,9 +884,9 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
 
     yearsToUse = rawApiData.length > 0
       ? [...new Set(rawApiData.map(item => item?.year?.toString()).filter(Boolean))].sort((a, b) => Number(a) - Number(b))
-      : ["2023", "2024", "2025"];
+      : [];
 
-    finalRows = defaultCashFlowRows;
+    finalRows = rawApiData.length > 0 ? defaultCashFlowRows : [];
   }
 
   const observationHtml = extractObservationHtml(financialHighlights?.cash_flow_analysis, rawApiData)
@@ -1487,7 +1487,47 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
   const showData = dealDetails?.data?.financial_highlights?.financial_performance?.data?.data?.revenue_in_cr?.status;
   console.log('Showing the data for Revenue', showData);
 
+  const ratioData = dealDetails?.data?.financial_highlights?.financial_ratio?.data || [];
+
+  const isRatioValid = (keys) => {
+    if (!Array.isArray(ratioData) || ratioData.length === 0) return false;
+    return ratioData.some(item => {
+      if (!item || typeof item !== 'object' || item.observation_and_insights) return false;
+      return keys.some(key => {
+        const val = item[key];
+        return val !== null && val !== undefined && val !== "" && !isNaN(Number(val));
+      });
+    });
+  };
+
+  const ratioTabVisibility = {
+    "Debt to Equity (x)": isRatioValid(["debt_to_equity"]),
+    "Interest Coverage Ratio (x)": isRatioValid(["interest_coverage", "interest_coverage_ratio"]),
+    "Current Ratio (x)": isRatioValid(["current_ratio", "currentratio"]),
+    "ROA (%)": isRatioValid(["roa", "roa_percent"]),
+    "ROE (%)": isRatioValid(["roe", "roe_percent"]),
+    "ROCE (%)": isRatioValid(["roce", "roce_percent"]),
+  };
+
+  const tabs = [
+    { key: "Debt to Equity (x)", label: "Debt to Equity (x)" },
+    { key: "Interest Coverage Ratio (x)", label: "Interest Coverage Ratio (x)" },
+    { key: "Current Ratio (x)", label: "Current Ratio (x)" },
+    { key: "ROA (%)", label: "ROA (%)" },
+    { key: "ROE (%)", label: "ROE (%)" },
+    { key: "ROCE (%)", label: "ROCE (%)" },
+  ];
+
+  const visibleTabs = tabs.filter(tab => ratioTabVisibility[tab.key]);
+
   const [activeTab, setActiveTab] = useState("Debt to Equity (x)");
+
+  useEffect(() => {
+    if (visibleTabs.length > 0 && !visibleTabs.some(t => t.key === activeTab)) {
+      setActiveTab(visibleTabs[0].key);
+    }
+  }, [visibleTabs, activeTab]);
+
   const [activeStyle, setActiveStyle] = useState({ left: 0, width: 0 });
   const tabsContainerRef = useRef(null);
 
@@ -1513,15 +1553,6 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
       window.removeEventListener("resize", updateActiveIndicator);
     };
   }, [activeTab]);
-
-  const tabs = [
-    { key: "Debt to Equity (x)", label: "Debt to Equity (x)" },
-    { key: "Interest Coverage Ratio (x)", label: "Interest Coverage Ratio (x)" },
-    { key: "Current Ratio (x)", label: "Current Ratio (x)" },
-    { key: "ROA (%)", label: "ROA (%)" },
-    { key: "ROE (%)", label: "ROE (%)" },
-    { key: "ROCE (%)", label: "ROCE (%)" },
-  ];
 
   const tabDescriptions = {
     "Debt to Equity (x)": "Measures the company’s leverage relative to shareholder equity.",
@@ -1700,7 +1731,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
       )}
 
       {/* Financial Ratios */}
-      {dealDetails?.data?.financial_highlights?.financial_ratio?.status && (
+      {dealDetails?.data?.financial_highlights?.financial_ratio?.status && visibleTabs.length > 0 && (
         <div className="section">
           <div
             className="section-header"
@@ -1724,7 +1755,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
                         width: `${activeStyle.width}px`,
                       }}
                     />
-                    {tabs.map((tab) => (
+                    {visibleTabs.map((tab) => (
                       <button
                         key={tab.key}
                         className={`customTab ${activeTab === tab.key ? "active" : ""

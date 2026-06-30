@@ -502,7 +502,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .qaCount {
@@ -1229,7 +1229,7 @@
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
-        gap: 4px !important;
+        gap: 7px !important;
     }
 
     /* Mobile Company Badge Row under Company Name */
@@ -1304,7 +1304,7 @@
     .listView .heroBoxes {
         display: flex !important;
         flex-direction: row !important;
-        gap: 20px !important;
+        gap: 20px;
         justify-content: flex-end;
         margin: 0 !important;
         padding: 0 !important;
@@ -1359,11 +1359,16 @@
     .metricsGrid{
     row-gap: 14px !important;
     }
+    .listView [class*="avatar"] {
+        width: 20px !important;
+        height: 29px !important;
+        font-size: 7px !important;
+    }
 }
 
 @media (max-width: 480px) {
     .listView .companyName {
-        max-width: 175px !important;
+        max-width: 250px !important;
         overflow: hidden !important;
         white-space: nowrap !important;
         text-overflow: ellipsis !important;
@@ -1374,7 +1379,7 @@
         gap: 0px;
     }
     .listView .heroBoxes{
-        gap:15px !important;
+        gap:15px ;
     }
 
     .mobileTagsInline {
@@ -1386,7 +1391,7 @@
     }
 
     .listView {
-        grid-template-columns: 0.5fr 1fr !important;
+        grid-template-columns: 1.1fr 0.9fr !important;
         gap: 2px 2px !important;
         padding: 12px !important;
     }
@@ -1406,10 +1411,15 @@
         max-width: 120px !important;
     }
     .listView .heroBoxes{
-        gap:15px !important;
+        gap:10px ;
     }
 
     .listView {
-        /* grid-template-columns: 1.1fr 0.9fr !important; */
+        grid-template-columns: 0.7fr 1fr !important;
+    }
+    .listView [class*="avatar"] {
+        width: 20px !important;
+        height: 17px !important;
+        font-size: 6px !important;
     }
 }

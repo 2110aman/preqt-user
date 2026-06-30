@@ -32,7 +32,8 @@ const ROCEBarchart = ({ isPrivate, data: apiData }) => {
                         value: Number(item.roce) || Number(item.roce_percent) || 0
                     };
                 })
-                .filter(item => item !== null && item.value > 0);
+                .filter(item => item !== null && item.value > 0)
+                .sort((a, b) => Number(a.year) - Number(b.year));
         } catch (error) {
             console.error('ROCEBarchart: Error transforming data', error);
             return [];
@@ -44,24 +45,12 @@ const ROCEBarchart = ({ isPrivate, data: apiData }) => {
         try {
             if (apiData) {
                 const transformed = transformData(apiData);
-                return transformed.length > 0 ? transformed : [
-                    { year: "2022", value: 18.5 },
-                    { year: "2023", value: 21.5 },
-                    { year: "2024", value: 31.6 }
-                ];
+                return transformed;
             }
-            return [
-                { year: "2022", value: 18.5 },
-                { year: "2023", value: 21.5 },
-                { year: "2024", value: 31.6 }
-            ];
+            return [];
         } catch (error) {
             console.error('ROCEBarchart: Error selecting chart data', error);
-            return [
-                { year: "2022", value: 18.5 },
-                { year: "2023", value: 21.5 },
-                { year: "2024", value: 31.6 }
-            ];
+            return [];
         }
     })();
 
