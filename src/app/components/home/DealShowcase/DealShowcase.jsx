@@ -10,6 +10,7 @@ export default function DealShowcase() {
     const [featuredDeals, setFeaturedDeals] = useState([]);
     const [upcomingDeals, setUpcomingDeals] = useState([]);
     const [unlistedDeals, setUnlistedDeals] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchShowcaseDeals = async () => {
@@ -42,14 +43,11 @@ export default function DealShowcase() {
                     // =========================================================================
                     const filteredFeatured = deals.filter(deal => 
                         (deal.deal_type?.toLowerCase() === 'public' || 
-                         deal.deal_type?.toLowerCase() === 'unlisted' || 
                          deal.deal_type?.toLowerCase() === 'unlisted') && 
                         deal.deal_sub_type?.toLowerCase() === 'featured'
                     );
 
-                    if (filteredFeatured.length > 0) {
-                        setFeaturedDeals(filteredFeatured);
-                    }
+                    setFeaturedDeals(filteredFeatured);
 
                     // =========================================================================
                     // FILTER CRITERIA FOR UPCOMING IPOs:
@@ -66,9 +64,7 @@ export default function DealShowcase() {
                         (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
                     );
 
-                    if (filteredUpcoming.length > 0) {
-                        setUpcomingDeals(filteredUpcoming);
-                    }
+                    setUpcomingDeals(filteredUpcoming);
 
                     // =========================================================================
                     // FILTER CRITERIA FOR UNLISTED SHARES:
@@ -85,49 +81,81 @@ export default function DealShowcase() {
                         (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
                     );
 
-                    if (filteredUnlisted.length > 0) {
-                        setUnlistedDeals(filteredUnlisted);
-                    }
+                    setUnlistedDeals(filteredUnlisted);
                 }
             } catch (error) {
                 console.error("Error fetching deals for landing showcase:", error);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchShowcaseDeals();
     }, []);
 
+    if (loading) {
+        return null;
+    }
+
     return (
         <div className={styles.showcaseContainer}>
-            {featuredDeals.length > 0 && (
-                <DealSection
-                    title="Featured Deals"
-                    subtitle="HIGHEST CONVICTION OPPORTUNITY"
-                    deals={featuredDeals}
-                    variantOverride="featured_deal"
-                />
-            )}
+            <DealSection
+                title="Featured Deals"
+                subtitle="HIGHEST CONVICTION OPPORTUNITY"
+                deals={featuredDeals}
+                variantOverride="featured_deal"
+            />
 
-            {upcomingDeals.length > 0 && (
-                <DealSection
-                    title="Upcoming IPOs"
-                    subtitle="INSTITUTIONAL GRADE IPOS"
-                    deals={upcomingDeals}
-                />
-            )}
+            <DealSection
+                title="Upcoming IPOs"
+                subtitle="INSTITUTIONAL GRADE IPOS"
+                deals={upcomingDeals}
+            />
 
-            {unlistedDeals.length > 0 && (
-                <DealSection
-                    title="Unlisted Shares"
-                    subtitle="Established companies traded in the private market"
-                    deals={unlistedDeals}
-                />
-            )}
+            <DealSection
+                title="Unlisted Shares"
+                subtitle="Established companies traded in the private market"
+                deals={unlistedDeals}
+            />
+        </div>
+    );
+}
+
+function FallbackCard() {
+    return (
+        <div className={styles.fallbackContainer}>
+            <div className={styles.shapesContainer}>
+                <svg width="100%" height="100%" viewBox="0 0 49 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="gold-gradient" x1="0" y1="0" x2="1" y2="0" gradientTransform="rotate(113.27 0.5 0.5)">
+                            <stop offset="15.04%" stopColor="#D2C299" />
+                            <stop offset="84.96%" stopColor="#8E6B0F" />
+                        </linearGradient>
+                    </defs>
+                    
+                    {/* Top Left: Circle (shrinks and grows) */}
+                    <circle className={styles.circleTop} cx="11.25" cy="11.25" r="11.25" fill="url(#gold-gradient)" />
+                    
+                    {/* Top Right: Square (translates top-down) */}
+                    <rect className={styles.squareTop} x="26.5" y="0" width="22.5" height="22.5" rx="4" fill="url(#gold-gradient)" />
+                    
+                    {/* Bottom Left: Triangle (rotates 360deg and pauses) */}
+                    <path className={styles.triangleBottom} d="M 11.25 29.5 L 19.5 46 L 3 46 Z" fill="url(#gold-gradient)" stroke="url(#gold-gradient)" strokeWidth="6" strokeLinejoin="round" />
+                    
+                    {/* Bottom Right: Circle (gets constricted when square is down) */}
+                    <circle className={styles.circleBottom} cx="37.75" cy="37.75" r="11.25" fill="url(#gold-gradient)" />
+                </svg>
+            </div>
+            <h3 className={styles.fallbackTitle}>Personalizing Opportunities</h3>
+            <p className={styles.fallbackSubtitle}>Our team is curating the best deals for you.</p>
+            <p className={styles.fallbackSubSubtitle}>Check back soon for exciting offers!</p>
         </div>
     );
 }
 
 function DealSection({ title, subtitle, deals, children, showArrow, titleColorClass, variantOverride }) {
+    const hasDeals = deals && deals.length > 0;
+
     return (
         <div className={styles.section}>
             <div className={styles.header}>
@@ -140,26 +168,31 @@ function DealSection({ title, subtitle, deals, children, showArrow, titleColorCl
 
             {children}
 
-            <div className={styles.cardRowWrapper}>
-                <Swiper
-                    slidesPerView="auto"
-                    spaceBetween={16}
-                    breakpoints={{
-                        768: {
-                            spaceBetween: 34,
-                        },
-                    }}
-                    loop={deals.length >= 2}
-                    grabCursor={true}
-                    className={styles.cardRow}
-                >
-                    {deals.map(deal => (
-                        <SwiperSlide key={deal.id} className={styles.cardWrapper}>
-                            <DealCard deal={deal} isAuthenticated={true} isListView={false} variantOverride={variantOverride} />
-                        </SwiperSlide>
-                    ))}
-                </Swiper>
-            </div>
+            {hasDeals ? (
+                <div className={styles.cardRowWrapper}>
+                    <Swiper
+                        slidesPerView="auto"
+                        spaceBetween={16}
+                        breakpoints={{
+                            768: {
+                                spaceBetween: 34,
+                            },
+                        }}
+                        loop={deals.length >= 2}
+                        grabCursor={true}
+                        className={styles.cardRow}
+                    >
+                        {deals.map(deal => (
+                            <SwiperSlide key={deal.id} className={styles.cardWrapper}>
+                                <DealCard deal={deal} isAuthenticated={true} isListView={false} variantOverride={variantOverride} />
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </div>
+            ) : (
+                <FallbackCard />
+            )}
         </div>
     );
 }
+

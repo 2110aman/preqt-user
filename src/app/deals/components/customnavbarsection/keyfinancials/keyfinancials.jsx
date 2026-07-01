@@ -14,6 +14,26 @@ import ROCEBarchart from "../charts/ROCEBarchart";
 import { useDealStore } from "@/store/dealStore";
 // import { useSearchParams } from "next/navigation";
 
+const formatIndianNumber = (value, defaultDecimals = null) => {
+  if (value === null || value === undefined || value === "") return "-";
+  const num = Number(value);
+  if (isNaN(num)) return value;
+  
+  let decimals = 0;
+  if (defaultDecimals !== null) {
+    decimals = defaultDecimals;
+  } else {
+    const str = String(value);
+    const parts = str.split('.');
+    decimals = parts.length > 1 ? parts[1].length : 0;
+  }
+  
+  return num.toLocaleString("en-IN", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+};
+
 const AccordionToggleIcon = ({ isOpen }) => {
   if (isOpen) {
     return (
@@ -334,11 +354,9 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
                         displayVal = `${Number(value).toFixed(1)}%`;
                       } else if (row.format === "currency") {
                         if (row.key === "revenue") {
-                          displayVal = Number(value) % 1 === 0
-                            ? Number(value).toFixed(0)
-                            : Number(value).toFixed(1);
+                          displayVal = formatIndianNumber(value);
                         } else {
-                          displayVal = Number(value).toFixed(1);
+                          displayVal = formatIndianNumber(value, 1);
                         }
                       } else {
                         displayVal = value.toString();
@@ -761,8 +779,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
 
                       let displayVal = "-";
                       if (value !== null && value !== undefined && value !== "") {
-                        const numVal = Number(value);
-                        const formattedNum = numVal % 1 === 0 ? numVal.toFixed(0) : numVal.toFixed(1);
+                        const formattedNum = formatIndianNumber(value);
                         displayVal = `₹ ${formattedNum} Cr`;
                       }
 
@@ -901,7 +918,7 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
     if (val === null || val === undefined || val === "") return "-";
     const num = Number(val);
     const sign = num >= 0 ? "+" : ""; // Negative numbers already include "-"
-    return `${sign}${num.toFixed(0)} Cr`;
+    return `${sign}${formatIndianNumber(val)} Cr`;
   };
 
   const getCashFlowColorClass = (val) => {
@@ -1142,9 +1159,8 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
 
   const formatDaysValue = (val) => {
-    if (val === null || val === undefined) return "-";
-    const num = Number(val);
-    return `${num.toFixed(0)} Days`;
+    if (val === null || val === undefined || val === "") return "-";
+    return `${formatIndianNumber(val)} Days`;
   };
 
   const tableWrapperRef = useRef(null);
