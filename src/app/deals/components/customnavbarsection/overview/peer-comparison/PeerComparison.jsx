@@ -219,7 +219,7 @@ const PeerComparison = ({ isPrivateDeal }) => {
                             src={logoUrl}
                             alt={company.company_name?.data}
                             className={styles.companyLogoImg || "companyLogoImg"}
-                            style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                            style={{ width: "35px", height: "35px", minWidth: "35px", minHeight: "35px", maxWidth: "35px", maxHeight: "35px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "contain", flexShrink: 0 }}
                             onError={(e) => {
                               e.target.style.display = 'none';
                             }}
@@ -229,7 +229,7 @@ const PeerComparison = ({ isPrivateDeal }) => {
                             src="/logo-fallback.png"
                             alt={company.company_name?.data || "Company Logo"}
                             className={styles.companyLogoImg || "companyLogoImg"}
-                            style={{ width: "28px", height: "28px", minWidth: "28px", minHeight: "28px", maxWidth: "28px", maxHeight: "28px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "cover", marginTop: "5px", backgroundColor: "#fff", flexShrink: 0 }}
+                            style={{ width: "35px", height: "35px", minWidth: "35px", minHeight: "35px", maxWidth: "35px", maxHeight: "35px", border: "1px solid #0000001A", borderRadius: "50%", objectFit: "cover", marginTop: "5px", backgroundColor: "#fff", flexShrink: 0 }}
                           />
                         )}
                       </div>

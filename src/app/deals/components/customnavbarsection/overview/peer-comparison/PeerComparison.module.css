@@ -89,10 +89,11 @@ border: 1px solid transparent;
 
 .companyInfo {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
+
 
 .companyName {
   font-size: 13px;

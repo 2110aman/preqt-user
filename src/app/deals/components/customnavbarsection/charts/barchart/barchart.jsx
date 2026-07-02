@@ -107,7 +107,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
           }}
 
           tick={{ fontSize: 12 }}
-          tickFormatter={(val) => `${val} Cr`}
+          tickFormatter={(val) => `${Number(val).toLocaleString("en-IN")} Cr`}
           axisLine={{ stroke: isPrivateDeal ? "#374151" : "#E2E8F0" }}
           tickLine={{ stroke: isPrivateDeal ? "#374151" : "#E2E8F0" }}
         />
@@ -124,7 +124,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
             style: { textAnchor: "middle", fontSize: 15, paddingLeft: 15 },
           }}
           tick={{ fontSize: 14 }}
-          tickFormatter={(val) => `${val}%`}
+          tickFormatter={(val) => `${Number(val).toLocaleString("en-IN")}%`}
           axisLine={{ stroke: isPrivateDeal ? "#374151" : "#E2E8F0" }}
           tickLine={{ stroke: isPrivateDeal ? "#374151" : "#E2E8F0" }}
         />
@@ -158,11 +158,19 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
                     let value = entry.value;
                     let formattedValue = "";
                     if (entry.dataKey === "revenue") {
-                      formattedValue = `${value.toFixed(1)} Cr`;
+                      formattedValue = `${Number(value).toLocaleString("en-IN", {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      })} Cr`;
                     } else if (entry.dataKey === "ebitda" || entry.dataKey === "pat") {
-                      formattedValue = `${value.toFixed(1)} %`;
+                      formattedValue = `${Number(value).toLocaleString("en-IN", {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      })} %`;
                     } else {
-                      formattedValue = value;
+                      formattedValue = isNaN(Number(value))
+                        ? value
+                        : Number(value).toLocaleString("en-IN");
                     }
 
                     return (
