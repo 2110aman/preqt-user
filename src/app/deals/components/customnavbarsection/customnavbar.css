@@ -138,6 +138,10 @@
     border-radius: 16px;
     box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.06);
   }
+
+  .tab-section-title-mobile{
+    padding: 0 32px 16px 32px;
+}
 }
 
 @media(max-width: 600px){

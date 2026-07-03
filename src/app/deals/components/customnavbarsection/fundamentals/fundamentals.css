@@ -5,7 +5,7 @@
 }
 .fundamentals-container{
       border-radius: 20px;
-      padding: 20px 0px;
+      padding: 20px 32px;
       padding-bottom:  20px;
 }
 
@@ -504,6 +504,7 @@ gap: 10px;
   background-color: #F3F4F6;
   border-radius: 12px;
 } 
+
 
 
 @media (max-width:600px) {
