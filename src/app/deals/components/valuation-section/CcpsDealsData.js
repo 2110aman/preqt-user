@@ -83,8 +83,7 @@ const CcpsDealsData = () => {
         const field = dealData?.[fieldKey];
         if (!field?.status) return null;
 
-        const staticLabel = fieldLabelMap[fieldKey];
-        const label = staticLabel || field?.label_name || fieldKey;
+        const label = field?.label_name || staticLabel || fieldKey;
         const tooltipData = field?.tool_tip?.data?.trim();
         const tooltipStatus = field?.tool_tip?.status;
         const value = field?.data;
@@ -97,8 +96,8 @@ const CcpsDealsData = () => {
         else if (typeof value === "object" && value?.data) displayValue = value.data;
         else displayValue = value ?? "-";
 
-        // ✅ Convert numeric 0 → TBA
-        if (!isNaN(Number(displayValue)) && Number(displayValue) === 0) {
+        // ✅ Convert numeric 0 → TBA (except for debt_to_equity_fy25)
+        if (fieldKey !== "debt_to_equity_fy25" && !isNaN(Number(displayValue)) && Number(displayValue) === 0) {
             displayValue = "TBD";
         }
 
@@ -205,7 +204,7 @@ const CcpsDealsData = () => {
                                 <section>
                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                                            <span className="data">{"Pre Money Valuation"}</span>
+                                            <span className="data">{dealData?.pre_money_valuation?.label_name || "Pre Money Valuation"}</span>
                                             {dealData?.pre_money_valuation?.tool_tip?.status === true && !!dealData?.pre_money_valuation?.tool_tip?.data?.trim() && (
                                                 <div className="custom-tooltip-wrapper">
                                                     <span className="tooltip-icon">
@@ -231,7 +230,7 @@ const CcpsDealsData = () => {
                                 <section>
                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                                            <span className="data">{"Revenue (FY'25)"}</span>
+                                            <span className="data">{dealData?.revenue_fy25_in_cr?.label_name || "Revenue (FY'25)"}</span>
                                             {dealData?.revenue_fy25_in_cr?.tool_tip?.status === true && !!dealData?.revenue_fy25_in_cr?.tool_tip?.data?.trim() && (
                                                 <div className="custom-tooltip-wrapper">
                                                     <span className="tooltip-icon">
@@ -261,7 +260,7 @@ const CcpsDealsData = () => {
                                 <section>
                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                                            <span className="data">{"PAT (FY'25)"}</span>
+                                            <span className="data">{dealData?.pat_fy25_in_cr?.label_name || "PAT (FY'25)"}</span>
                                             {dealData?.pat_fy25_in_cr?.tool_tip?.status === true && !!dealData?.pat_fy25_in_cr?.tool_tip?.data?.trim() && (
                                                 <div className="custom-tooltip-wrapper">
                                                     <span className="tooltip-icon">
@@ -287,7 +286,7 @@ const CcpsDealsData = () => {
                                 <section>
                                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                                            <span className="data">{"P/E Trailing Forward"}</span>
+                                            <span className="data">{dealData?.pe_trailing_forward?.label_name || "P/E Trailing Forward"}</span>
                                             {dealData?.pe_trailing_forward?.tool_tip?.status === true && !!dealData?.pe_trailing_forward?.tool_tip?.data?.trim() && (
                                                 <div className="custom-tooltip-wrapper">
                                                     <span className="tooltip-icon">

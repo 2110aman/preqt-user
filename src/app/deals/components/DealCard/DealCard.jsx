@@ -33,6 +33,7 @@ export default function DealCard({
         let calculated = originalDeal.min_investment_amount_in_inr;
         if (!isNaN(lotSize) && !isNaN(perSharePrice) && !isNaN(lotSizeShare)) {
             calculated = lotSize * perSharePrice * lotSizeShare;
+            console.log("calculated", calculated);
         }
         return {
             ...originalDeal,

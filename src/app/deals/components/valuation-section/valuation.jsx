@@ -15,7 +15,7 @@ const Valuation = ({ isPrivateDeal, isccps, isofs }) => {
   const minLots = Number(dealData?.min_investment?.data?.lot_size) || 1;
   const lotSize = Number(dealData?.lot_size?.data) || 1;
   const sharesPerLot = lotSize;
-  const perSharePrice = Number(dealData?.offer_price?.data) || 0;
+  const perSharePrice = Number(dealData?.per_share_price?.data || dealData?.offer_price?.data || 0);
   const pricePerCcps = Number(dealData?.price_per_ccps?.data) || 0;
   const dealType = dealDetails?.data?.deal_type;
   const isunlisted = dealType === "unlisted";
@@ -69,7 +69,7 @@ const Valuation = ({ isPrivateDeal, isccps, isofs }) => {
               <div>
                 <p className="label">{dealData?.min_investment?.label_name || "Minimum Investment"}</p>
                 <h2 className="amt">
-                  ₹{formatCommaseparated(pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
+                  ₹{formatCommaseparated(typeof pricePerLot === 'number' && !isNaN(pricePerLot) ? pricePerLot.toFixed(1) : pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
                 </h2>
               </div>
             </div>
@@ -143,7 +143,7 @@ const Valuation = ({ isPrivateDeal, isccps, isofs }) => {
                 </div>
 
                 <h2 className="amt">
-                  ₹{formatCommaseparated(pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
+                  ₹{formatCommaseparated(typeof pricePerLot === 'number' && !isNaN(pricePerLot) ? pricePerLot.toFixed(1) : pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
                 </h2>
               </div>
             </div>

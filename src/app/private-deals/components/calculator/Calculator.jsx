@@ -189,7 +189,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
                 <div className={styles.div}>
                   <p>Minimum Investment</p>
                   <span>
-                    ₹{formatCommaseparated(pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
+                    ₹{formatCommaseparated(typeof pricePerLot === 'number' && !isNaN(pricePerLot) ? pricePerLot.toFixed(1) : pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
                   </span>
                 </div>
                 {isDarkTheme ? (
@@ -231,7 +231,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
               {/* Investment amount */}
               <div className={styles.amount}>
                 <p>Investment amount </p>
-                <h2>₹{((lots * pricePerLot) / minLots).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</h2>
+                <h2>₹{((lots * pricePerLot) / minLots).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</h2>
               </div>
 
               <button

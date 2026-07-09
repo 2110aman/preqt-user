@@ -4,7 +4,9 @@ import { formatDateMonthDay } from '@/app/utils/FormatDate';
 
 const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || num === "TBD") return "TBD";
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    const parsed = Number(num);
+    if (isNaN(parsed)) return num;
+    return parsed.toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 };
 
 export default function CardHeroMetrics({ deal, config, style }) {

@@ -63,7 +63,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
   const minLots = Number(dealData?.min_investment?.data?.lot_size) || 1;
   const lotSize = Number(dealData?.lot_size?.data) || 1;
   const sharesPerLot = lotSize;
-  const perSharePrice = Number(dealData?.offer_price?.data) || 0;
+  const perSharePrice = Number(dealData?.per_share_price?.data || dealData?.offer_price?.data || 0);
   const pricePerCcps = Number(dealData?.price_per_ccps?.data) || 0;
 
   const pricePerLot = dealType === "ccps"
@@ -220,8 +220,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
     }
 
     const staticLabel = fieldLabelMap[fieldKey];
-    // For CCPS/OFS/Private deals, prefer our static maps as labels coming from API might actually be values
-    const label = (isPrivateLike && staticLabel) ? staticLabel : (field?.label_name || staticLabel || fieldKey);
+    const label = field?.label_name || staticLabel || fieldKey;
 
     const tooltipData = typeof field?.tool_tip === 'string'
       ? field.tool_tip
@@ -243,8 +242,8 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
       displayValue = value;
     }
 
-    // ✅ Convert numeric 0 → TBD
-    if (displayValue !== "-" && !isNaN(Number(displayValue)) && Number(displayValue) === 0) {
+    // ✅ Convert numeric 0 → TBD (except for debt_to_equity_fy25)
+    if (fieldKey !== "debt_to_equity_fy25" && displayValue !== "-" && !isNaN(Number(displayValue)) && Number(displayValue) === 0) {
       displayValue = "TBD";
     }
 
@@ -400,7 +399,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                   )}
                 </div>
                 <h6 className="mb-0">
-                  ₹{dealData?.min_investment?.data?.amount_in_inr ? formatCommaseparated(parseFloat(dealData.min_investment.data.amount_in_inr)) : formatCommaseparated(pricePerLot)} / {formatCommaseparated((Number(dealData?.min_investment?.data?.lot_size) || 0) * (Number(dealData?.lot_size?.data) || 0))} shares
+                  ₹{dealData?.min_investment?.data?.amount_in_inr ? formatCommaseparated(Number(dealData.min_investment.data.amount_in_inr).toFixed(1)) : formatCommaseparated(typeof pricePerLot === 'number' && !isNaN(pricePerLot) ? pricePerLot.toFixed(1) : pricePerLot)} / {formatCommaseparated((Number(dealData?.min_investment?.data?.lot_size) || 0) * (Number(dealData?.lot_size?.data) || 0))} shares
                 </h6>
               </section>
             )}
@@ -483,7 +482,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 <section className="subs1-topp" style={{ backgroundColor: isDarkTheme ? "#1D1D1D" : "#F3F4F6" }}>
                   <div className="label-with-tooltip">
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <span className="data" >{"Listing Timeline"}</span>
+                      <span className="data" >{dealData?.listing_timeline?.label_name || "Listing Timeline"}</span>
                       {shouldShowTooltip(dealData?.listing_timeline?.tool_tip) && (
                         <div className={`custom-tooltip-wrapper ${isMobile ? "main-other" : ""}`}>
                           <span className="tooltip-icon">
@@ -533,7 +532,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     <section>
                       <div>
                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                          <span className="data">{(isofs ? 'Market Cap' : 'Valuation')}</span>
+                          <span className="data">{dealData?.valuation_in_cr?.label_name || (isofs ? 'Market Cap' : 'Valuation')}</span>
                           {shouldShowTooltip(dealData?.valuation_in_cr?.tool_tip) && (
                             <div className="custom-tooltip-wrapper left-side">
                               <span className="tooltip-icon">
@@ -558,7 +557,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                       <section>
                         <div>
                           <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                            <span className="data">{"Revenue"}</span>
+                            <span className="data">{dealData?.revenue_fy25_in_cr?.label_name || "Revenue"}</span>
                             {shouldShowTooltip(dealData?.revenue_fy25_in_cr?.tool_tip) && (
                               <div className="custom-tooltip-wrapper right-side">
                                 <span className="tooltip-icon">
@@ -587,7 +586,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     <section>
                       <div>
                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                          <span className="data">{"PAT (FY'25)"}</span>
+                          <span className="data">{dealData?.pat_fy25_in_cr?.label_name || "PAT (FY'25)"}</span>
                           {shouldShowTooltip(dealData?.pat_fy25_in_cr?.tool_tip) && (
                             <div className="custom-tooltip-wrapper left-side">
                               <span className="tooltip-icon">
@@ -613,7 +612,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     <section>
                       <div>
                         <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                          <span className="data">{"P/E Multiple"}</span>
+                          <span className="data">{dealData?.pe_multiple?.label_name || "P/E Multiple"}</span>
                           {shouldShowTooltip(dealData?.pe_multiple?.tool_tip) && (
                             <div className="custom-tooltip-wrapper">
                               <span className="tooltip-icon">
@@ -744,7 +743,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 <section className={`subs1-top card-valuation ${spanValuation ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                      <span className="data">{"Valuation"}</span>
+                      <span className="data">{dealData?.valuation_in_cr?.label_name || "Valuation"}</span>
                       {shouldShowTooltip(dealData?.valuation_in_cr?.tool_tip) && (
                         <div className="custom-tooltip-wrapper left-side">
                           <span className="tooltip-icon">
@@ -765,7 +764,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 <section className={`subs1-top card-revenue ${spanRevenue ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                      <span className="data">{"Revenue"}</span>
+                      <span className="data">{dealData?.revenue_fy25_in_cr?.label_name || "Revenue"}</span>
                       {shouldShowTooltip(dealData?.revenue_fy25_in_cr?.tool_tip) && (
                         <div className="custom-tooltip-wrapper right-side">
                           <span className="tooltip-icon">
@@ -786,7 +785,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 <section className={`subs1-top card-pat ${spanPat ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                      <span className="data">{"PAT"}</span>
+                      <span className="data">{dealData?.pat_fy25_in_cr?.label_name || "PAT"}</span>
                       {shouldShowTooltip(dealData?.pat_fy25_in_cr?.tool_tip) && (
                         <div className="custom-tooltip-wrapper left-side">
                           <span className="tooltip-icon">
@@ -807,7 +806,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                 <section className={`subs1-top card-issue-size ${spanIssueSize ? "grid-span-2" : ""}`}>
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
-                      <span className="data">{"Issue Size"}</span>
+                      <span className="data">{dealData?.issue_size?.label_name || "Issue Size"}</span>
                       {shouldShowTooltip(dealData?.issue_size?.tool_tip) && (
                         <div className="custom-tooltip-wrapper right-side">
                           <span className="tooltip-icon">
