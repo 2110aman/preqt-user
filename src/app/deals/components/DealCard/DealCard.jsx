@@ -8,7 +8,7 @@ import Badge from './ui/Badge';
 import styles from './DealCard.module.css';
 
 export default function DealCard({
-    deal,
+    deal: originalDeal,
     variantOverride,
     isAuthenticated,
     onLoginClick,
@@ -17,22 +17,63 @@ export default function DealCard({
     isListView,
     ignoreFeatured = false
 }) {
+    const deal = React.useMemo(() => {
+        if (!originalDeal) return originalDeal;
+        const getNumeric = (val) => {
+            if (val === null || val === undefined) return NaN;
+            if (typeof val === 'number') return val;
+            const clean = String(val).replace(/[^0-9.]/g, '');
+            const num = parseFloat(clean);
+            return isNaN(num) ? NaN : num;
+        };
+        const lotSize = getNumeric(originalDeal.min_investment_lot_size);
+        const perSharePrice = getNumeric(originalDeal.per_share_price || originalDeal.offer_price);
+        const lotSizeShare = getNumeric(originalDeal.lot_size_share);
+        
+        let calculated = originalDeal.min_investment_amount_in_inr;
+        if (!isNaN(lotSize) && !isNaN(perSharePrice) && !isNaN(lotSizeShare)) {
+            calculated = lotSize * perSharePrice * lotSizeShare;
+        }
+        return {
+            ...originalDeal,
+            min_investment_amount_in_inr: calculated
+        };
+    }, [originalDeal]);
+
     // 1. Determine Variant
     const variantKey = variantOverride || determineVariant(deal, ignoreFeatured);
     const theme = CARD_THEMES[variantKey] || CARD_THEMES.public_standard;
     const layout = CARD_LAYOUTS[variantKey] || CARD_LAYOUTS.public_standard;
     let metrics = METRICS_CONFIG[variantKey] || METRICS_CONFIG.public_standard;
 
-    // Overriding metrics for featured unlisted deals to match the updated UI design:
-    if (variantKey === 'featured_deal' && deal?.deal_type?.toLowerCase() === 'unlisted') {
-        metrics = {
-            hero: [
-                { label: "VALUATION", key: "valuation_in_cr", format: "currency", suffix: "Cr" },
-                { label: "SHARE PRICE", keys: ["per_share_price", "offer_price"], format: "currency", perShare: true },
-                { label: "EXP. LISTING", key: "listing_timeline", format: "date" }
-            ],
-            grid: []
-        };
+    // Overriding metrics for unlisted deals if ROCE (FY'25) is available
+    if (deal?.deal_type?.toLowerCase() === 'unlisted') {
+        const hasRoce = deal?.roce_fy25_percent !== null && deal?.roce_fy25_percent !== undefined && String(deal?.roce_fy25_percent).trim() !== '';
+        
+        if (variantKey === 'featured_deal') {
+            metrics = {
+                hero: [
+                    { label: "VALUATION", key: "valuation_in_cr", format: "currency", suffix: "Cr" },
+                    { label: "SHARE PRICE", keys: ["per_share_price", "offer_price"], format: "currency", perShare: true },
+                    hasRoce 
+                        ? { label: "ROCE (FY'25)", key: "roce_fy25_percent", format: "percent", suffix: "%" }
+                        : { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" }
+                ],
+                grid: []
+            };
+        } else if (variantKey === 'unlisted_nse') {
+            metrics = {
+                ...metrics,
+                grid: metrics.grid.map(m => {
+                    if (m.key === 'listing_timeline') {
+                        return hasRoce
+                            ? { label: "ROCE (FY'25)", key: "roce_fy25_percent", format: "percent" }
+                            : m;
+                    }
+                    return m;
+                })
+            };
+        }
     }
 
     // Handle Auth Locked State for Private deals

@@ -17,7 +17,7 @@ export const METRICS_CONFIG = {
             { label: "Revenue (FY'25)", key: "revenue_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "P/E Multiple", key: "pe_multiple", format: "multiplier" },
-            { label: "Open Date", key: "offer_date_from", format: "date_short" },
+            { label: "Open Date", key: "timeline_ipo_open_date", format: "date_short" },
             { label: "CAGR 3Y", key: "cagr_growth_3y_percent", format: "percent" }
         ]
     },
@@ -55,7 +55,7 @@ export const METRICS_CONFIG = {
             { label: "Share Price", keys: ["per_share_price", "offer_price"], format: "currency", perShare: true }
         ],
         grid: [
-            { label: "MIN. INVESTMENT", key: "min_investment_amount_in_inr", format: "currency", suffix: "Cr" },
+            { label: "MIN. INVESTMENT", key: "min_investment_amount_in_inr", format: "currency" },
             { label: "REVENUE (FY'25)", key: "revenue_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "P/E MULTIPLE", key: "pe_multiple", format: "multiplier" },

@@ -64,6 +64,8 @@
 
 .cardWrapper {
     width: 340px !important;
+    height: auto !important;
+    display: flex;
     /* Force SwiperSlide to have exact width so slidesPerView="auto" calculates correctly */
 }
 

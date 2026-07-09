@@ -40,9 +40,9 @@ export default function CardHeader({ deal, layout, isListView }) {
                     </Badge>
                 )}
 
-                {deal.deal_type?.toLowerCase() === 'public' && (
+                {deal.deal_type?.toLowerCase() === 'public' && deal.tags?.[0] && (
                     <Badge color="sme" variant="pill">
-                        {deal.tags?.[0]}
+                        {deal.tags[0]}
                     </Badge>
                 )}
 

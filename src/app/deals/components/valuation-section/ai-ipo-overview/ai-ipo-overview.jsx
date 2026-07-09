@@ -53,6 +53,13 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
     dealData.offer_date.data.from &&
     dealData.offer_date.data.to;
 
+  const isOfferDateNull = !dealData?.offer_date?.data || 
+    dealData.offer_date.data === "null" ||
+    dealData.offer_date.data === "" ||
+    (typeof dealData.offer_date.data === "object" && 
+     (!dealData.offer_date.data.from || dealData.offer_date.data.from === "null" || dealData.offer_date.data.from === "") && 
+     (!dealData.offer_date.data.to || dealData.offer_date.data.to === "null" || dealData.offer_date.data.to === ""));
+
   const minLots = Number(dealData?.min_investment?.data?.lot_size) || 1;
   const lotSize = Number(dealData?.lot_size?.data) || 1;
   const sharesPerLot = lotSize;
@@ -203,6 +210,15 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
       return null;
     }
 
+    let value = field?.data;
+    if (value && typeof value === 'object' && 'data' in value) {
+      value = value.data;
+    }
+
+    if (value === undefined || value === null || value === "") {
+      return null;
+    }
+
     const staticLabel = fieldLabelMap[fieldKey];
     // For CCPS/OFS/Private deals, prefer our static maps as labels coming from API might actually be values
     const label = (isPrivateLike && staticLabel) ? staticLabel : (field?.label_name || staticLabel || fieldKey);
@@ -213,14 +229,11 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
     const tooltipStatus = typeof field?.tool_tip === 'string'
       ? !!field.tool_tip
       : field?.tool_tip?.status;
-    const value = field?.data;
 
     const formatConfig = fieldFormatMap[fieldKey] || {};
     let displayValue = "-";
 
-    if (!isMappedAndActive || value === undefined || value === null || value === "") {
-      displayValue = "-";
-    } else if (isDate) {
+    if (isDate) {
       displayValue = formatDate(value);
     } else if (typeof value === "boolean") {
       displayValue = value ? "✅ Yes" : "❌ No";
@@ -321,8 +334,9 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
 
   // ✅ Function to format dates for IPO timeline (returns TBA)
   const formatDateForIPO = (dateString) => {
-    if (!dateString) return "TBA";
+    if (!dateString || dateString === "null" || dateString === "TBA") return "TBA";
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "TBA";
     const day = date.getDate();
 
     const getOrdinal = (n) => {
@@ -385,7 +399,9 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                     </div>
                   )}
                 </div>
-                <h6 className="mb-0">₹{formatCommaseparated(pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares</h6>
+                <h6 className="mb-0">
+                  ₹{dealData?.min_investment?.data?.amount_in_inr ? formatCommaseparated(parseFloat(dealData.min_investment.data.amount_in_inr)) : formatCommaseparated(pricePerLot)} / {formatCommaseparated((Number(dealData?.min_investment?.data?.lot_size) || 0) * (Number(dealData?.lot_size?.data) || 0))} shares
+                </h6>
               </section>
             )}
 
@@ -626,7 +642,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
           ) : (
             <>
               {/* Card 1: Offer Start Date (Desktop only) */}
-              {!isMobile && hasFromAndTo && (
+              {!isMobile && hasFromAndTo && !isOfferDateNull && (
                 <section className="subs1-top card-start-date">
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
@@ -647,7 +663,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               )}
 
               {/* Card 2: Offer End Date (Desktop only) */}
-              {!isMobile && hasFromAndTo && (
+              {!isMobile && hasFromAndTo && !isOfferDateNull && (
                 <section className="subs1-top card-end-date">
                   <div>
                     <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
@@ -668,7 +684,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               )}
 
               {/* Card 3: Offer Date Range (Mobile only or if single date) */}
-              {(isMobile || !hasFromAndTo) && dealData?.offer_date?.status && (
+              {(isMobile || !hasFromAndTo) && dealData?.offer_date?.status && !isOfferDateNull && (
                 <section className="subs1-top card-range-date">
                   {isMobile && hasFromAndTo ? (
                     <div className="ipo-dropdownButton" onClick={() => setOpen(!open)}>

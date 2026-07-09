@@ -614,21 +614,47 @@ function AllDealsContent() {
                                         className={`${stylesdeals.toggleIcon} ${viewType === 'grid' ? stylesdeals.active : ""}`}
                                         onClick={() => setViewType('grid')}
                                     >
-                                        <img
-                                            src={viewType === 'grid' ? '/grid.svg' : '/default.svg'}
-                                            alt="Grid"
-                                            style={{ filter: viewType === 'grid' ? 'invert(65%) sepia(54%) saturate(457%) hue-rotate(1deg) brightness(88%) contrast(89%)' : 'none' }}
-                                        />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke={viewType === 'grid' ? '#96785f' : '#aba99b'}
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="lucide lucide-layout-grid-icon lucide-layout-grid"
+                                        >
+                                            <rect width="7" height="7" x="3" y="3" rx="1" />
+                                            <rect width="7" height="7" x="14" y="3" rx="1" />
+                                            <rect width="7" height="7" x="14" y="14" rx="1" />
+                                            <rect width="7" height="7" x="3" y="14" rx="1" />
+                                        </svg>
                                     </div>
                                     <div
                                         className={`${stylesdeals.toggleIcon} ${viewType === 'list' ? stylesdeals.active : ""}`}
                                         onClick={() => setViewType('list')}
                                     >
-                                        <img
-                                            src={viewType === 'list' ? '/listview.svg' : '/default.svg'}
-                                            alt="List"
-                                            style={{ filter: viewType === 'list' ? 'invert(65%) sepia(54%) saturate(457%) hue-rotate(1deg) brightness(88%) contrast(89%)' : 'none' }}
-                                        />
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="20"
+                                            height="20"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke={viewType === 'list' ? '#96785f' : '#aba99b'}
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            className="lucide lucide-list-icon lucide-list"
+                                        >
+                                            <path d="M3 5h.01" />
+                                            <path d="M3 12h.01" />
+                                            <path d="M3 19h.01" />
+                                            <path d="M8 5h13" />
+                                            <path d="M8 12h13" />
+                                            <path d="M8 19h13" />
+                                        </svg>
                                     </div>
                                 </div>
 

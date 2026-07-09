@@ -359,14 +359,16 @@
     transition: all 0.2s ease;
 }
 
-.toggleIcon img {
+.toggleIcon img,
+.toggleIcon svg {
     width: 20px;
     height: 20px;
     opacity: 0.3;
     transition: all 0.2s ease;
 }
 
-.toggleIcon.active img {
+.toggleIcon.active img,
+.toggleIcon.active svg {
     opacity: 1;
 }
 
@@ -534,14 +536,16 @@
     transition: all 0.2s ease;
 }
 
-.toggleIcon img {
+.toggleIcon img,
+.toggleIcon svg {
     width: 20px;
     height: 20px;
     opacity: 0.3;
     transition: all 0.2s ease;
 }
 
-.toggleIcon.active img {
+.toggleIcon.active img,
+.toggleIcon.active svg {
     opacity: 1;
 }
 

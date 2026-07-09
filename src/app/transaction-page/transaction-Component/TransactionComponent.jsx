@@ -761,7 +761,23 @@ const mainData = transactionDetails
 
           const minLot =
             t.deal_details?.min_investment_lot_size || "N/A";
-            const minInvestment = t.deal_details?.deal_data?.data?.min_investment_amount_in_inr || "N/A";
+          const dealData = t.deal_details?.deal_data?.data || t.deal_details;
+          const getNumeric = (val) => {
+              if (val === null || val === undefined) return NaN;
+              if (typeof val === 'number') return val;
+              const clean = String(val).replace(/[^0-9.]/g, '');
+              const num = parseFloat(clean);
+              return isNaN(num) ? NaN : num;
+          };
+          const lotSize = getNumeric(dealData?.min_investment_lot_size);
+          const perSharePrice = getNumeric(dealData?.per_share_price || dealData?.offer_price);
+          const lotSizeShare = getNumeric(dealData?.lot_size_share);
+          
+          let calculated = dealData?.min_investment_amount_in_inr;
+          if (!isNaN(lotSize) && !isNaN(perSharePrice) && !isNaN(lotSizeShare)) {
+              calculated = lotSize * perSharePrice * lotSizeShare;
+          }
+          const minInvestment = calculated || "N/A";
           const amount = t.amount ? `₹${t.amount.toLocaleString()}` : "N/A";
           const lots = t.lots || "N/A";
           const tags = t.deal_details?.tags?.join(", ") || "-";

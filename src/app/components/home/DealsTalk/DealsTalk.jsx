@@ -156,6 +156,26 @@ function DealsTalkContent() {
                     return type === 'public' || 
                            type === 'unlisted' || 
                            (type === 'ofs' && (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null'));
+                }).map(deal => {
+                    const getNumeric = (val) => {
+                        if (val === null || val === undefined) return NaN;
+                        if (typeof val === 'number') return val;
+                        const clean = String(val).replace(/[^0-9.]/g, '');
+                        const num = parseFloat(clean);
+                        return isNaN(num) ? NaN : num;
+                    };
+                    const lotSize = getNumeric(deal?.min_investment_lot_size);
+                    const perSharePrice = getNumeric(deal?.per_share_price || deal?.offer_price);
+                    const lotSizeShare = getNumeric(deal?.lot_size_share);
+                    
+                    let calculated = deal?.min_investment_amount_in_inr;
+                    if (!isNaN(lotSize) && !isNaN(perSharePrice) && !isNaN(lotSizeShare)) {
+                        calculated = lotSize * perSharePrice * lotSizeShare;
+                    }
+                    return {
+                        ...deal,
+                        min_investment_amount_in_inr: calculated
+                    };
                 });
                 setAllTopDeals(filteredDeals);
             } else {
@@ -477,8 +497,17 @@ function DealsTalkContent() {
                             <span className={styles.gridValue}>{formatNumberWithCommas(deal?.pe_multiple) || "TBD"}{deal?.pe_multiple ? "x" : ""}</span>
                         </div>
                         <div className={styles.gridItem}>
-                            <span className={styles.gridLabel}>Listing Date </span>
-                            <span className={styles.gridValue}>{formatDate(deal?.listing_timeline) || "Sep '27"}</span>
+                            {deal?.deal_type?.toLowerCase() === 'unlisted' && deal?.roce_fy25_percent !== null && deal?.roce_fy25_percent !== undefined && String(deal?.roce_fy25_percent).trim() !== '' ? (
+                                <>
+                                    <span className={styles.gridLabel}>ROCE (FY'25)</span>
+                                    <span className={styles.gridValue}>{formatNumberWithCommas(deal.roce_fy25_percent)}%</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className={styles.gridLabel}>Listing Date </span>
+                                    <span className={styles.gridValue}>{formatDate(deal?.listing_timeline) || "Sep '27"}</span>
+                                </>
+                            )}
                         </div>
                         <div className={styles.gridItem}>
                             <span className={styles.gridLabel}>CAGR 3Y</span>
