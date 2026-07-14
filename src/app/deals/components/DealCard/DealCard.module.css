@@ -457,6 +457,7 @@
     /* width: 300px; */
     overflow: hidden;
     flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 10px;
     max-height: 30px;
     margin-top: 4PX;
@@ -1364,9 +1365,9 @@
     row-gap: 14px !important;
     }
     .listView [class*="avatar"] {
-        width: 20px !important;
-        height: 29px !important;
-        font-size: 7px !important;
+        width: 27px !important;
+        height: 20px !important;
+        font-size: 8px !important;
     }
 }
 
@@ -1418,12 +1419,33 @@
         gap:10px ;
     }
 
+    .companyName{
+        font-family: 15px !important;
+    }
+
     .listView {
         grid-template-columns: 0.7fr 1fr !important;
     }
     .listView [class*="avatar"] {
-        width: 20px !important;
-        height: 17px !important;
-        font-size: 6px !important;
+        width: 27px !important;
+        height: 20px !important;
+        font-size: 7px !important;
+        padding-top: 2px;
     }
+}
+
+@media (max-width: 375px) {
+    .cardContainer {
+        /* width: 32%; */
+        min-width: 310px;
+    }
+    
+}
+
+@media (max-width: 345px) {
+    .cardContainer {
+        /* width: 32%; */
+        min-width: 270px;
+    }
+    
 }

@@ -90,6 +90,18 @@ function AllDealsContent() {
         { label: "Startup Deals", value: "Startup" }
     ];
 
+    useEffect(() => {
+        const typeParam = searchParams?.get("type");
+        if (typeParam) {
+            const matchingTab = dealTypeTabs.find(
+                (tab) => tab.value.toLowerCase() === typeParam.toLowerCase()
+            );
+            if (matchingTab) {
+                setSelectedDealType(matchingTab.value);
+            }
+        }
+    }, [searchParams, setSelectedDealType]);
+
     const availableStages = useMemo(() => {
         if (!allDeals) return [];
         const allStages = allDeals.map(deal => deal.company_stage).filter(Boolean);
@@ -204,14 +216,13 @@ function AllDealsContent() {
                     const percent = target > 0 ? (raised / target) * 100 : 0;
 
                     return appliedFilters.fundingStatus.some(lbl => {
-                        if (lbl === "< 50% Funded") return percent < 50 && percent > 0;
+                        if (lbl === "< 50% Funded") return percent < 50 && percent >=0;
                         if (lbl === "80%+ Funded") return percent >= 80;
                         if (lbl === "50% – 80% Funded") return percent >= 50 && percent <= 80;
                         return false;
                     });
                 });
             }
-
             // Valuation Range
             if (appliedFilters.valuationRange) {
                 const [min, max] = appliedFilters.valuationRange;
@@ -757,7 +768,7 @@ function AllDealsContent() {
                                                     <UnlockTeaser isGridCard={true} isAllDeals={true} />
                                                 </div>
                                             )}
-                                            {viewType === 'list' && (
+                                            {viewType === 'list'&& selectedDealType === "All"  && (
                                                 <div className="col-lg-12 col-md-12 col-sm-12 px-0" style={{ width: "100%", marginTop: "0px" }}>
                                                     <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} />
                                                 </div>

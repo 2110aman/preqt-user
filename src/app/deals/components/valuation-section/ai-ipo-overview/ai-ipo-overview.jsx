@@ -833,7 +833,9 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
               {renderField("lot_size")}
               {renderField("sale_type")}
               {renderField("pat_fy25_in_cr")}
+              {renderField("pat_margin_percent")}
               {renderField("pe_multiple")}
+              {renderField("ebitda_fy25_in_cr")}
               {renderField("cagr_growth_3y_percent")}
               {renderField("roe_fy25_percent")}
               {renderField("roce_fy25_percent")}

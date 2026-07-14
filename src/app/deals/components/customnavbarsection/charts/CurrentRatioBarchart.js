@@ -32,7 +32,7 @@ const CurrentRatioBarchart = ({ isPrivate, data: apiData }) => {
                         value: Number(item.current_ratio) || Number(item.currentratio) || 0
                     };
                 })
-                .filter(item => item !== null && item.value > 0)
+                .filter(item => item !== null && item.value >=0)
                 .sort((a, b) => Number(a.year) - Number(b.year));
         } catch (error) {
             console.error('CurrentRatioBarchart: Error transforming data', error);

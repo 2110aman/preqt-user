@@ -5,6 +5,7 @@ import 'swiper/css';
 import Cookies from 'js-cookie';
 import styles from './DealShowcase.module.css';
 import DealCard from '@/app/deals/components/DealCard';
+import Link from 'next/link';
 
 export default function DealShowcase() {
     const [featuredDeals, setFeaturedDeals] = useState([]);
@@ -110,12 +111,14 @@ export default function DealShowcase() {
                 title="Upcoming IPOs"
                 subtitle="INSTITUTIONAL GRADE IPOS"
                 deals={upcomingDeals}
+                redirectUrl="/deals?type=public"
             />
 
             <DealSection
                 title="Unlisted Shares"
                 subtitle="Established companies traded in the private market"
                 deals={unlistedDeals}
+                redirectUrl="/deals?type=unlisted"
             />
         </div>
     );
@@ -153,16 +156,35 @@ function FallbackCard() {
     );
 }
 
-function DealSection({ title, subtitle, deals, children, showArrow, titleColorClass, variantOverride }) {
+function DealSection({ title, subtitle, deals, children, redirectUrl, titleColorClass, variantOverride }) {
     const hasDeals = deals && deals.length > 0;
 
     return (
         <div className={styles.section}>
             <div className={styles.header}>
-                <h2 className={`${styles.title} ${titleColorClass ? styles[titleColorClass] : ''}`}>
-                    {title}
-                    {showArrow && <span className={styles.titleArrow}> ↗</span>}
-                </h2>
+                <div className={styles.headerTop}>
+                    <h2 className={`${styles.title} ${titleColorClass ? styles[titleColorClass] : ''}`}>
+                        {title}
+                    </h2>
+                    {redirectUrl && (
+                        <Link href={redirectUrl} className={styles.arrowLink}>
+                            <svg 
+                                width="24" 
+                                height="24" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                className={styles.arrowIcon}
+                            >
+                                <line x1="7" y1="17" x2="17" y2="7"></line>
+                                <polyline points="7 7 17 7 17 17"></polyline>
+                            </svg>
+                        </Link>
+                    )}
+                </div>
                 <p className={styles.subtitle}>{subtitle}</p>
             </div>
 

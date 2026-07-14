@@ -812,6 +812,32 @@ line-height: leading-5; /* 142.857% */
 }
 /* =====================================new comment section css end=================================== */
 
+
+@media (max-width: 1150px){
+  .postsMainContainer{
+    max-width:600px;
+    
+  }
+}
+@media (max-width: 1100px){
+  .postsMainContainer{
+    max-width:550px;
+    
+  }
+}
+@media (max-width: 1024px){
+  .postsMainContainer{
+    max-width:500px;
+    
+  }
+}
+@media (max-width: 992px){
+  .postsMainContainer{
+    max-width:660px;
+    
+  }
+}
+
 @media (max-width: 768px) {
   .searchContainer{
     border-radius: 8px;
@@ -1172,4 +1198,11 @@ line-height: leading-5; /* 142.857% */
 
 .resetWidth {
   max-width: 100%;
+}
+
+@media (max-width:480px){
+  .preqtLogoContainer img{ 
+  width: 35px;
+  height: 35px;
+  }
 }

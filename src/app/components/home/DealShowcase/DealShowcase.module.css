@@ -19,6 +19,17 @@
     gap: 4px;
 }
 
+.headerTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.arrowLink {
+    display: none;
+}
+
 .title {
     font-size: 26px;
     font-weight: 500;
@@ -110,12 +121,38 @@
     .cardRowWrapper::after {
         display: none;
     }
+    .subtitle {
+        font-size: 14px;
+    }
 }
 
 @media (max-width: 550px) {
     .showcaseContainer {
         gap: 0px;
         padding-bottom: 0px;
+    }
+    .subtitle {
+        font-size: 12px;
+    }
+    .arrowLink {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1E293B;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    .arrowLink:hover {
+        transform: translate(2px, -2px);
+    }
+
+    .title{
+        font-size: 20px;
+        line-height: 28px;
+    }
+
+    .header{
+        gap: 2px;
     }
 }
 
@@ -365,7 +402,26 @@
     .fallbackSubSubtitle{
         font-size: 14px;
     }
+    .subtitle {
+        font-size: 12px;
+    }
 
 
+}
+
+@media (max-width: 375px) {
+    .cardWrapper {
+        /* width: 32%; */
+        max-width: 310px;
+    }
+    
+}
+
+@media (max-width: 345px) {
+    .cardWrapper {
+        /* width: 32%; */
+        max-width: 270px;
+    }
+    
 }
 

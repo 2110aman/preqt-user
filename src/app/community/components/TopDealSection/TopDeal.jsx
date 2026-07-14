@@ -17,7 +17,7 @@ import RatingBadge from '@/app/deals/components/DealCard/ui/RatingBadge';
 
 const truncateDescription = (text) => {
   if (!text || typeof text !== 'string') return '';
-  const maxLength = 85;
+  const maxLength = 200;
   if (text.length <= maxLength) return text;
   let truncated = text.slice(0, maxLength);
   const lastSpace = truncated.lastIndexOf(' ');
@@ -297,7 +297,8 @@ const TopDeal = () => {
 
     const combined = [...list];
     for (const defaultDeal of DEFAULT_PUBLIC_DEALS) {
-      if (combined.length >= 2) break;
+      if (combined.length >= 2
+      ) break;
       const isAlreadyPresent = combined.some(
         (d) => d.company_name?.toLowerCase() === defaultDeal.company_name.toLowerCase()
       );
@@ -306,7 +307,7 @@ const TopDeal = () => {
       }
     }
 
-    return combined.slice(0, 2);
+    return combined.slice(0, 1);
   }, [deals]);
 
   const showOverlayDeal = useMemo(() => {

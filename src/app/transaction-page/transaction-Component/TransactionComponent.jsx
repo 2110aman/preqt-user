@@ -829,7 +829,7 @@ const mainData = transactionDetails
                 <div className={styles.companyInfo}>
                   <Image className={styles.companyLogo}
                     src={logoUrl}
-                    alt={company}
+                    alt="logo"
                     width={34}
                     height={34}
                     unoptimized

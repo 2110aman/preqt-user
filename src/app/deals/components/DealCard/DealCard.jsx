@@ -17,6 +17,7 @@ export default function DealCard({
     isListView,
     ignoreFeatured = false
 }) {
+   
     const deal = React.useMemo(() => {
         if (!originalDeal) return originalDeal;
         const getNumeric = (val) => {
@@ -29,7 +30,7 @@ export default function DealCard({
         const lotSize = getNumeric(originalDeal.min_investment_lot_size);
         const perSharePrice = getNumeric(originalDeal.per_share_price || originalDeal.offer_price);
         const lotSizeShare = getNumeric(originalDeal.lot_size_share);
-        
+
         let calculated = originalDeal.min_investment_amount_in_inr;
         if (!isNaN(lotSize) && !isNaN(perSharePrice) && !isNaN(lotSizeShare)) {
             calculated = lotSize * perSharePrice * lotSizeShare;
@@ -43,6 +44,9 @@ export default function DealCard({
 
     // 1. Determine Variant
     const variantKey = variantOverride || determineVariant(deal, ignoreFeatured);
+    if (variantKey === 'featured_deal') {
+        console.log("originalDeal", originalDeal);
+    }
     const theme = CARD_THEMES[variantKey] || CARD_THEMES.public_standard;
     const layout = CARD_LAYOUTS[variantKey] || CARD_LAYOUTS.public_standard;
     let metrics = METRICS_CONFIG[variantKey] || METRICS_CONFIG.public_standard;

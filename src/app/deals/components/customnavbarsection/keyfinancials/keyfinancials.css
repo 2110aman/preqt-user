@@ -974,6 +974,10 @@
   margin-top: 12px;
 }
 
+.balance-sheet-wrapper-relative .scroll-hint-badge {
+  top: 20%;
+}
+
 .scroll-shadow-left {
   position: absolute;
   top: 1px;

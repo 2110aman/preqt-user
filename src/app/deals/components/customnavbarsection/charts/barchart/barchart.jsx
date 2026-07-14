@@ -103,7 +103,7 @@ const Barchart = ({ isPrivateDeal, data: apiData }) => {
             value: "Revenue (₹ Cr)",
             angle: -90,
             position: "insideLeft",
-            style: { textAnchor: "middle", fontSize: 15, paddingRight: 15 },
+            style: { textAnchor: "middle", fontSize: 15, paddingRight: 50,},
           }}
 
           tick={{ fontSize: 12 }}

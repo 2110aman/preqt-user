@@ -1480,7 +1480,7 @@ const ShowInterestModal = ({ show = false, onClose = () => { }, lots, amount, de
         {step === 1 && (
           <>
             <div className="fillDetailsHead">
-              <h5 className=" mb-2  text_left">Fill details for share application</h5>
+              <h5 className=" mb-2  text_left">Fill in details to confirm your interest</h5>
               <p className="small_text text-left mb-1">Private & confidential, not for circulation</p>
             </div>
 

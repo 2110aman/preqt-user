@@ -176,7 +176,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                     </>
                 )}
 
-                <div className={styles.ipocollapseright}>
+                <div className={`${styles.ipocollapseright} ${(!isofs && dealData?.issue_size?.status) ? "" : styles.noChevron}`}>
                     {dealData?.lot_size?.status && (
                         <div className={styles.ipocollapserightInner}>
                             <small className={styles.smallText}>
