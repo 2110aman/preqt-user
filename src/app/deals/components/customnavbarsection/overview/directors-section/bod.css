@@ -109,7 +109,8 @@
   padding-top: 12px;
 }
 
-.dropdown-body a {
+.dropdown-body > a,
+.dropdown-body a.linkedin-btn {
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -130,6 +131,17 @@
   cursor: pointer;
   transition: background 0.2s ease;
   width: 100%;
+}
+
+.dropdown-body .bg-content a {
+  display: inline;
+  background: transparent;
+  color: #B59131;
+  padding: 0;
+  width: auto;
+  border-radius: 0;
+  text-decoration: underline;
+  word-break: break-word;
 }
 
 .dropdown-body .bg-content {

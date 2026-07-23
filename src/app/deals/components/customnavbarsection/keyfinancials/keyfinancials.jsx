@@ -14,16 +14,35 @@ import ROCEBarchart from "../charts/ROCEBarchart";
 import { useDealStore } from "@/store/dealStore";
 // import { useSearchParams } from "next/navigation";
 
+const extractMetricData = (val) => {
+  if (val === null || val === undefined) return null;
+  if (typeof val === "object") {
+    if ("data" in val) {
+      if (val.data === null || val.data === undefined) return null;
+      if (typeof val.data === "object") return extractMetricData(val.data);
+      return val.data;
+    }
+    if ("value" in val) {
+      if (val.value === null || val.value === undefined) return null;
+      if (typeof val.value === "object") return extractMetricData(val.value);
+      return val.value;
+    }
+    return null;
+  }
+  return val;
+};
+
 const formatIndianNumber = (value, defaultDecimals = null) => {
-  if (value === null || value === undefined || value === "") return "-";
-  const num = Number(value);
-  if (isNaN(num)) return value;
+  const val = extractMetricData(value);
+  if (val === null || val === undefined || val === "" || val === "N/A" || val === "n.a") return "-";
+  const num = Number(val);
+  if (isNaN(num)) return typeof val === "string" ? val : "-";
   
   let decimals = 0;
   if (defaultDecimals !== null) {
     decimals = defaultDecimals;
   } else {
-    const str = String(value);
+    const str = String(val);
     const parts = str.split('.');
     decimals = parts.length > 1 ? parts[1].length : 0;
   }
@@ -346,20 +365,21 @@ const IncomeStatementTrends = ({ isPrivateDeal, data }) => {
                   <td className="td-label">{row.label}</td>
                   {trendsData.map((col, idx) => {
                     const isLatest = idx === trendsData.length - 1;
-                    const value = col[row.key];
+                    const rawVal = extractMetricData(col[row.key]);
 
                     let displayVal = "-";
-                    if (value !== null && value !== undefined) {
+                    if (rawVal !== null && rawVal !== undefined && rawVal !== "" && rawVal !== "N/A" && rawVal !== "n.a") {
                       if (row.format === "percentage") {
-                        displayVal = `${Number(value).toFixed(1)}%`;
+                        const num = Number(rawVal);
+                        displayVal = isNaN(num) ? String(rawVal) : `${num.toFixed(1)}%`;
                       } else if (row.format === "currency") {
                         if (row.key === "revenue") {
-                          displayVal = formatIndianNumber(value);
+                          displayVal = formatIndianNumber(rawVal);
                         } else {
-                          displayVal = formatIndianNumber(value, 1);
+                          displayVal = formatIndianNumber(rawVal, 1);
                         }
                       } else {
-                        displayVal = value.toString();
+                        displayVal = String(rawVal);
                       }
                     }
 
@@ -777,10 +797,11 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
                         value = apiItem?.[row.key] ?? apiItem?.data?.[row.key];
                       }
 
+                      const rawVal = extractMetricData(value);
                       let displayVal = "-";
-                      if (value !== null && value !== undefined && value !== "") {
-                        const formattedNum = formatIndianNumber(value);
-                        displayVal = `₹ ${formattedNum} Cr`;
+                      if (rawVal !== null && rawVal !== undefined && rawVal !== "" && rawVal !== "N/A" && rawVal !== "n.a") {
+                        const formattedNum = formatIndianNumber(rawVal);
+                        displayVal = formattedNum === "-" ? "-" : `₹ ${formattedNum} Cr`;
                       }
 
                       return (
@@ -915,15 +936,21 @@ const CashFlowSection = ({ isPrivateDeal, data }) => {
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
 
   const formatCashFlowValue = (val) => {
-    if (val === null || val === undefined || val === "") return "-";
-    const num = Number(val);
+    const raw = extractMetricData(val);
+    if (raw === null || raw === undefined || raw === "" || raw === "N/A" || raw === "n.a") return "-";
+    const num = Number(raw);
+    if (isNaN(num)) return typeof raw === "string" ? raw : "-";
     const sign = num >= 0 ? "+" : ""; // Negative numbers already include "-"
-    return `${sign}${formatIndianNumber(val)} Cr`;
+    const formattedNum = formatIndianNumber(raw);
+    return formattedNum === "-" ? "-" : `${sign}${formattedNum} Cr`;
   };
 
   const getCashFlowColorClass = (val) => {
-    if (val === null || val === undefined || val === "") return "";
-    return Number(val) >= 0 ? "cf-positive" : "cf-negative";
+    const raw = extractMetricData(val);
+    if (raw === null || raw === undefined || raw === "" || raw === "N/A" || raw === "n.a") return "";
+    const num = Number(raw);
+    if (isNaN(num)) return "";
+    return num >= 0 ? "cf-positive" : "cf-negative";
   };
 
   const tableWrapperRef = useRef(null);
@@ -1129,10 +1156,10 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
       const wc = item.data.working_capital;
       return {
         year: yearVal,
-        debtor_days: wc.debtor_days?.data ?? wc.debtor_days ?? null,
-        creditor_days: wc.creditor_days?.data ?? wc.creditor_days ?? null,
-        inventory_days: wc.inventory_days?.data ?? wc.inventory_days ?? null,
-        working_capital_ccc: wc.working_capital_ccc?.data ?? wc.working_capital_ccc ?? null,
+        debtor_days: extractMetricData(wc.debtor_days),
+        creditor_days: extractMetricData(wc.creditor_days),
+        inventory_days: extractMetricData(wc.inventory_days),
+        working_capital_ccc: extractMetricData(wc.working_capital_ccc),
       };
     });
 
@@ -1159,8 +1186,11 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
   const observationsList = Array.isArray(apiObservations) ? apiObservations : defaultObservations;
 
   const formatDaysValue = (val) => {
-    if (val === null || val === undefined || val === "") return "-";
-    return `${formatIndianNumber(val)} Days`;
+    const raw = extractMetricData(val);
+    if (raw === null || raw === undefined || raw === "" || raw === "N/A" || raw === "n.a") return "-";
+    const formatted = formatIndianNumber(raw);
+    if (formatted === "-") return "-";
+    return `${formatted} Days`;
   };
 
   const tableWrapperRef = useRef(null);
@@ -1267,20 +1297,27 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
 
                       let value;
                       if (row.isCCC) {
-                        const debtorVal = apiItem?.debtor_days ?? apiItem?.data?.debtor_days;
-                        const creditorVal = apiItem?.creditor_days ?? apiItem?.data?.creditor_days;
-                        const inventoryVal = apiItem?.inventory_days ?? apiItem?.data?.inventory_days;
-                        const cccVal = apiItem?.working_capital_ccc ?? apiItem?.data?.working_capital_ccc;
+                        const debtorVal = extractMetricData(apiItem?.debtor_days ?? apiItem?.data?.debtor_days);
+                        const creditorVal = extractMetricData(apiItem?.creditor_days ?? apiItem?.data?.creditor_days);
+                        const inventoryVal = extractMetricData(apiItem?.inventory_days ?? apiItem?.data?.inventory_days);
+                        const cccVal = extractMetricData(apiItem?.working_capital_ccc ?? apiItem?.data?.working_capital_ccc);
 
                         if (cccVal !== undefined && cccVal !== null) {
                           value = cccVal;
                         } else if (debtorVal !== undefined && creditorVal !== undefined && inventoryVal !== undefined && debtorVal !== null && creditorVal !== null && inventoryVal !== null) {
-                          value = Number(debtorVal) + Number(inventoryVal) - Number(creditorVal);
+                          const dNum = Number(debtorVal);
+                          const iNum = Number(inventoryVal);
+                          const cNum = Number(creditorVal);
+                          if (!isNaN(dNum) && !isNaN(iNum) && !isNaN(cNum)) {
+                            value = dNum + iNum - cNum;
+                          } else {
+                            value = null;
+                          }
                         } else {
-                          value = undefined;
+                          value = null;
                         }
                       } else {
-                        value = apiItem?.[row.key] ?? apiItem?.data?.[row.key];
+                        value = extractMetricData(apiItem?.[row.key] ?? apiItem?.data?.[row.key]);
                       }
 
                       const displayVal = formatDaysValue(value);
@@ -1349,43 +1386,43 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
 
             revenue: {
               status: yearData.revenue_in_cr?.status || false,
-              value: yearData.revenue_in_cr.data
+              value: extractMetricData(yearData.revenue_in_cr)
             },
 
             // growth
             growth: {
               status: yearData.topline_growth_percent?.status || false,
-              value: yearData.topline_growth_percent.data
+              value: extractMetricData(yearData.topline_growth_percent)
             },
 
             // earnings
             ebitda: {
               status: yearData.earnings?.ebitda_in_cr?.status || false,
-              value: yearData.earnings?.ebitda_in_cr?.data || 0,
+              value: extractMetricData(yearData.earnings?.ebitda_in_cr),
             },
             pat: {
               status: yearData.earnings?.pat_in_cr?.status || false,
-              value: yearData.earnings?.pat_in_cr?.data || 0,
+              value: extractMetricData(yearData.earnings?.pat_in_cr),
             },
 
             // valuation
             peratio: {
               status: yearData.valuation?.pe_ratio?.status || false,
-              value: yearData.valuation?.pe_ratio?.data || 0,
+              value: extractMetricData(yearData.valuation?.pe_ratio),
             },
 
             // returns on capital
             roa: {
               status: yearData.returns_on_capital?.roa_percent?.status || false,
-              value: yearData.returns_on_capital?.roa_percent?.data || 0,
+              value: extractMetricData(yearData.returns_on_capital?.roa_percent),
             },
             roe: {
               status: yearData.returns_on_capital?.roe_percent?.status || false,
-              value: yearData.returns_on_capital?.roe_percent?.data || 0,
+              value: extractMetricData(yearData.returns_on_capital?.roe_percent),
             },
             roce: {
               status: yearData.returns_on_capital?.roce_percent?.status || false,
-              value: yearData.returns_on_capital?.roce_percent?.data || 0,
+              value: extractMetricData(yearData.returns_on_capital?.roce_percent),
             },
 
             // leverage and coverage
@@ -1393,29 +1430,28 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
               status:
                 yearData.leverage_and_coverage?.debt_to_equity?.status || false,
               value:
-                yearData.leverage_and_coverage?.debt_to_equity?.data || 0,
+                extractMetricData(yearData.leverage_and_coverage?.debt_to_equity),
             },
             interestcoverage: {
               status:
                 yearData.leverage_and_coverage?.interest_coverage_ratio?.status ||
                 false,
               value:
-                yearData.leverage_and_coverage?.interest_coverage_ratio?.data ||
-                0,
+                extractMetricData(yearData.leverage_and_coverage?.interest_coverage_ratio),
             },
 
             // working capital
             debtordays: {
               status: yearData.working_capital?.debtor_days?.status || false,
-              value: yearData.working_capital?.debtor_days?.data || 0,
+              value: extractMetricData(yearData.working_capital?.debtor_days),
             },
             creditordays: {
               status: yearData.working_capital?.creditor_days?.status || false,
-              value: yearData.working_capital?.creditor_days?.data || 0,
+              value: extractMetricData(yearData.working_capital?.creditor_days),
             },
             inventorydays: {
               status: yearData.working_capital?.inventory_days?.status || false,
-              value: yearData.working_capital?.inventory_days?.data || 0,
+              value: extractMetricData(yearData.working_capital?.inventory_days),
             },
 
             // asset efficiency
@@ -1424,13 +1460,13 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
                 yearData.asset_efficiency?.lt_funds_to_fixed_assets?.status ||
                 false,
               value:
-                yearData.asset_efficiency?.lt_funds_to_fixed_assets?.data || 0,
+                extractMetricData(yearData.asset_efficiency?.lt_funds_to_fixed_assets),
             },
 
             // liquidity
             currentratio: {
               status: yearData.liquidity?.current_ratio?.status || false,
-              value: yearData.liquidity?.current_ratio?.data || 0,
+              value: extractMetricData(yearData.liquidity?.current_ratio),
             },
 
             // cost structure
@@ -1438,7 +1474,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
               status:
                 yearData.cost_structure?.cogs_percent_of_revenue?.status || false,
               value:
-                yearData.cost_structure?.cogs_percent_of_revenue?.data || 0,
+                extractMetricData(yearData.cost_structure?.cogs_percent_of_revenue),
             },
           };
         });
@@ -1479,12 +1515,12 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
   const hasWorkingCapitalData = performanceArray.some(item => {
     const wc = item?.data?.working_capital;
     if (!wc) return false;
-    const debtor = wc.debtor_days?.data ?? wc.debtor_days;
-    const creditor = wc.creditor_days?.data ?? wc.creditor_days;
-    const inventory = wc.inventory_days?.data ?? wc.inventory_days;
-    return (debtor !== null && debtor !== undefined) ||
-           (creditor !== null && creditor !== undefined) ||
-           (inventory !== null && inventory !== undefined);
+    const debtor = extractMetricData(wc.debtor_days);
+    const creditor = extractMetricData(wc.creditor_days);
+    const inventory = extractMetricData(wc.inventory_days);
+    return (debtor !== null && debtor !== undefined && debtor !== "") ||
+           (creditor !== null && creditor !== undefined && creditor !== "") ||
+           (inventory !== null && inventory !== undefined && inventory !== "");
   }) || !!(dealDetails?.data?.financial_highlights?.working_capital?.data?.length > 0);
 
   const hasBalanceSheetData = !!(dealDetails?.data?.financial_highlights?.balance_sheet?.data?.length > 0);
@@ -1510,7 +1546,7 @@ const Keyfinancials = ({ isPrivateDeal = false }) => {
     return ratioData.some(item => {
       if (!item || typeof item !== 'object' || item.observation_and_insights) return false;
       return keys.some(key => {
-        const val = item[key];
+        const val = extractMetricData(item[key]);
         return val !== null && val !== undefined && val !== "" && !isNaN(Number(val));
       });
     });

@@ -29,6 +29,8 @@ const Bod = ({ isPrivateDeal }) => {
           ? `${process.env.NEXT_PUBLIC_USER_BASE}admin/${director.profile_image.path.replace("public", "")}`
           : "/logo-fallback.png";
 
+        const linkedinUrl = director.linkedin || director.linkedin_url;
+
         return (
           <div key={index} className="bod-item">
             <button className="dropdown-header" onClick={() => toggleItem(index)}>
@@ -51,13 +53,14 @@ const Bod = ({ isPrivateDeal }) => {
                   className="bg-content"
                   dangerouslySetInnerHTML={{ __html: director.background || "" }} 
                 />
-                {director.linkedin &&
-                  director.linkedin.trim() !== "" &&
-                  director.linkedin.toLowerCase() !== "n.a" && (
+                {linkedinUrl &&
+                  linkedinUrl.trim() !== "" &&
+                  linkedinUrl.toLowerCase() !== "n.a" && (
 
                     <Link
-                      href={director.linkedin}
+                      href={linkedinUrl}
                       target="_blank"
+                      className="linkedin-btn"
                       style={{ color: "white", display: "flex", gap: "10px" , textDecoration: "none" }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
