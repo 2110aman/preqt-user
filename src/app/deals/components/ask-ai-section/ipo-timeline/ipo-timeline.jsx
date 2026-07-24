@@ -25,7 +25,7 @@ const Ipotimeline = ({ handleAskAI, handleQuesAns, isPrivateDeal, qaCount }) => 
         { label: "Initiation of Refunds", date: ipoData.initiation_of_refunds },
         { label: "Credit of Shares to Demat", date: ipoData.credit_of_shares_to_demat },
         { label: "Tentative Listing Date", date: ipoData.tentative_listing_date },
-        { label: "Cut-off time for UPI mandate confirmation", date: ipoData.cut_off_time_for_upi_mandate_confirmation },
+        // { label: "Cut-off time for UPI mandate confirmation", date: ipoData.cut_off_time_for_upi_mandate_confirmation },
       ]
     : [];
 

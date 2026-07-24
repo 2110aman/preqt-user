@@ -154,7 +154,7 @@ export default function FundAndTimeline() {
     { key: "initiation_of_refunds", label: "Initiation of Refunds" },
     { key: "credit_of_shares_to_demat", label: "Credit of Shares to Demat" },
     { key: "tentative_listing_date", label: "Tentative Listing Date" },
-    { key: "cut_off_time_for_upi_mandate_confirmation", label: "Cut-off time for UPI mandate confirmation" },
+    // { key: "cut_off_time_for_upi_mandate_confirmation", label: "Cut-off time for UPI mandate confirmation" },
   ];
 
   const formatDate = (dateStr) => {

@@ -4,6 +4,7 @@
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
+  gap:20px
 }
 
 .body-section4 section {
@@ -74,7 +75,7 @@
 }
 
 .body-section4 h6 {
-  white-space: nowrap;
+  white-space: pre-wrap;
   color: #1F2937;
   font-size: 20px;
   font-weight: 500;
