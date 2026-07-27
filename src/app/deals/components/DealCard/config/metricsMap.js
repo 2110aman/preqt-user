@@ -24,7 +24,7 @@ export function getMetricDetail(deal, metric) {
                 if (raw.label_name && String(raw.label_name).trim() !== '') {
                     let cleanedLabel = String(raw.label_name).trim();
                     const lowerLabel = cleanedLabel.toLowerCase();
-                    if (lowerLabel === 'per share price') {
+                    if (lowerLabel === 'per share price' || lowerLabel === 'per share price ') {
                         cleanedLabel = (metric?.label && metric.label === metric.label.toUpperCase()) ? 'SHARE PRICE' : 'Share Price';
                     } else if (lowerLabel === 'ipo open date') {
                         cleanedLabel = (metric?.label && metric.label === metric.label.toUpperCase()) ? 'OPEN DATE' : 'Open Date';

@@ -173,6 +173,8 @@
 .leftBadges {
     display: flex;
     gap: 4px;
+    max-height: 27px;
+    overflow: hidden;
     margin-top: 0 !important;
     margin-bottom: auto !important;
     flex-wrap: wrap;
