@@ -1,8 +1,8 @@
 import { CARD_THEMES } from './themes';
 import { CARD_LAYOUTS } from './layouts';
-import { METRICS_CONFIG } from './metricsMap';
+import { METRICS_CONFIG, getMetricDetail, getVal } from './metricsMap';
 
-export { CARD_THEMES, CARD_LAYOUTS, METRICS_CONFIG };
+export { CARD_THEMES, CARD_LAYOUTS, METRICS_CONFIG, getMetricDetail, getVal };
 
 export function determineVariant(deal, ignoreFeatured = false) {
     const type = (deal.deal_type || '').toLowerCase();

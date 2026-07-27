@@ -108,9 +108,11 @@ function AllDealsContent() {
         return [...new Set(allStages)].sort();
     }, [allDeals]);
 
+    const getVal = (val) => (typeof val === 'object' && val !== null && 'data' in val) ? val.data : val;
+
     const revenueRange = useMemo(() => {
         if (!allDeals || allDeals.length === 0) return { min: 0, max: 100 };
-        const revenues = allDeals.map(d => parseFloat(d.revenue_fy25_in_cr)).filter(n => !isNaN(n));
+        const revenues = allDeals.map(d => parseFloat(getVal(d.revenue_fy25_in_cr))).filter(n => !isNaN(n));
         if (revenues.length === 0) return { min: 0, max: 100 };
         return {
             min: Math.floor(Math.min(...revenues)),
@@ -120,7 +122,7 @@ function AllDealsContent() {
 
     const valuationRangeData = useMemo(() => {
         if (!allDeals || allDeals.length === 0) return { min: 0, max: 10000 };
-        const valuations = allDeals.map(d => parseFloat(d.valuation_in_cr || d.target_valuation_in_cr)).filter(n => !isNaN(n));
+        const valuations = allDeals.map(d => parseFloat(getVal(d.valuation_in_cr) || getVal(d.target_valuation_in_cr))).filter(n => !isNaN(n));
         if (valuations.length === 0) return { min: 0, max: 10000 };
         return {
             min: Math.floor(Math.min(...valuations)),
@@ -204,7 +206,7 @@ function AllDealsContent() {
             if (appliedFilters.ticketSize) {
                 const [min, max] = appliedFilters.ticketSize;
                 deals = deals.filter(deal => {
-                    const rev = parseFloat(deal.revenue_fy25_in_cr || 0);
+                    const rev = parseFloat(getVal(deal.revenue_fy25_in_cr) || 0);
                     return rev >= min && rev <= max;
                 });
             }
@@ -212,7 +214,7 @@ function AllDealsContent() {
             if (appliedFilters.fundingStatus && appliedFilters.fundingStatus.length > 0) {
                 deals = deals.filter(deal => {
                     const raised = parseFloat(deal.raised_amount || 0);
-                    const target = parseFloat(deal.target_funding_in_cr || deal.issue_size_overall || 0);
+                    const target = parseFloat(getVal(deal.target_funding_in_cr) || getVal(deal.issue_size_overall) || 0);
                     const percent = target > 0 ? (raised / target) * 100 : 0;
 
                     return appliedFilters.fundingStatus.some(lbl => {
@@ -227,7 +229,7 @@ function AllDealsContent() {
             if (appliedFilters.valuationRange) {
                 const [min, max] = appliedFilters.valuationRange;
                 deals = deals.filter(deal => {
-                    const val = parseFloat(deal.valuation_in_cr || deal.target_valuation_in_cr || 0);
+                    const val = parseFloat(getVal(deal.valuation_in_cr) || getVal(deal.target_valuation_in_cr) || 0);
                     return val >= min && val <= max;
                 });
             }

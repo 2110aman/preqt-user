@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../DealCard.module.css';
 import { formatDateMonthDay } from '@/app/utils/FormatDate';
+import { getMetricDetail } from '../config';
 
 const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || num === "TBD") return "TBD";
@@ -12,18 +13,8 @@ const formatNumberWithCommas = (num) => {
 export default function CardHeroMetrics({ deal, config, style }) {
     if (!config || style === 'none') return null;
 
-    const getValue = (metric) => {
-        if (metric.keys) {
-            for (const key of metric.keys) {
-                if (deal[key]) return deal[key];
-            }
-            return "TBD";
-        }
-        return deal[metric.key] || "TBD";
-    };
-
     const formatMetricValue = (value, metric) => {
-        if (value === "TBD") return "TBD";
+        if (value === "TBD" || value === null || value === undefined) return "TBD";
         if (metric.format === 'date') {
             return formatDateMonthDay(value).toUpperCase();
         }
@@ -34,10 +25,10 @@ export default function CardHeroMetrics({ deal, config, style }) {
         return (
             <div className={styles.heroBoxes}>
                 {config.map((metric, idx) => {
-                    const value = getValue(metric);
+                    const { value, label } = getMetricDetail(deal, metric);
                     return (
                         <div key={idx} className={styles.heroBox}>
-                            <span className={styles.metricLabel}>{metric.label}</span>
+                            <span className={styles.metricLabel}>{label}</span>
                             <span className={styles.metricValue}>
                                 {value !== "TBD" && metric.format === "currency" ? "₹" : ""}
                                 {formatMetricValue(value, metric)}
@@ -60,10 +51,10 @@ export default function CardHeroMetrics({ deal, config, style }) {
         return (
             <div className={styles.heroInline}>
                 {config.map((metric, idx) => {
-                    const value = getValue(metric);
+                    const { value, label } = getMetricDetail(deal, metric);
                     return (
                         <div key={idx} className={styles.heroInlineItem}>
-                            <span className={styles.metricLabel}>{metric.label}</span>
+                            <span className={styles.metricLabel}>{label}</span>
                             <span className={styles.metricValue}>
                                 {value !== "TBD" && metric.format === "currency" ? "₹" : ""}
                                 {formatMetricValue(value, metric)}
@@ -85,11 +76,11 @@ export default function CardHeroMetrics({ deal, config, style }) {
         return (
             <div className={styles.heroDivided}>
                 {config.map((metric, idx) => {
-                    const value = getValue(metric);
+                    const { value, label } = getMetricDetail(deal, metric);
                     return (
                         <React.Fragment key={idx}>
                             <div className={styles.heroDividedItem}>
-                                <span className={styles.metricLabel}>{metric.label}</span>
+                                <span className={styles.metricLabel}>{label}</span>
                                 <span className={`${styles.metricValue} ${metric.format === 'percent_gain' ? (Number(value) >= 0 ? styles.gain : styles.loss) : ''}`}>
                                     {value !== "TBD" && metric.format === "currency" ? "₹" : ""}
                                     {metric.format === 'percent_gain' && value !== "TBD" && Number(value) > 0 ? '+' : ''}

@@ -11,7 +11,8 @@ export default function CardProgress({ deal }) {
         ? 4.5
         : Number(deal?.raised_amount || 0);
 
-    const target = Number(deal?.target_funding_in_cr || 0);
+    const targetRaw = (typeof deal?.target_funding_in_cr === 'object' && deal?.target_funding_in_cr !== null && 'data' in deal?.target_funding_in_cr) ? deal.target_funding_in_cr.data : deal?.target_funding_in_cr;
+    const target = Number(targetRaw || 0);
 
     if (target <= 0) return null;
 

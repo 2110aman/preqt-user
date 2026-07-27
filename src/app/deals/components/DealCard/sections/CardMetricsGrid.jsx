@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../DealCard.module.css';
-import { formatDate, formatDateMonthDay } from '@/app/utils/FormatDate';
+import { formatDateMonthDay } from '@/app/utils/FormatDate';
+import { getMetricDetail } from '../config';
 
 const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || num === "TBD") return "TBD";
@@ -27,6 +28,7 @@ export default function CardMetricsGrid({ deal, config }) {
             case 'date_short':
                 if (!value) return "TBD";
                 const d = new Date(value);
+                if (isNaN(d.getTime())) return value;
                 const month = d.toLocaleString('en-US', { month: 'short' });
                 const year = d.getFullYear().toString().slice(-2);
                 return `${month} '${year}`;
@@ -37,14 +39,17 @@ export default function CardMetricsGrid({ deal, config }) {
 
     return (
         <div className={styles.metricsGrid}>
-            {config.map((metric, idx) => (
-                <div key={idx} className={styles.gridItem}>
-                    <span className={styles.gridLabel}>{metric.label}</span>
-                    <span className={styles.gridValue}>
-                        {formatValue(deal[metric.key], metric)}
-                    </span>
-                </div>
-            ))}
+            {config.map((metric, idx) => {
+                const { value, label } = getMetricDetail(deal, metric);
+                return (
+                    <div key={idx} className={styles.gridItem}>
+                        <span className={styles.gridLabel}>{label}</span>
+                        <span className={styles.gridValue}>
+                            {formatValue(value, metric)}
+                        </span>
+                    </div>
+                );
+            })}
         </div>
     );
 }

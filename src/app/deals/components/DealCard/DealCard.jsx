@@ -21,9 +21,10 @@ export default function DealCard({
     const deal = React.useMemo(() => {
         if (!originalDeal) return originalDeal;
         const getNumeric = (val) => {
-            if (val === null || val === undefined) return NaN;
-            if (typeof val === 'number') return val;
-            const clean = String(val).replace(/[^0-9.]/g, '');
+            const extracted = (typeof val === 'object' && val !== null && 'data' in val) ? val.data : val;
+            if (extracted === null || extracted === undefined) return NaN;
+            if (typeof extracted === 'number') return extracted;
+            const clean = String(extracted).replace(/[^0-9.]/g, '');
             const num = parseFloat(clean);
             return isNaN(num) ? NaN : num;
         };
@@ -53,7 +54,8 @@ export default function DealCard({
 
     // Overriding metrics for unlisted deals if ROCE (FY'25) is available
     if (deal?.deal_type?.toLowerCase() === 'unlisted') {
-        const hasRoce = deal?.roce_fy25_percent !== null && deal?.roce_fy25_percent !== undefined && String(deal?.roce_fy25_percent).trim() !== '';
+        const roceVal = (typeof deal?.roce_fy25_percent === 'object' && deal?.roce_fy25_percent !== null) ? deal.roce_fy25_percent.data : deal?.roce_fy25_percent;
+        const hasRoce = roceVal !== null && roceVal !== undefined && String(roceVal).trim() !== '';
         
         if (variantKey === 'featured_deal') {
             metrics = {
