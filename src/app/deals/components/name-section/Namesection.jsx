@@ -680,13 +680,13 @@ const Namedetailsection = ({ slug }) => {
                 {(() => {
                   const hasTags = dealData?.tags?.status && Array.isArray(dealData?.tags?.data) && dealData?.tags?.data?.length > 0;
                   const isIpoReviewStatusTrue = dealData?.ipo_review_rating?.status === true || dealData?.ipo_review_rating?.status === "true";
-                  const rating = (isIpoReviewStatusTrue && dealData?.ipo_review_rating?.data?.weighted_composite_score);
+                  const rating = (isIpoReviewStatusTrue && (dealData?.ipo_review_rating?.data?.weighted_composite_score || dealData?.ipo_review_rating?.weighted_composite_score));
                   const numericRating = parseFloat(rating) || 0;
                   const hasRating = numericRating > 0;
 
                   return (
                     <div className={`deal-badges-column ${!hasTags ? 'no-tags' : ''} ${hasRating ? 'has-rating' : ''}`}>
-                      {dealDetails?.data?.deal_type === "public" && hasRating && (
+                      {hasRating && (
                         <div className={`ratingContainer ${dealData?.exclusive_deal ? 'has-exclusive' : ''}`}>
                           <RatingBadge rating={rating} />
                         </div>
@@ -777,7 +777,7 @@ const Namedetailsection = ({ slug }) => {
                   )}
                 </div>
               )}
-              {!isDarkTheme && !hideForReferral && (dealData?.ipo_review_rating?.status === true || dealData?.ipo_review_rating?.status === "true") && <IPOReviewAndRating reviewData={dealData?.ipo_review_rating?.data} />}
+              {!isDarkTheme && !hideForReferral && (dealData?.ipo_review_rating?.status === true || dealData?.ipo_review_rating?.status === "true") && <IPOReviewAndRating reviewData={dealData?.ipo_review_rating?.data || dealData?.ipo_review_rating} />}
               {isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
                 <PreqtSummarySection 
                   isPrivateLike={true} 
