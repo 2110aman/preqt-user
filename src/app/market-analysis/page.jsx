@@ -455,12 +455,12 @@ export default function MarketAnalysisPage() {
             <div className={styles.scoreBox}>
               <span className={styles.scoreLabel}>PR.QTY INDEX SCORE</span>
               <div className={styles.scoreValueRow}>
-                <span className={styles.scoreMain}>{postData?.index_score ?? "7.4"}</span>
-                <span className={styles.scoreMax}>/ 05</span>
+                <span className={styles.scoreMain}>{postData?.index_score ?? "-"}</span>
+                <span className={styles.scoreMax}>/ 10</span>
               </div>
               <div className={styles.bullishBadge}>
                 <span className={styles.bullishDot}></span>
-                {postData?.market_remark || "BULLISH"}
+                {postData?.market_remark || ""}
               </div>
             </div>
 
