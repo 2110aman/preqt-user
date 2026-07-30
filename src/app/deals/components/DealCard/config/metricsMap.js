@@ -94,7 +94,7 @@ export const METRICS_CONFIG = {
             { label: "GMP", keys: ["gmp", "estimated_gain_loss"], format: "currency", showGainLoss: true }
         ],
         grid: [
-            { label: "Expected Val.", key: "expected_valuation", format: "currency", suffix: "Cr" },
+            { label: "Valuation", key: "valuation_in_cr", format: "currency", suffix: "Cr" },
             { label: "Revenue (FY'25)", key: "revenue_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "P/E Multiple", key: "pe_multiple", format: "multiplier" },

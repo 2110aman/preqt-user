@@ -218,8 +218,8 @@ const Business = ({ isPrivateDeal }) => {
       setOpenStates({
         [productsTitle]: true,
         [servicesTitle]: true,
-        "Geographical Presence": !!business?.geographical_presence?.status,
         [businessModelTitle]: !!business?.business_model?.status,
+        "Geographical Presence": !!business?.geographical_presence?.status,
         [salesChannelTitle]: !!business?.sales_channel?.status,
         "Clients": !!business?.clients?.status,
       });
@@ -312,46 +312,6 @@ const Business = ({ isPrivateDeal }) => {
     );
   }
 
-  if (business?.geographical_presence?.status) {
-    activeSections.push(
-      <Dropdown
-        key="geo"
-        title="Geographical Presence"
-        isOpen={openStates["Geographical Presence"]}
-        onToggle={toggleDropdown}
-        isPrivateDeal={isPrivateDeal}
-      >
-        {typeof business.geographical_presence.data === "string" ? (
-          <div
-            className={styles.businessModal}
-            dangerouslySetInnerHTML={{ __html: business.geographical_presence.data }}
-          />
-        ) : Array.isArray(business.geographical_presence.data?.data) ? (
-          business.geographical_presence.data.data.map((item, index) => (
-            <div key={index} className={styles.pTag}>
-              {item.label_name && <strong className={styles.strong}>{item.label_name}</strong>}
-              <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: item.content }} />
-              {renderFiles(item.files)}
-            </div>
-          ))
-        ) : Array.isArray(business.geographical_presence.data) ? (
-          business.geographical_presence.data.map((item, index) => (
-            <div key={index} className={styles.pTag}>
-              {item.label_name && <strong className={styles.strong}>{item.label_name}</strong>}
-              <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: item.content }} />
-              {renderFiles(item.files)}
-            </div>
-          ))
-        ) : business.geographical_presence.data?.content ? (
-          <div className={styles.pTag}>
-            <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: business.geographical_presence.data.content }} />
-            {renderFiles(business.geographical_presence.data.files)}
-          </div>
-        ) : null}
-      </Dropdown>
-    );
-  }
-
   if (business?.business_model?.status) {
     activeSections.push(
       <Dropdown
@@ -391,6 +351,46 @@ const Business = ({ isPrivateDeal }) => {
               </div>
             ) : null}
             {renderFiles(business.business_model.files)}
+          </div>
+        ) : null}
+      </Dropdown>
+    );
+  }
+
+  if (business?.geographical_presence?.status) {
+    activeSections.push(
+      <Dropdown
+        key="geo"
+        title="Geographical Presence"
+        isOpen={openStates["Geographical Presence"]}
+        onToggle={toggleDropdown}
+        isPrivateDeal={isPrivateDeal}
+      >
+        {typeof business.geographical_presence.data === "string" ? (
+          <div
+            className={styles.businessModal}
+            dangerouslySetInnerHTML={{ __html: business.geographical_presence.data }}
+          />
+        ) : Array.isArray(business.geographical_presence.data?.data) ? (
+          business.geographical_presence.data.data.map((item, index) => (
+            <div key={index} className={styles.pTag}>
+              {item.label_name && <strong className={styles.strong}>{item.label_name}</strong>}
+              <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: item.content }} />
+              {renderFiles(item.files)}
+            </div>
+          ))
+        ) : Array.isArray(business.geographical_presence.data) ? (
+          business.geographical_presence.data.map((item, index) => (
+            <div key={index} className={styles.pTag}>
+              {item.label_name && <strong className={styles.strong}>{item.label_name}</strong>}
+              <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: item.content }} />
+              {renderFiles(item.files)}
+            </div>
+          ))
+        ) : business.geographical_presence.data?.content ? (
+          <div className={styles.pTag}>
+            <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: business.geographical_presence.data.content }} />
+            {renderFiles(business.geographical_presence.data.files)}
           </div>
         ) : null}
       </Dropdown>
