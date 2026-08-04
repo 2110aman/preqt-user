@@ -16,6 +16,7 @@ const Chatbot = ({ onBack, showInModal = false, onClose, isPrivate, isPrivateLik
   const slug = pathname?.split("/deals/")[1] || "";
   const dealDetails = useDealStore((state) => state.dealDetails);
   const dealDocumentName = dealDetails?.data?.deal_setpData?.boat_document_name;
+  const { investor } = useUserContext();
   console.log("Deal Details on chatbot : ", dealDetails)
 
   console.log("Deal DOcument name : ", dealDocumentName)
@@ -91,30 +92,31 @@ const Chatbot = ({ onBack, showInModal = false, onClose, isPrivate, isPrivateLik
   const authToken = Cookies.get("accessToken");
 
   useEffect(() => {
-  const fetchHistory = async () => {
-    try {
-      if (!investor?.id) return;
+    const fetchHistory = async () => {
+      try {
+        if (!investor?.id || !dealId) return;
 
-      const historyRes = await fetch(
-        `https://pdf.webninjaz.com/history_chat?skip=0&limit=50&user_id=${investor.id}&deal_id=${dealId}`
-      );
-      const data = await historyRes.json();
+        const historyRes = await fetch(
+          `https://pdf.webninjaz.com/history_chat?skip=0&limit=50&user_id=${investor.id}&deal_id=${dealId}`
+        );
+        if (!historyRes.ok) return;
+        const data = await historyRes.json();
 
-      if (Array.isArray(data?.history)) {
-        const mappedHistory = data.history.map(h => ({
-          user: h?.response?.question || "",
-          ai: h?.response?.answer || ""
-        }));
+        if (Array.isArray(data?.history)) {
+          const mappedHistory = data.history.map(h => ({
+            user: h?.response?.question || "",
+            ai: h?.response?.answer || ""
+          }));
 
-        setUserChat(mappedHistory);
+          setUserChat(mappedHistory);
+        }
+      } catch (err) {
+        console.warn("Error loading chat history:", err);
       }
-    } catch (err) {
-      console.error("Error loading chat history:", err);
-    }
-  };
+    };
 
-  fetchHistory();
-}, []);
+    fetchHistory();
+  }, [investor?.id, dealId]);
 
 
   const askAI = async (userQuestion) => {
@@ -130,6 +132,7 @@ const Chatbot = ({ onBack, showInModal = false, onClose, isPrivate, isPrivateLik
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (!response.ok) return "Chat service unavailable. Please try again.";
       const data = await response.json();
       return data.answer || "No answer available.";
     } catch (error) {
@@ -137,7 +140,6 @@ const Chatbot = ({ onBack, showInModal = false, onClose, isPrivate, isPrivateLik
       return "Something went wrong. Please try again.";
     }
   };
-  const  {investor} = useUserContext();
 
   const saveChatHistory = async (question, answer) => {
   try {

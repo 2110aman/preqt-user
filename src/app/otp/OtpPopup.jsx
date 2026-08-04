@@ -196,20 +196,17 @@ useEffect(() => {
       );
 
       await refreshInvestor?.();
-      onVerified?.();
 
       clearFormData();
 
-      // If a redirect target is provided (e.g. original deal page), go there after login
-      clearFormData();
-
-      if (redirectTo) {
+      if (onVerified) {
+        onVerified();
+      } else if (redirectTo) {
         router.replace(redirectTo);
       } else {
         router.replace("/");
       }
 
-      router.refresh();
       handleHidePopUp();
     } catch (error) {
       console.error("Login error:", error);

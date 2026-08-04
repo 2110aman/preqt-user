@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import { showErrorToast, showSuccessToast } from "@/app/components/ToastProvider";
 import GetInvite from "./GetInvite";
 
-const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, limit, qaCount, replies, isccps, authToken, isShowInterest, fetchDealDetails }) => {
+const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, limit, qaCount, replies, isccps, authToken, isShowInterest, fetchDealDetails, onLoginClick, onShowOtp, isAskAiActive }) => {
 
   const isunlisted = dealDetails?.deal_type === "unlisted";
   const isMinInvestmentStatusFalse = isunlisted && dealDetails?.deal_setpData?.min_investment?.status === false;
@@ -148,6 +148,18 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
 
     return diffDays; // Could be 0 or negative
   }
+
+  useEffect(() => {
+    const handleOpenInterest = () => {
+      if (isMobile) {
+        setShowSlider(true);
+      } else {
+        setShowInterestModal(true);
+      }
+    };
+    window.addEventListener("openShowInterest", handleOpenInterest);
+    return () => window.removeEventListener("openShowInterest", handleOpenInterest);
+  }, [isMobile]);
   const getLatestReplyInitials = (questions = []) => {
     const allReplies = [];
 
@@ -237,6 +249,10 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
               <button
                 className={styles.showBtn}
                 onClick={() => {
+                  if (!authToken) {
+                    if (onLoginClick) onLoginClick("show_interest");
+                    return;
+                  }
                   setShowSlider(false);
                   if (lots < minLots) {
                     showErrorToast(`Minimum lot should be ${minLots}.`);
@@ -263,9 +279,19 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
           )
       )}
       {/* Optional Ask AI button only when chatbot is supported */}
-      {!isMobile && dealDetails?.chat_bot_supported && <button
+      {dealDetails?.chat_bot_supported && <button
         className={styles.askAiButton}
-        onClick={() => setShowChatBot(true)}
+        onClick={() => {
+          if (!authToken) {
+            if (onLoginClick) onLoginClick("ask_ai");
+            return;
+          }
+          if (handleAskAI) {
+            handleAskAI(true);
+          } else {
+            setShowChatBot(true);
+          }
+        }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M9.97075 5.57749L10.573 7.24999C11.242 9.10624 12.7037 10.568 14.56 11.237L16.2325 11.8392C16.3832 11.894 16.3832 12.1077 16.2325 12.1617L14.56 12.764C12.7037 13.433 11.242 14.8947 10.573 16.751L9.97075 18.4235C9.916 18.5742 9.70225 18.5742 9.64825 18.4235L9.046 16.751C8.377 14.8947 6.91525 13.433 5.059 12.764L3.3865 12.1617C3.23575 12.107 3.23575 11.8932 3.3865 11.8392L5.059 11.237C6.91525 10.568 8.377 9.10624 9.046 7.24999L9.64825 5.57749C9.70225 5.42599 9.916 5.42599 9.97075 5.57749Z" fill="#C9A74E" />
@@ -285,11 +311,15 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
           </Link>
         </div>} */}
 
-
-
       <GetInvite fetchDealDetails={fetchDealDetails} />
 
-      <button className={`${styles.imageStack} ${styles.mobileStackImage} ${qaCount <= 0 ? styles.centeredImageStack : ''}`} onClick={() => setShowQnA(true)}>
+      <button className={`${styles.imageStack} ${styles.mobileStackImage} ${qaCount <= 0 ? styles.centeredImageStack : ''}`} onClick={() => {
+        if (!authToken) {
+          if (onLoginClick) onLoginClick("qna");
+          return;
+        }
+        setShowQnA(true);
+      }}>
         <>
           {qaCount > 0 && (
             <div>
@@ -348,9 +378,16 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
             ) : (
               <PrivateQuestion onBack={() => setShowQnA(false)} qaCount={qaCount} replies={replies} />
             )
-          ) : showchatbot ? (
+          ) : (showchatbot || isAskAiActive) ? (
             <Chatbot
-              onBack={() => setShowChatBot(false)}
+              onBack={() => {
+                setShowChatBot(false);
+                if (handleAskAI) handleAskAI(false);
+              }}
+              onClose={() => {
+                setShowChatBot(false);
+                if (handleAskAI) handleAskAI(false);
+              }}
               isPrivateDeal={isPrivateDeal}
               isPrivate={isPrivateDeal}
               isPrivateLike={isPrivateLike}
@@ -365,12 +402,50 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
 
       {/* Mobile View with Slider */}
       {/* MOBILE VIEW — CALCULATOR + QnA SLIDER */}
-      {authToken && isMobile && (
+      {isMobile && (
         <>
           {/* FIXED BOTTOM SHOW INTEREST BUTTON */}
           {isPrivateDeal && !isMinInvestmentStatusFalse && (
             <div className={`${styles.fixedBottomBtn} ${isDarkTheme ? "" : styles.lightCard}`}>
-              <button onClick={() => setShowSlider(true)}>Show Interest</button>
+              <button onClick={() => {
+                if (!authToken) {
+                  if (onLoginClick) onLoginClick("show_interest");
+                  return;
+                }
+                setShowSlider(true);
+              }}>
+                Show Interest
+              </button>
+            </div>
+          )}
+
+          {/* CHATBOT SLIDER / MODAL ON MOBILE */}
+          {(showchatbot || isAskAiActive) && (
+            <div
+              className={styles.overlay}
+              onClick={() => {
+                setShowChatBot(false);
+                if (handleAskAI) handleAskAI(false);
+              }}
+            >
+              <div
+                className={`${styles.slider} ${isDarkTheme ? "" : styles.lightCard}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Chatbot
+                  onBack={() => {
+                    setShowChatBot(false);
+                    if (handleAskAI) handleAskAI(false);
+                  }}
+                  onClose={() => {
+                    setShowChatBot(false);
+                    if (handleAskAI) handleAskAI(false);
+                  }}
+                  isPrivateDeal={isPrivateDeal}
+                  isPrivate={isPrivateDeal}
+                  isPrivateLike={isPrivateLike}
+                />
+              </div>
             </div>
           )}
 

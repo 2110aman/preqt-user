@@ -57,14 +57,25 @@ const Namedetailsection = ({ slug }) => {
   // ---- Signin + OTP states ----
   const [showSignin, setShowSignin] = useState(false);
   const [signinEmail, setSigninEmail] = useState("");
+  const [otpPayload, setOtpPayload] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
 
   const [showOtp, setShowOtp] = useState(false);
   const [otpEmail, setOtpEmail] = useState("");
   const [otpSource, setOtpSource] = useState("");
 
-  const handleSigninOpen = () => setShowSignin(true);
+  const handleSigninOpen = (action = null) => {
+    if (action && typeof action === "string") {
+      setPendingAction(action);
+    }
+    setShowSignin(true);
+  };
   const handleSigninClose = () => setShowSignin(false);
   const handleOtpClose = () => setShowOtp(false);
+  const handleSigninShowOtp = (payload) => {
+    setShowSignin(false);
+    setOtpPayload({ ...payload, flow: "signin" });
+  };
 
 
   // const activeDealFromStore = deal ?? selectedDeal;
@@ -278,7 +289,8 @@ const Namedetailsection = ({ slug }) => {
         "Failed to fetch deal details: Please Provide Valid Token to access This Deal.";
 
       const errorMessage = "Failed to fetch deal details: Deal not found for given slug or deal_id."
-      if ((data?.status === 500 && errorMessage == data.data.message) || (data?.data?.deal_type != "public" && (!authToken && !sessionStorage.getItem("referral")))) {
+      const isPublicOrUnlisted = data?.data?.deal_type === "public" || data?.data?.deal_type === "unlisted";
+      if ((data?.status === 500 && errorMessage == data.data.message) || (!isPublicOrUnlisted && (!authToken && !sessionStorage.getItem("referral")))) {
         // Redirect to deals and trigger signin popup.
         // Include the original deal URL so we can come back here after login.
         const referral = sessionStorage.getItem("referral");
@@ -440,6 +452,10 @@ const Namedetailsection = ({ slug }) => {
   };
 
   const handleAskAI = (flag) => {
+    if (flag && !authToken) {
+      handleSigninOpen("ask_ai");
+      return;
+    }
     setIsAskAiActive(flag);
   }
   const handleQuesAns = (flag) => {
@@ -854,8 +870,14 @@ const Namedetailsection = ({ slug }) => {
               </div> */}
             </div>
 
-            {authToken && <button className={`${isDarkTheme ? " private-qna-btn" : "qna-mob-btn"}`}
-              onClick={() => { isDarkTheme ? setShowPrivateQna(true) : setShowQnA(true) }}
+            <button className={`${isDarkTheme ? " private-qna-btn" : "qna-mob-btn"}`}
+              onClick={() => {
+                if (!authToken) {
+                  handleSigninOpen("qna");
+                  return;
+                }
+                isDarkTheme ? setShowPrivateQna(true) : setShowQnA(true);
+              }}
             >
               <>
                 <div className="initialsContainer">
@@ -876,7 +898,7 @@ const Namedetailsection = ({ slug }) => {
                   <img src="/assets/pictures/8e3073ca31264b3cb0bd9cb1e07af102b937cb5c.gif" alt="gif" />
                 </span>
               </>
-            </button>}
+            </button>
 
             {/* <div className={hideForReferral ? "hideCardUI" : ""}>
               <Featured isPrivateDeal={isPrivateLike} data={setDealDataDetails} />
@@ -886,7 +908,7 @@ const Namedetailsection = ({ slug }) => {
 
           {isPrivateLike ? (
             <div className={hideForReferral ? "hideCardUI" : ""}>
-              <Calculator dealDetails={dealDetails.data} isAskAiActive={isAskAiActive} handleAskAI={handleAskAI} isPrivateDeal={isPrivateLike} deal_id={dealDetails?.data?.deal_id} limit={limit} qaCount={qaCount} replies={replies} isccps={isccps} authToken={authToken} isShowInterest={isShowInterest} fetchDealDetails={fetchDealDetails} />
+              <Calculator dealDetails={dealDetails.data} isAskAiActive={isAskAiActive} handleAskAI={handleAskAI} isPrivateDeal={isPrivateLike} deal_id={dealDetails?.data?.deal_id} limit={limit} qaCount={qaCount} replies={replies} isccps={isccps} authToken={authToken} isShowInterest={isShowInterest} fetchDealDetails={fetchDealDetails} onLoginClick={handleSigninOpen} onShowOtp={handleSigninShowOtp} />
             </div>
           ) : (
             <AskAiSection
@@ -947,6 +969,43 @@ const Namedetailsection = ({ slug }) => {
           </div>
         )
       }
+
+      {showSignin && (
+        <SigninPopup
+          show={showSignin}
+          onHide={handleSigninClose}
+          onShowOtp={handleSigninShowOtp}
+        />
+      )}
+
+      {otpPayload && (
+        <OtpPopup
+          {...otpPayload}
+          show
+          handleClose={() => {
+            setOtpPayload(null);
+            setPendingAction(null);
+          }}
+          handleBack={() => {
+            setOtpPayload(null);
+            setShowSignin(true);
+          }}
+          onVerified={() => {
+            setOtpPayload(null);
+            fetchDealDetails();
+
+            if (pendingAction === "show_interest") {
+              window.dispatchEvent(new CustomEvent("openShowInterest"));
+            } else if (pendingAction === "ask_ai") {
+              setIsAskAiActive(true);
+            } else if (pendingAction === "qna") {
+              if (isDarkTheme) setShowPrivateQna(true);
+              else setShowQnA(true);
+            }
+            setPendingAction(null);
+          }}
+        />
+      )}
     </div >
   );
 };

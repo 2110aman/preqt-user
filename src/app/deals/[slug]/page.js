@@ -1,6 +1,5 @@
 import Namedetailsection from "../components/name-section/Namesection";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation"; // 👈 import redirect
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -26,74 +25,115 @@ export async function generateMetadata({ params }) {
 
     const deal = await res.json();
 
-   
     const dealName = deal?.data?.deal_setpData?.company_name || "";
+    const rawDealType =
+      deal?.data?.deal_type || deal?.data?.deal_setpData?.deal_type || "";
 
- 
-    const lotSize = deal?.data?.deal_setpData?.lot_size?.data || "";
+    const dealTypeMap = {
+      public: "IPO Share",
+      ipo: "IPO Share",
+      unlisted: "Unlisted Share",
+      private: "Private Share",
+      ofs: "OFS Share",
+      ccps: "CCPS Share",
+    };
 
-   
-    const tags = Array.isArray(deal?.data?.deal_setpData?.tags?.data)
+    const dealTypeLabel =
+      dealTypeMap[rawDealType.toLowerCase()] || rawDealType || "";
+
+    const title = dealName
+      ? dealTypeLabel
+        ? `${dealName} - ${dealTypeLabel}`
+        : dealName
+      : "Deal Details";
+
+    const rawSummary =
+      deal?.data?.deal_setpData?.preqt_summary?.data ||
+      deal?.data?.preqt_summary?.data ||
+      "";
+
+    const cleanSummary = rawSummary
+      ? rawSummary.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
+      : "";
+
+    const rawTagline =
+      deal?.data?.deal_setpData?.tag_line?.data ||
+      (typeof deal?.data?.tag_line === "string"
+        ? deal?.data?.tag_line
+        : deal?.data?.tag_line?.data) ||
+      "";
+
+    const cleanTagline = rawTagline
+      ? rawTagline.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
+      : "";
+
+    const description =
+      cleanSummary ||
+      cleanTagline ||
+      (dealName
+        ? `Discover ${dealName} on PrEqt`
+        : "Explore detailed deal information.");
+
+    const rawTags = Array.isArray(deal?.data?.deal_setpData?.tags?.data)
       ? deal.data.deal_setpData.tags.data
+      : Array.isArray(deal?.data?.tags?.data)
+      ? deal.data.tags.data
+      : Array.isArray(deal?.data?.tags)
+      ? deal.data.tags
       : [];
 
-   
-    const featureDescriptions = Array.isArray(deal?.data?.deal_setpData?.features?.data)
-      ? deal.data.deal_setpData.features.data
-          .map((item) => item?.description)
-          .filter(Boolean)                     
+    const rawHighlights = Array.isArray(
+      deal?.data?.deal_setpData?.key_highlights?.data
+    )
+      ? deal.data.deal_setpData.key_highlights.data
+      : Array.isArray(deal?.data?.key_highlights?.data)
+      ? deal.data.key_highlights.data
+      : Array.isArray(deal?.data?.key_highlights)
+      ? deal.data.key_highlights
       : [];
 
-    
-    const allDescriptions = featureDescriptions.join(" | ");
+    const combinedItems = [...rawTags, ...rawHighlights]
+      .map((item) =>
+        typeof item === "string"
+          ? item
+          : item?.description || item?.name || item?.label || ""
+      )
+      .filter((item) => Boolean(item && item.trim()));
 
-    
+    const keywordList = combinedItems.map((item) =>
+      dealName ? `${dealName} - ${item.trim()}` : item.trim()
+    );
+
     const keywords =
-      dealName && allDescriptions
-        ? `${dealName} | ${allDescriptions} | `
+      keywordList.length > 0
+        ? keywordList.join(", ")
+        : dealName
+        ? `${dealName}, Deals, Investments, Opportunities`
         : "Deals, Investments, Opportunities";
 
-    console.log("Generated Keywords:", keywords);
-
     return {
-      title:
-        `${dealName} - ${tags.join(", ")} | Lot Size: ${lotSize} | PrEqt` ||
-        "Deal Details",
-
-      description:
-        `Discover ${dealName}, Lot Size: ${lotSize}, minimum Investment: ${deal?.data?.deal_setpData?.min_investment?.data?.amount_in_inr} and risk analysis on PrEqt` ||
-        "Deal Details",
-
-      keywords, 
-
-     openGraph: {
-  title:
-    `${dealName} - ${tags.join(", ")} | Lot Size: ${lotSize} | PrEqt` ||
-    "Deal Details",
-  description:
-    `Discover ${dealName}, Lot Size: ${lotSize}, minimum Investment: ${deal?.data?.deal_setpData?.min_investment?.data?.amount_in_inr} and risk analysis on PrEqt` ||
-    "Deal Details",
-  locale: "en_IN",
-
-  images: [
-    // ⭐ Static OG preview image (favicon or your logo/banner)
-    {
-    url: "/favicon.png",   // Use this instead of favicon.png
-    width: 1200,
-    height: 630,
-    alt: `${dealName} - primary preview`,
-  },
-
-    // ⭐ Then append dynamic API images
-    ...(
-      deal?.data?.deal_overview?.company_intro_images?.data?.map(img => ({
-        url: `${process.env.NEXT_PUBLIC_USER_BASE}admin/${img?.path?.replace("public/", "")}`,
-        alt: `${dealName}- ${tags.join(", ")}`,
-      })) || []
-    )
-  ],
-}
-
+      title,
+      description,
+      keywords,
+      openGraph: {
+        title,
+        description,
+        locale: "en_IN",
+        images: [
+          {
+            url: "/favicon.png",
+            width: 1200,
+            height: 630,
+            alt: `${dealName} - primary preview`,
+          },
+          ...(
+            deal?.data?.deal_overview?.company_intro_images?.data?.map((img) => ({
+              url: `${process.env.NEXT_PUBLIC_USER_BASE}admin/${img?.path?.replace("public/", "")}`,
+              alt: title,
+            })) || []
+          ),
+        ],
+      },
     };
   } catch (error) {
     console.error("Error fetching metadata:", error);
@@ -105,16 +145,6 @@ export async function generateMetadata({ params }) {
   }
 }
 
-
-// export async function generateMetadata({ params }) {
-//   const { slug } = params;
-//   return {
-//     title: `Deal | ${slug}`,
-//     description: "Explore exclusive deals and investment opportunities",
-//   };
-// }
-
-
 export default async function DealPage({ params }) {
   const { slug } = await params;
 
@@ -124,3 +154,4 @@ export default async function DealPage({ params }) {
     </div>
   );
 }
+
