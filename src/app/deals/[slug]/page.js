@@ -3,18 +3,27 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 
 const getDealData = cache(async (slug, token) => {
+  if (!slug) return null;
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_USER_BASE 
+  ).replace(/\/$/, "");
+
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/public/detailsbyslug/${slug}`,
+      `${baseUrl}/admin/api/deals/public/detailsbyslug/${encodeURIComponent(slug)}`,
       {
         method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         next: { revalidate: 60 },
       }
     );
     if (res.ok) {
       return await res.json();
     }
+    console.error(`getDealData HTTP ${res.status} for ${slug} on ${baseUrl}`);
   } catch (error) {
     console.error("Error fetching deal on server:", error);
   }
