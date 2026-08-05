@@ -1,5 +1,25 @@
 import Namedetailsection from "../components/name-section/Namesection";
 import { cookies } from "next/headers";
+import { cache } from "react";
+
+const getDealData = cache(async (slug, token) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/public/detailsbyslug/${slug}`,
+      {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        next: { revalidate: 60 },
+      }
+    );
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (error) {
+    console.error("Error fetching deal on server:", error);
+  }
+  return null;
+});
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -7,27 +27,28 @@ export async function generateMetadata({ params }) {
   const token = cookieStore.get("accessToken")?.value;
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/public/detailsbyslug/${slug}`,
-      {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        cache: "no-store",
-      }
-    );
-
-    if (!res.ok) {
+    const deal = await getDealData(slug, token);
+    if (!deal) {
       return {
-        title: "Deal Not Found",
-        description: "Unable to load deal information.",
+        title: "Deal Details",
+        description: "Explore detailed deal information.",
       };
     }
 
-    const deal = await res.json();
+    const dealData = deal?.data || deal;
 
-    const dealName = deal?.data?.deal_setpData?.company_name || "";
+    const dealName =
+      dealData?.company_name ||
+      dealData?.deal_setpData?.company_name ||
+      dealData?.deal_overview?.company_name ||
+      "";
+
     const rawDealType =
-      deal?.data?.deal_type || deal?.data?.deal_setpData?.deal_type || "";
+      dealData?.deal_type ||
+      dealData?.deal_setpData?.deal_type ||
+      dealData?.deal_overview?.deal_type ||
+      dealData?.deal_sub_type ||
+      "";
 
     const dealTypeMap = {
       public: "IPO Share",
@@ -48,8 +69,8 @@ export async function generateMetadata({ params }) {
       : "Deal Details";
 
     const rawSummary =
-      deal?.data?.deal_setpData?.preqt_summary?.data ||
-      deal?.data?.preqt_summary?.data ||
+      dealData?.deal_setpData?.preqt_summary?.data ||
+      dealData?.preqt_summary?.data ||
       "";
 
     const cleanSummary = rawSummary
@@ -57,10 +78,10 @@ export async function generateMetadata({ params }) {
       : "";
 
     const rawTagline =
-      deal?.data?.deal_setpData?.tag_line?.data ||
-      (typeof deal?.data?.tag_line === "string"
-        ? deal?.data?.tag_line
-        : deal?.data?.tag_line?.data) ||
+      dealData?.deal_setpData?.tag_line?.data ||
+      (typeof dealData?.tag_line === "string"
+        ? dealData?.tag_line
+        : dealData?.tag_line?.data) ||
       "";
 
     const cleanTagline = rawTagline
@@ -74,22 +95,22 @@ export async function generateMetadata({ params }) {
         ? `Discover ${dealName} on PrEqt`
         : "Explore detailed deal information.");
 
-    const rawTags = Array.isArray(deal?.data?.deal_setpData?.tags?.data)
-      ? deal.data.deal_setpData.tags.data
-      : Array.isArray(deal?.data?.tags?.data)
-      ? deal.data.tags.data
-      : Array.isArray(deal?.data?.tags)
-      ? deal.data.tags
+    const rawTags = Array.isArray(dealData?.deal_setpData?.tags?.data)
+      ? dealData.deal_setpData.tags.data
+      : Array.isArray(dealData?.tags?.data)
+      ? dealData.tags.data
+      : Array.isArray(dealData?.tags)
+      ? dealData.tags
       : [];
 
     const rawHighlights = Array.isArray(
-      deal?.data?.deal_setpData?.key_highlights?.data
+      dealData?.deal_setpData?.key_highlights?.data
     )
-      ? deal.data.deal_setpData.key_highlights.data
-      : Array.isArray(deal?.data?.key_highlights?.data)
-      ? deal.data.key_highlights.data
-      : Array.isArray(deal?.data?.key_highlights)
-      ? deal.data.key_highlights
+      ? dealData.deal_setpData.key_highlights.data
+      : Array.isArray(dealData?.key_highlights?.data)
+      ? dealData.key_highlights.data
+      : Array.isArray(dealData?.key_highlights)
+      ? dealData.key_highlights
       : [];
 
     const combinedItems = [...rawTags, ...rawHighlights]
@@ -118,7 +139,9 @@ export async function generateMetadata({ params }) {
       openGraph: {
         title,
         description,
+        siteName: "PrEqt",
         locale: "en_IN",
+        type: "website",
         images: [
           {
             url: "/favicon.png",
@@ -127,12 +150,17 @@ export async function generateMetadata({ params }) {
             alt: `${dealName} - primary preview`,
           },
           ...(
-            deal?.data?.deal_overview?.company_intro_images?.data?.map((img) => ({
+            dealData?.deal_overview?.company_intro_images?.data?.map((img) => ({
               url: `${process.env.NEXT_PUBLIC_USER_BASE}admin/${img?.path?.replace("public/", "")}`,
               alt: title,
             })) || []
           ),
         ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
       },
     };
   } catch (error) {
@@ -150,22 +178,7 @@ export default async function DealPage({ params }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
 
-  let initialDealData = null;
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/public/detailsbyslug/${slug}`,
-      {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        cache: "no-store",
-      }
-    );
-    if (res.ok) {
-      initialDealData = await res.json();
-    }
-  } catch (error) {
-    console.error("Error fetching deal on server:", error);
-  }
+  const initialDealData = await getDealData(slug, token);
 
   return (
     <div>

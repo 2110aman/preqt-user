@@ -55,3 +55,26 @@ export function formatDateMonthDay(dateString) {
     const day = date.getDate();
     return `${month} ${day}`;
 }
+
+export function formatFullDate(dateString) {
+    if (!dateString || dateString === "TBD") {
+        return "TBD";
+    }
+    const match = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+        const [_, year, month, day] = match;
+        const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+        const monthName = date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+        const paddedDay = day.padStart(2, '0');
+        return `${monthName} ${paddedDay}, ${year}`;
+    }
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+        return dateString;
+    }
+    const paddedDay = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${month} ${paddedDay}, ${year}`;
+}

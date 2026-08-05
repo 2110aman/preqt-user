@@ -24,11 +24,6 @@ const PeerComparison = ({ isPrivateDeal }) => {
     );
   }, [peerComparison]);
 
-  if (!peerComparison?.status || companies.length === 0) {
-    return null;
-  }
-  const themeClass = isPrivateDeal ? styles.dark : styles.light;
-
   const tableWrapperRef = useRef(null);
   const hasDismissedRef = useRef(false);
   const [showRightShadow, setShowRightShadow] = useState(false);
@@ -43,6 +38,8 @@ const PeerComparison = ({ isPrivateDeal }) => {
   };
 
   useEffect(() => {
+    if (!peerComparison?.status || companies.length === 0) return;
+
     checkScroll();
 
     if (hasDismissedRef.current) return;
@@ -69,7 +66,12 @@ const PeerComparison = ({ isPrivateDeal }) => {
         return () => window.removeEventListener("resize", checkScroll);
       }
     }
-  }, [companies]);
+  }, [companies, peerComparison?.status]);
+
+  if (!peerComparison?.status || companies.length === 0) {
+    return null;
+  }
+  const themeClass = isPrivateDeal ? styles.dark : styles.light;
 
 
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from '../DealCard.module.css';
-import { formatDateMonthDay } from '@/app/utils/FormatDate';
+import { formatDateMonthDay, formatFullDate } from '@/app/utils/FormatDate';
 import { getMetricDetail } from '../config';
 
 const formatNumberWithCommas = (num) => {
@@ -16,7 +16,7 @@ export default function CardHeroMetrics({ deal, config, style }) {
     const formatMetricValue = (value, metric) => {
         if (value === "TBD" || value === null || value === undefined) return "TBD";
         if (metric.format === 'date') {
-            return formatDateMonthDay(value).toUpperCase();
+            return formatFullDate(value);
         }
         return formatNumberWithCommas(value);
     };

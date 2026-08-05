@@ -98,7 +98,7 @@ export const METRICS_CONFIG = {
             { label: "Revenue (FY'25)", key: "revenue_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "P/E Multiple", key: "pe_multiple", format: "multiplier" },
-            { label: "Open Date", key: "timeline_ipo_open_date", format: "date_short" },
+            { label: "Open Date", key: "timeline_ipo_open_date", format: "date" },
             { label: "CAGR 3Y", key: "cagr_growth_3y_percent", format: "percent" }
         ]
     },
