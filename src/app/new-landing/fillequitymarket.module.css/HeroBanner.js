@@ -246,12 +246,15 @@ export default function HeroBanner() {
         handleClose={handleOtpClose}
         handleBack={() => {
           handleOtpClose();
-          // Return to correct previous modal based on flow
           if (otpSource === "signup") {
             setShowSignupForm(true);
           } else if (otpSource === "signin") {
             setShowSignin(true);
           }
+        }}
+        onVerified={() => {
+          handleOtpClose();
+          router.refresh();
         }}
       />
 

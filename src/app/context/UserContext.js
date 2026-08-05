@@ -11,10 +11,16 @@ export function UserProvider({ children }) {
     const router = useRouter();
 
     const logout = () => {
+        Cookies.remove("accessToken", { path: "/" });
         Cookies.remove("accessToken");
+        Cookies.remove("verifyOtp", { path: "/" });
         Cookies.remove("verifyOtp");
+        Cookies.remove("investorName", { path: "/" });
+        Cookies.remove("investor", { path: "/" });
         setInvestor(null);
+        window.dispatchEvent(new Event("tokenChanged"));
         router.replace("/");
+        router.refresh();
     };
 
 

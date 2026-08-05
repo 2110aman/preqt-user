@@ -167,11 +167,11 @@ useEffect(() => {
 
       
       if (token) {
-        Cookies.set("accessToken", token);
+        Cookies.set("accessToken", token, { path: "/", expires: 7 });
         window.dispatchEvent(new Event("tokenChanged"));
       }
       if (investor) {
-        Cookies.set("investorName", investor.full_name);
+        Cookies.set("investorName", investor.full_name, { path: "/", expires: 7 });
         Cookies.set(
           "investor",
           JSON.stringify({
@@ -185,7 +185,8 @@ useEffect(() => {
             organization: investor.organization,
             designation: investor.designation,
             location: investor.location,
-          })
+          }),
+          { path: "/", expires: 7 }
         );
       }
 
@@ -203,8 +204,10 @@ useEffect(() => {
         onVerified();
       } else if (redirectTo) {
         router.replace(redirectTo);
+        router.refresh();
       } else {
         router.replace("/");
+        router.refresh();
       }
 
       handleHidePopUp();

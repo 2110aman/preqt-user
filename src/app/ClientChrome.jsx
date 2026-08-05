@@ -57,6 +57,7 @@ export default function ClientChrome({ children, initialHasToken }) {
       const currentToken = !!Cookies.get("accessToken");
       if (currentToken !== hasToken) {
         setHasToken(currentToken);
+        router.refresh();
       }
     };
     checkToken();
@@ -66,7 +67,7 @@ export default function ClientChrome({ children, initialHasToken }) {
     window.addEventListener("tokenChanged", handleTokenChange);
 
     return () => window.removeEventListener("tokenChanged", handleTokenChange);
-  }, [pathname, hasToken]);
+  }, [pathname, hasToken, router]);
 
   // whether we would have shown LandingPageHeader (only when no access token)
   const shouldShowLandingHeader =
@@ -205,6 +206,7 @@ export default function ClientChrome({ children, initialHasToken }) {
           onVerified={() => {
             setHasToken(true);
             closeOtp();
+            router.refresh();
           }}
 
         />
