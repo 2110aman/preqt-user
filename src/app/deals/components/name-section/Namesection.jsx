@@ -36,7 +36,7 @@ import OtpPopup from "@/app/otp/OtpPopup";
 import { useSearchParams } from "next/navigation";
 
 
-const Namedetailsection = ({ slug }) => {
+const Namedetailsection = ({ slug, initialDealData }) => {
   const [bellactive, setBellactive] = useState(false);
   const [isAskAiActive, setIsAskAiActive] = useState(false);
   const [isQuesAnsActive, setIsQuesAnsActive] = useState(false);
@@ -46,13 +46,13 @@ const Namedetailsection = ({ slug }) => {
   const [countLoading, setCountLoading] = useState(false);
   const [countError, setCountError] = useState(false)
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialDealData);
   const [replies, setReplies] = useState(null); // Store replies data
   const isMobile = useMediaQuery({ maxWidth: 920 });
   const isBelow500 = useMediaQuery({ maxWidth: 500 });
   const { selectedDeal } = useDealStore();
   const router = useRouter();
-  const [mainLoader, setMainLoader] = useState(true);
+  const [mainLoader, setMainLoader] = useState(!initialDealData);
 
   // ---- Signin + OTP states ----
   const [showSignin, setShowSignin] = useState(false);
@@ -82,7 +82,17 @@ const Namedetailsection = ({ slug }) => {
   const { setDealDataDetails } = useDealStore();
   const { updateDealType } = useDealType();
   const authToken = Cookies.get('accessToken') || "";
-  const [currentDealType, setCurrenDealType] = useState("public");
+  const [currentDealType, setCurrenDealType] = useState(initialDealData?.data?.deal_type || "public");
+
+  useEffect(() => {
+    if (initialDealData?.data) {
+      setDealDataDetails(initialDealData);
+      updateDealType(initialDealData?.data?.deal_type);
+      setCurrenDealType(initialDealData?.data?.deal_type);
+      setMainLoader(false);
+      setLoading(false);
+    }
+  }, [initialDealData, setDealDataDetails, updateDealType]);
 
   const searchParams = useSearchParams();
   const [hideForReferral, setHideForReferral] = useState(false);

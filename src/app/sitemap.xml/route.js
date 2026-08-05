@@ -71,7 +71,15 @@ export async function GET() {
         }
 
         const data = await res.json();
-        const items = data?.data || [];
+        const items = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data?.data?.deals)
+          ? data.data.deals
+          : Array.isArray(data?.deals)
+          ? data.deals
+          : Array.isArray(data)
+          ? data
+          : [];
 
         if (Array.isArray(items) && items.length > 0) {
           allData = [...allData, ...items];
@@ -118,12 +126,20 @@ export async function GET() {
   const mapDynamicRoutes = (items, basePath, config) => {
     return items
       .filter(item => item && item.slug && typeof item.slug === 'string' && item.slug.trim() !== "") // Slug validation
-      .map(item => ({
-        url: `${BASE_URL}${basePath}/${item.slug.trim()}`,
-        lastModified: item.updatedAt ? new Date(item.updatedAt) : now,
-        changeFrequency: config.changeFrequency,
-        priority: config.priority,
-      }));
+      .map(item => {
+        const dateVal = item.updatedAt || item.updated_at || item.createdAt || item.created_at;
+        let lastModDate = now;
+        if (dateVal) {
+          const parsed = new Date(dateVal);
+          if (!isNaN(parsed.getTime())) lastModDate = parsed;
+        }
+        return {
+          url: `${BASE_URL}${basePath}/${item.slug.trim()}`,
+          lastModified: lastModDate,
+          changeFrequency: config.changeFrequency,
+          priority: config.priority,
+        };
+      });
   };
 
   const dealUrls = mapDynamicRoutes(dealsResult, '/deals', SEO_CONFIG.dealDetail);

@@ -147,10 +147,29 @@ export async function generateMetadata({ params }) {
 
 export default async function DealPage({ params }) {
   const { slug } = await params;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
+
+  let initialDealData = null;
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/public/detailsbyslug/${slug}`,
+      {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        cache: "no-store",
+      }
+    );
+    if (res.ok) {
+      initialDealData = await res.json();
+    }
+  } catch (error) {
+    console.error("Error fetching deal on server:", error);
+  }
 
   return (
     <div>
-      <Namedetailsection slug={slug} />
+      <Namedetailsection slug={slug} initialDealData={initialDealData} />
     </div>
   );
 }
