@@ -2,11 +2,17 @@ import Namedetailsection from "../components/name-section/Namesection";
 import { cookies } from "next/headers";
 import { cache } from "react";
 
+export const dynamic = "force-dynamic";
+
+const getBaseUrl = () => {
+  return (
+    process.env.NEXT_PUBLIC_USER_BASE || "https://apistaging.preqt.club/"
+  ).replace(/\/$/, "");
+};
+
 const getDealData = cache(async (slug, token) => {
   if (!slug) return null;
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_USER_BASE 
-  ).replace(/\/$/, "");
+  const baseUrl = getBaseUrl();
 
   try {
     const res = await fetch(
@@ -160,7 +166,7 @@ export async function generateMetadata({ params }) {
           },
           ...(
             dealData?.deal_overview?.company_intro_images?.data?.map((img) => ({
-              url: `${process.env.NEXT_PUBLIC_USER_BASE}admin/${img?.path?.replace("public/", "")}`,
+              url: `${getBaseUrl()}/admin/${img?.path?.replace("public/", "")}`,
               alt: title,
             })) || []
           ),
