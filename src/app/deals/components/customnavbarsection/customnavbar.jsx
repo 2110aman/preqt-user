@@ -47,8 +47,13 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
     const hasModel = !!(business?.business_model?.status && business.business_model.data);
     const hasChannel = !!(business?.sales_channel?.status && business.sales_channel.data);
     const hasClients = !!(business?.clients?.status && Array.isArray(business.clients.data) && business.clients.data.length > 0);
+    const hasRisk = !!(
+      business?.key_risk_factors?.status &&
+      ((Array.isArray(business.key_risk_factors.data) && business.key_risk_factors.data.length > 0) ||
+        (Array.isArray(business.key_risk_factors.data?.data) && business.key_risk_factors.data.data.length > 0))
+    );
 
-    return hasProducts || hasServices || hasGeo || hasModel || hasChannel || hasClients;
+    return hasProducts || hasServices || hasGeo || hasModel || hasChannel || hasClients || hasRisk;
   }, [dealDetails]);
 
   const hasFundraise = useMemo(() => {

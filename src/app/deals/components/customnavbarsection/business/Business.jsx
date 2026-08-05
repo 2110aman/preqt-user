@@ -211,6 +211,14 @@ const Business = ({ isPrivateDeal }) => {
   const businessModelTitle = business?.business_model?.label_name || "Business Model";
   const salesChannelTitle = business?.sales_channel?.label_name || "Sales Channel";
 
+  const keyRiskFactorsObj = business?.key_risk_factors;
+  const keyRiskFactorsData = Array.isArray(keyRiskFactorsObj?.data)
+    ? keyRiskFactorsObj.data
+    : Array.isArray(keyRiskFactorsObj?.data?.data)
+      ? keyRiskFactorsObj.data.data
+      : null;
+  const keyRiskFactorsTitle = keyRiskFactorsObj?.label_name || "Key Risk Factors";
+
   const [openStates, setOpenStates] = useState({});
 
   useEffect(() => {
@@ -222,9 +230,10 @@ const Business = ({ isPrivateDeal }) => {
         "Geographical Presence": !!business?.geographical_presence?.status,
         [salesChannelTitle]: !!business?.sales_channel?.status,
         "Clients": !!business?.clients?.status,
+        [keyRiskFactorsTitle]: !!business?.key_risk_factors?.status,
       });
     }
-  }, [business, productsTitle, servicesTitle, businessModelTitle, salesChannelTitle]);
+  }, [business, productsTitle, servicesTitle, businessModelTitle, salesChannelTitle, keyRiskFactorsTitle]);
 
   const toggleDropdown = (title) => {
     setOpenStates((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -478,6 +487,54 @@ const Business = ({ isPrivateDeal }) => {
     );
   }
 
+  if (
+    business?.key_risk_factors?.status &&
+    Array.isArray(keyRiskFactorsData) &&
+    keyRiskFactorsData.length > 0
+  ) {
+    activeSections.push(
+      <Dropdown
+        key="key_risk_factors"
+        title={keyRiskFactorsTitle}
+        isOpen={openStates[keyRiskFactorsTitle]}
+        onToggle={toggleDropdown}
+        isPrivateDeal={isPrivateDeal}
+      >
+        <div className={styles.riskFactorsContainer}>
+          {keyRiskFactorsData.map((item, index) => {
+            const riskLevel = (item.risk_level || "").toLowerCase();
+            let badgeClass = styles.badgeMedium;
+            if (riskLevel === "high") badgeClass = styles.badgeHigh;
+            else if (riskLevel === "low") badgeClass = styles.badgeLow;
+
+            return (
+              <div key={index} className={styles.riskItem}>
+                <div className={styles.riskHeader}>
+                  <div className={styles.riskTitleGroup}>
+                    <span className={styles.riskDot} />
+                    <span className={styles.riskTitle}>
+                      {item.factor_name}
+                    </span>
+                  </div>
+                  {item.risk_level && (
+                    <span className={`${styles.riskBadge} ${badgeClass}`}>
+                      {item.risk_level}
+                    </span>
+                  )}
+                </div>
+                {item.factor_description && (
+                  <div className={styles.riskDescription}>
+                    {item.factor_description}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </Dropdown>
+    );
+  }
+
   if (activeSections.length === 0) return null;
 
   return (
@@ -489,7 +546,7 @@ const Business = ({ isPrivateDeal }) => {
       {activeSections.map((section, index) => (
         <React.Fragment key={index}>
           {section}
-          {index < activeSections.length - 1 && <hr className={styles.hr} />}
+          <hr className={styles.hr} />
         </React.Fragment>
       ))}
     </div>
