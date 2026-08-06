@@ -2,42 +2,34 @@ import Namedetailsection from "../components/name-section/Namesection";
 import { cookies } from "next/headers";
 import { cache } from "react";
 
-const getBaseUrl = () => {
-  const raw = process.env.NEXT_PUBLIC_USER_BASE || "";
-  return raw.endsWith("/") ? raw.slice(0, -1) : raw;
-};
+export const dynamic = "force-dynamic";
 
-const fetchWithTimeout = async (url, options = {}, timeoutMs = 2000) => {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
-    clearTimeout(id);
-    return response;
-  } catch (err) {
-    clearTimeout(id);
-    return null;
-  }
+const getBaseUrl = () => {
+  return (
+    process.env.NEXT_PUBLIC_USER_BASE || "https://apistaging.preqt.club/"
+  ).replace(/\/$/, "");
 };
 
 const getDealData = cache(async (slug, token) => {
+  if (!slug) return null;
+  const baseUrl = getBaseUrl();
+
   try {
-    const baseUrl = getBaseUrl();
-    const res = await fetchWithTimeout(
-      `${baseUrl}/admin/api/deals/public/detailsbyslug/${slug}`,
+    const res = await fetch(
+      `${baseUrl}/admin/api/deals/public/detailsbyslug/${encodeURIComponent(slug)}`,
       {
         method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         next: { revalidate: 60 },
-      },
-      2500
+      }
     );
-    if (res && res.ok) {
+    if (res.ok) {
       return await res.json();
     }
+    console.error(`getDealData HTTP ${res.status} for ${slug} on ${baseUrl}`);
   } catch (error) {
     console.error("Error fetching deal on server:", error);
   }
@@ -50,13 +42,7 @@ export async function generateMetadata({ params }) {
   const token = cookieStore.get("accessToken")?.value;
 
   try {
-    // Independent fast resolution guard: guarantees metadata completes within 2s max
-    const dealPromise = getDealData(slug, token);
-    const timeoutPromise = new Promise((resolve) =>
-      setTimeout(() => resolve(null), 2000)
-    );
-
-    const deal = await Promise.race([dealPromise, timeoutPromise]);
+    const deal = await getDealData(slug, token);
     if (!deal) {
       return {
         title: "Deal Details",
@@ -215,4 +201,3 @@ export default async function DealPage({ params }) {
     </div>
   );
 }
-
