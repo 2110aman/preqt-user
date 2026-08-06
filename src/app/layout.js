@@ -41,7 +41,7 @@ const inter = Inter({
 });
 
 
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(
+const SITE_URL = (process.env.NEXT_PUBLIC_USER_BASE || "https://www.preqt.club").replace(
   /\/$/,
   ""
 );
@@ -79,16 +79,6 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* <link
-          href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-          rel="stylesheet"
-        /> */}
-      </head>
-
       <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${inter.variable}`}>
         {/* Google Tag Manager */}
         <Script
