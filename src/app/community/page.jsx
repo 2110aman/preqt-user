@@ -1,5 +1,4 @@
 import PostDealcontainer from "./components/PostDealContainer/PostDealcontainer";
-import { cache } from "react";
 
 export const revalidate = 300;
 const PAGE_SIZE = 10;
@@ -64,7 +63,7 @@ const stripHtml = (value) => {
 };
 
 
-const fetchCommunityPosts = cache(async ({ limitToOne = false } = {}) => {
+async function fetchCommunityPosts({ limitToOne = false } = {}) {
   const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
   if (!baseUrl) {
     return { posts: [], noPosts: true };
@@ -95,7 +94,7 @@ const fetchCommunityPosts = cache(async ({ limitToOne = false } = {}) => {
     // console.error("Community page fetch error:", error);  
     return { posts: [], noPosts: true };
   }
-});
+}
 
 export async function generateMetadata() {
   const { posts } = await fetchCommunityPosts({ limitToOne: true });

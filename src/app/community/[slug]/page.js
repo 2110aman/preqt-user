@@ -1,14 +1,13 @@
 import Link from "next/link";
 import PostDetails from "../components/PostDetails";
-import Styles from './page.module.css';
-import { cache } from "react";
-
+import Styles from './page.module.css'
+import sharp from "sharp";
 export const runtime = "nodejs";
 const FALLBACK_TITLE = "Preqt Community Post";
 const FALLBACK_DESCRIPTION =
   "Dive into detailed insights, polls, and conversations from the Preqt community.";
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL
-const SITE_URL = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(
+const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || "https://apistaging.preqt.club/admin/"
+const SITE_URL = ("https://preqt.vercel.app").replace(
   /\/$/,
   ""
 );
@@ -48,7 +47,7 @@ const ensureTitleLength = (text) => {
   return padded.length >= 25 ? padded : `${padded} Insights`;
 };
 
-const fetchPostBySlug = cache(async (slug) => {
+async function fetchPostBySlug(slug) {
   const normalized = normalizeSlug(slug);
   if (!normalized) return null;
   const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
@@ -69,7 +68,7 @@ const fetchPostBySlug = cache(async (slug) => {
     console.error("Failed to fetch post by slug:", error);
     return null;
   }
-});
+}
 
 export async function generateMetadata({ params }) {
   const { slug: rawSlug } = await params;
@@ -109,6 +108,25 @@ export async function generateMetadata({ params }) {
       ? (`${IMAGE_URL}/${image}`).replaceAll("public/", "")
       : `${SITE_URL}/default_meta_image.png`;
 
+  // 🔥 Dynamic width & height detection
+  let width = 1200;
+  let height = 630;
+
+  try {
+    if (absoluteImage) {
+      const response = await fetch(absoluteImage);
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        const metadata = await sharp(Buffer.from(arrayBuffer)).metadata();
+
+        width = metadata.width ?? 1200;
+        height = metadata.height ?? 630;
+      }
+    }
+  } catch (error) {
+    console.error("OG image dimension detection failed:", error);
+  }
+
   return {
     title,
     description,
@@ -131,8 +149,8 @@ export async function generateMetadata({ params }) {
       images: [
         {
           url: absoluteImage,
-          width: 1200,
-          height: 630,
+          width,
+          height,
           alt: post.title ?? "Preqt Community Post",
         },
       ],
