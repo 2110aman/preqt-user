@@ -10,6 +10,14 @@ const getBaseUrl = () => {
   ).replace(/\/$/, "");
 };
 
+const formatSlugToTitle = (slug) => {
+  if (!slug) return "Deal Details";
+  return slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 const getDealData = cache(async (slug, token) => {
   if (!slug) return null;
   const baseUrl = getBaseUrl();
@@ -41,22 +49,18 @@ export async function generateMetadata({ params }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
 
+  const baseUrl = getBaseUrl();
+  const fallbackTitle = formatSlugToTitle(slug);
+
   try {
     const deal = await getDealData(slug, token);
-    if (!deal) {
-      return {
-        title: "Deal Details",
-        description: "Explore detailed deal information.",
-      };
-    }
-
     const dealData = deal?.data || deal;
 
     const dealName =
       dealData?.company_name ||
       dealData?.deal_setpData?.company_name ||
       dealData?.deal_overview?.company_name ||
-      "";
+      fallbackTitle;
 
     const rawDealType =
       dealData?.deal_type ||
@@ -77,15 +81,14 @@ export async function generateMetadata({ params }) {
     const dealTypeLabel =
       dealTypeMap[rawDealType.toLowerCase()] || rawDealType || "";
 
-    const title = dealName
-      ? dealTypeLabel
-        ? `${dealName} - ${dealTypeLabel}`
-        : dealName
-      : "Deal Details";
+    const title = dealTypeLabel
+      ? `${dealName} - ${dealTypeLabel}`
+      : `${dealName} - PrEqt`;
 
     const rawSummary =
       dealData?.deal_setpData?.preqt_summary?.data ||
       dealData?.preqt_summary?.data ||
+      dealData?.deal_overview?.company_intro?.data ||
       "";
 
     const cleanSummary = rawSummary
@@ -106,9 +109,7 @@ export async function generateMetadata({ params }) {
     const description =
       cleanSummary ||
       cleanTagline ||
-      (dealName
-        ? `Discover ${dealName} on PrEqt`
-        : "Explore detailed deal information.");
+      `Explore detailed deal information, financials, and overview for ${dealName} on PrEqt.`;
 
     const rawTags = Array.isArray(dealData?.deal_setpData?.tags?.data)
       ? dealData.deal_setpData.tags.data
@@ -143,11 +144,10 @@ export async function generateMetadata({ params }) {
     const keywords =
       keywordList.length > 0
         ? keywordList.join(", ")
-        : dealName
-        ? `${dealName}, Deals, Investments, Opportunities`
-        : "Deals, Investments, Opportunities";
+        : `${dealName}, Deals, Investments, Opportunities, Private Equity`;
 
     return {
+      metadataBase: new URL(baseUrl),
       title,
       description,
       keywords,
@@ -166,7 +166,7 @@ export async function generateMetadata({ params }) {
           },
           ...(
             dealData?.deal_overview?.company_intro_images?.data?.map((img) => ({
-              url: `${getBaseUrl()}/admin/${img?.path?.replace("public/", "")}`,
+              url: `${baseUrl}/admin/${img?.path?.replace("public/", "")}`,
               alt: title,
             })) || []
           ),
@@ -180,10 +180,13 @@ export async function generateMetadata({ params }) {
     };
   } catch (error) {
     console.error("Error fetching metadata:", error);
+    const title = `${fallbackTitle} - PrEqt`;
+    const description = `Explore detailed deal information and overview for ${fallbackTitle} on PrEqt.`;
     return {
-      title: "Deal Details",
-      description: "Explore detailed deal information.",
-      keywords: "Deals, Investments, Opportunities",
+      metadataBase: new URL(baseUrl),
+      title,
+      description,
+      keywords: `${fallbackTitle}, Deals, Investments, Opportunities`,
     };
   }
 }
@@ -201,3 +204,4 @@ export default async function DealPage({ params }) {
     </div>
   );
 }
+
