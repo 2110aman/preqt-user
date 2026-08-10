@@ -487,11 +487,7 @@ const Business = ({ isPrivateDeal }) => {
     );
   }
 
-  if (
-    business?.key_risk_factors?.status &&
-    Array.isArray(keyRiskFactorsData) &&
-    keyRiskFactorsData.length > 0
-  ) {
+  if (business?.key_risk_factors?.status) {
     activeSections.push(
       <Dropdown
         key="key_risk_factors"
@@ -500,37 +496,72 @@ const Business = ({ isPrivateDeal }) => {
         onToggle={toggleDropdown}
         isPrivateDeal={isPrivateDeal}
       >
-        <div className={styles.riskFactorsContainer}>
-          {keyRiskFactorsData.map((item, index) => {
-            const riskLevel = (item.risk_level || "").toLowerCase();
-            let badgeClass = styles.badgeMedium;
-            if (riskLevel === "high") badgeClass = styles.badgeHigh;
-            else if (riskLevel === "low") badgeClass = styles.badgeLow;
-
-            return (
-              <div key={index} className={styles.riskItem}>
-                <div className={styles.riskHeader}>
-                  <div className={styles.riskTitleGroup}>
-                    <span className={styles.riskDot} />
-                    <span className={styles.riskTitle}>
-                      {item.factor_name}
-                    </span>
-                  </div>
-                  {item.risk_level && (
-                    <span className={`${styles.riskBadge} ${badgeClass}`}>
-                      {item.risk_level}
-                    </span>
-                  )}
+        {business.key_risk_factors ? (
+          <div className={styles.pTag}>
+            {typeof business.key_risk_factors.data === "string" ? (
+              <div
+                className={styles.businessModal}
+                dangerouslySetInnerHTML={{ __html: business.key_risk_factors.data }}
+              />
+            ) : Array.isArray(business.key_risk_factors.data?.data) ? (
+              business.key_risk_factors.data.data.map((item, index) => (
+                <div key={index} className={styles.pTag} style={{ paddingLeft: "0", paddingRight: "0" }}>
+                  {item.label_name && <strong className={styles.strong}>{item.label_name}</strong>}
+                  <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: item.content }} />
+                  {renderFiles(item.files)}
                 </div>
-                {item.factor_description && (
-                  <div className={styles.riskDescription}>
-                    {item.factor_description}
+              ))
+            ) : Array.isArray(business.key_risk_factors.data) ? (
+              business.key_risk_factors.data.some((item) => item?.factor_name) ? (
+                <div className={styles.riskFactorsContainer}>
+                  {business.key_risk_factors.data.map((item, index) => {
+                    const riskLevel = (item.risk_level || "").toLowerCase();
+                    let badgeClass = styles.badgeMedium;
+                    if (riskLevel === "high") badgeClass = styles.badgeHigh;
+                    else if (riskLevel === "low") badgeClass = styles.badgeLow;
+
+                    return (
+                      <div key={index} className={styles.riskItem}>
+                        <div className={styles.riskHeader}>
+                          <div className={styles.riskTitleGroup}>
+                            <span className={styles.riskDot} />
+                            <span className={styles.riskTitle}>
+                              {item.factor_name}
+                            </span>
+                          </div>
+                          {item.risk_level && (
+                            <span className={`${styles.riskBadge} ${badgeClass}`}>
+                              {item.risk_level}
+                            </span>
+                          )}
+                        </div>
+                        {item.factor_description && (
+                          <div className={styles.riskDescription}>
+                            {item.factor_description}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                business.key_risk_factors.data.map((item, index) => (
+                  <div key={index} className={styles.pTag} style={{ paddingLeft: "0", paddingRight: "0" }}>
+                    {item.label_name && <strong className={styles.strong}>{item.label_name}</strong>}
+                    <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: item.content }} />
+                    {renderFiles(item.files)}
                   </div>
-                )}
+                ))
+              )
+            ) : business.key_risk_factors.data?.content ? (
+              <div>
+                <div className={styles.businessModal} dangerouslySetInnerHTML={{ __html: business.key_risk_factors.data.content }} />
+                {renderFiles(business.key_risk_factors.data.files)}
               </div>
-            );
-          })}
-        </div>
+            ) : null}
+            {renderFiles(business.key_risk_factors.files)}
+          </div>
+        ) : null}
       </Dropdown>
     );
   }

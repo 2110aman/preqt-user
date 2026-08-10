@@ -49,8 +49,13 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
     const hasClients = !!(business?.clients?.status && Array.isArray(business.clients.data) && business.clients.data.length > 0);
     const hasRisk = !!(
       business?.key_risk_factors?.status &&
-      ((Array.isArray(business.key_risk_factors.data) && business.key_risk_factors.data.length > 0) ||
-        (Array.isArray(business.key_risk_factors.data?.data) && business.key_risk_factors.data.data.length > 0))
+      (
+        (typeof business.key_risk_factors.data === "string" && business.key_risk_factors.data.trim() !== "") ||
+        (Array.isArray(business.key_risk_factors.data) && business.key_risk_factors.data.length > 0) ||
+        (Array.isArray(business.key_risk_factors.data?.data) && business.key_risk_factors.data.data.length > 0) ||
+        business.key_risk_factors.data?.content ||
+        (Array.isArray(business.key_risk_factors.files) && business.key_risk_factors.files.length > 0)
+      )
     );
 
     return hasProducts || hasServices || hasGeo || hasModel || hasChannel || hasClients || hasRisk;

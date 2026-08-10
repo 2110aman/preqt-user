@@ -314,6 +314,25 @@ line-height: 20px;
   color: #FFFFFF !important;
 }
 
+.businessModal ul,
+.businessModal ol {
+  padding-left: 20px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.businessModal li {
+  font-size: 14px;
+  font-weight: 400;
+  color: #1F2937;
+  line-height: 20px;
+  margin-bottom: 4px;
+}
+
+.privateDeal .businessModal li {
+  color: var(--Zinc-300, #D4D4D8) !important;
+}
+
 /* ======================= Key Risk Factors =========================== */
 .riskFactorsContainer {
   display: flex;
