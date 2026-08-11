@@ -242,13 +242,8 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
       displayValue = value;
     }
 
-    // ✅ Convert numeric 0 → TBD (except for debt_to_equity_fy25)
-    if (fieldKey !== "debt_to_equity_fy25" && displayValue !== "-" && !isNaN(Number(displayValue)) && Number(displayValue) === 0) {
-      displayValue = "TBD";
-    }
-
     // Apply static prefix/suffix formatting (skip if TBD)
-    if (displayValue && displayValue !== "-" && displayValue !== "TBA" && displayValue !== "TBD") {
+    if (displayValue !== null && displayValue !== undefined && displayValue !== "" && displayValue !== "-" && displayValue !== "TBA" && displayValue !== "TBD") {
       const num = !isNaN(Number(displayValue)) ? formatNumber(displayValue) : displayValue;
       const prefix = formatConfig.prefix ? `${formatConfig.prefix} ` : "";
       const suffix =
@@ -547,7 +542,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                       <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                         {(() => {
                           const value = dealData?.valuation_in_cr?.data;
-                          if (!value || value === 0) return "TBD";
+                          if (value === null || value === undefined || value === "") return "TBD";
                           return `₹${formatNumber(value)} Cr`;
                         })()}
                       </span>
@@ -572,7 +567,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                         <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                           {(() => {
                             const value = dealData?.revenue_fy25_in_cr?.data;
-                            if (!value || value === 0) return "TBD";
+                            if (value === null || value === undefined || value === "") return "TBD";
                             return `₹${formatNumber(value)} Cr`;
                           })()}
                         </span>
@@ -601,7 +596,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                       <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                         {(() => {
                           const value = dealData?.pat_fy25_in_cr?.data;
-                          if (!value || value === 0) return "TBD";
+                          if (value === null || value === undefined || value === "") return "TBD";
                           return `₹${formatNumber(value)} Cr`;
                         })()}
                       </span>
@@ -629,7 +624,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
                       <span className="offer-day" style={{ color: isDarkTheme ? "white" : "#242424" }}>
                         {(() => {
                           const value = dealData?.pe_multiple?.data;
-                          if (!value || value === 0) return "TBD";
+                          if (value === null || value === undefined || value === "") return "TBD";
                           return `${formatNumber(value)}x`;
                         })()}
                       </span>

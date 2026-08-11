@@ -96,13 +96,8 @@ const CcpsDealsData = () => {
         else if (typeof value === "object" && value?.data) displayValue = value.data;
         else displayValue = value ?? "-";
 
-        // ✅ Convert numeric 0 → TBA (except for debt_to_equity_fy25)
-        if (fieldKey !== "debt_to_equity_fy25" && !isNaN(Number(displayValue)) && Number(displayValue) === 0) {
-            displayValue = "TBD";
-        }
-
         // Apply static prefix/suffix formatting (skip if TBA)
-        if (displayValue && displayValue !== "-" && displayValue !== "TBA" && displayValue !== "TBD") {
+        if (displayValue !== null && displayValue !== undefined && displayValue !== "" && displayValue !== "-" && displayValue !== "TBA" && displayValue !== "TBD") {
             const num = !isNaN(Number(displayValue)) ? formatNumber(displayValue) : displayValue;
             const prefix = formatConfig.prefix ? `${formatConfig.prefix} ` : "";
             const suffix =
@@ -220,7 +215,7 @@ const CcpsDealsData = () => {
                                         dealData?.pre_money_valuation,
                                         (() => {
                                             const value = dealData?.pre_money_valuation?.data;
-                                            if (!value || value === 0) return "TBD";
+                                            if (value === null || value === undefined || value === "") return "TBD";
                                             return `₹${formatNumber(value)} Cr`;
                                         })()
                                     )}
@@ -246,7 +241,7 @@ const CcpsDealsData = () => {
                                         dealData?.revenue_fy25_in_cr,
                                         (() => {
                                             const value = dealData?.revenue_fy25_in_cr?.data;
-                                            if (!value || value === 0) return "TBD";
+                                            if (value === null || value === undefined || value === "") return "TBD";
                                             return `₹${formatNumber(value)} Cr`;
                                         })()
                                     )}
@@ -276,7 +271,7 @@ const CcpsDealsData = () => {
                                         dealData?.pat_fy25_in_cr,
                                         (() => {
                                             const value = dealData?.pat_fy25_in_cr?.data;
-                                            if (!value || value === 0) return "TBD";
+                                            if (value === null || value === undefined || value === "") return "TBD";
                                             return `₹${formatNumber(value)} Cr`;
                                         })()
                                     )}
@@ -302,7 +297,7 @@ const CcpsDealsData = () => {
                                         dealData?.pe_trailing_forward,
                                         (() => {
                                             const value = dealData?.pe_trailing_forward?.data;
-                                            if (!value || value === 0) return "TBD";
+                                            if (value === null || value === undefined || value === "") return "TBD";
                                             return `${formatNumber(value)}x`;
                                         })()
                                     )}

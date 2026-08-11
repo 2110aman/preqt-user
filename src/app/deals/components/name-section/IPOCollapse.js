@@ -122,7 +122,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                         )}
                                     </small>
                                     <h5 className={styles.largeText}>
-                                        {dealData?.gmp?.data ? (
+                                        {dealData?.gmp?.data !== null && dealData?.gmp?.data !== undefined && dealData?.gmp?.data !== "" ? (
                                             <>₹{formatNumber(dealData?.gmp?.data)}</>
                                         ) : (
                                             "-"
@@ -149,7 +149,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                         )}
                                     </small>
                                     <h5 className={styles.gainTextgreen} style={{ color: Number(dealData?.estimated_gain_loss?.data) < 0 ? 'red' : undefined }}>
-                                        {dealData?.estimated_gain_loss?.data !== undefined && dealData?.estimated_gain_loss?.data !== null ? (
+                                        {dealData?.estimated_gain_loss?.data !== undefined && dealData?.estimated_gain_loss?.data !== null && dealData?.estimated_gain_loss?.data !== "" ? (
                                             <>
                                                 {dealData.estimated_gain_loss.data > 0 ? "+" : ""}{dealData.estimated_gain_loss.data}%
                                                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginLeft: "8px", alignItems: "center", marginBottom: "3px" }}>
@@ -193,7 +193,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                 )}
                             </small>
                             <h5 className={styles.largeText}>
-                                {formatNumber(dealData?.lot_size?.data) == 0
+                                {dealData?.lot_size?.data === null || dealData?.lot_size?.data === undefined || dealData?.lot_size?.data === ""
                                     ? "TBD"
                                     : `${formatNumber(dealData?.lot_size?.data)} Shares`}
                             </h5>
@@ -246,10 +246,10 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                     </td>
                                     <td className="text-end">
                                         {isccps
-                                            ? (dealData.issue_size.data.overall?.data
+                                            ? (dealData.issue_size.data.overall?.data !== null && dealData.issue_size.data.overall?.data !== undefined && dealData.issue_size.data.overall?.data !== ""
                                                 ? `₹${formatNumber(dealData?.issue_size.data.overall?.data)} Cr`
                                                 : "-")
-                                            : (dealData.issue_size.data.overall
+                                            : (dealData.issue_size.data.overall !== null && dealData.issue_size.data.overall !== undefined && dealData.issue_size.data.overall !== ""
                                                 ? `₹${formatNumber(dealData?.issue_size?.data?.overall)} Cr`
                                                 : "-")}
                                     </td>
@@ -262,10 +262,10 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                     </td>
                                     <td className="text-end">
                                         {isccps
-                                            ? (dealData.issue_size.data.fresh_issue?.data
+                                            ? (dealData.issue_size.data.fresh_issue?.data !== null && dealData.issue_size.data.fresh_issue?.data !== undefined && dealData.issue_size.data.fresh_issue?.data !== ""
                                                 ? `₹${formatNumber(dealData.issue_size.data.fresh_issue.data)} Cr`
                                                 : "-")
-                                            : (dealData.issue_size.data.fresh_issue
+                                            : (dealData.issue_size.data.fresh_issue !== null && dealData.issue_size.data.fresh_issue !== undefined && dealData.issue_size.data.fresh_issue !== ""
                                                 ? `₹${formatNumber(dealData.issue_size.data.fresh_issue)} Cr`
                                                 : "-")}
                                     </td>
@@ -278,10 +278,10 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                     </td>
                                     <td className="text-end">
                                         {isccps
-                                            ? (dealData.issue_size.data.offer_for_sale?.data
+                                            ? (dealData.issue_size.data.offer_for_sale?.data !== null && dealData.issue_size.data.offer_for_sale?.data !== undefined && dealData.issue_size.data.offer_for_sale?.data !== ""
                                                 ? `₹${formatNumber(dealData.issue_size.data.offer_for_sale.data)} Cr`
                                                 : "NIL")
-                                            : (dealData.issue_size.data.offer_for_sale
+                                            : (dealData.issue_size.data.offer_for_sale !== null && dealData.issue_size.data.offer_for_sale !== undefined && dealData.issue_size.data.offer_for_sale !== ""
                                                 ? `₹${formatNumber(dealData.issue_size.data.offer_for_sale)} Cr`
                                                 : "-")}
                                     </td>

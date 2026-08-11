@@ -679,22 +679,22 @@ function DealsTalkContent() {
                             <section className={styles.card2StatsRow}>
                                 <article className={styles.card2Stat}>
                                     <p className={styles.card2StatHeading}>Valuation</p>
-                                    <p className={styles.card2StatValue}>{deal?.valuation_in_cr ? "₹" : ""}{formatNumberWithCommas(deal.valuation_in_cr || 0)} {deal?.valuation_in_cr ? "Cr" : ""}</p>
+                                    <p className={styles.card2StatValue}>{(deal?.valuation_in_cr !== null && deal?.valuation_in_cr !== undefined && deal?.valuation_in_cr !== "") ? "₹" : ""}{formatNumberWithCommas(deal?.valuation_in_cr ?? 0)} {(deal?.valuation_in_cr !== null && deal?.valuation_in_cr !== undefined && deal?.valuation_in_cr !== "") ? "Cr" : ""}</p>
                                 </article>
                                 <article className={styles.card2Stat}>
                                     <p className={styles.card2StatHeading}>Revenue (FY'25)</p>
-                                    <p className={styles.card2StatValue}>{deal?.revenue_fy25_in_cr ? "₹" : ""}{formatNumberWithCommas(deal?.revenue_fy25_in_cr || 0)} {deal?.revenue_fy25_in_cr ? "Cr" : ""}</p>
+                                    <p className={styles.card2StatValue}>{(deal?.revenue_fy25_in_cr !== null && deal?.revenue_fy25_in_cr !== undefined && deal?.revenue_fy25_in_cr !== "") ? "₹" : ""}{formatNumberWithCommas(deal?.revenue_fy25_in_cr ?? 0)} {(deal?.revenue_fy25_in_cr !== null && deal?.revenue_fy25_in_cr !== undefined && deal?.revenue_fy25_in_cr !== "") ? "Cr" : ""}</p>
                                 </article>
                                 <article className={styles.card2Stat}>
                                     <p className={styles.card2StatHeading}>PAT (FY'25)</p>
-                                    <p className={styles.card2StatValue}>{deal?.pat_fy25_in_cr ? "₹" : ""}{formatNumberWithCommas(deal?.pat_fy25_in_cr || 0)} {deal?.pat_fy25_in_cr ? "Cr" : ""}</p>
+                                    <p className={styles.card2StatValue}>{(deal?.pat_fy25_in_cr !== null && deal?.pat_fy25_in_cr !== undefined && deal?.pat_fy25_in_cr !== "") ? "₹" : ""}{formatNumberWithCommas(deal?.pat_fy25_in_cr ?? 0)} {(deal?.pat_fy25_in_cr !== null && deal?.pat_fy25_in_cr !== undefined && deal?.pat_fy25_in_cr !== "") ? "Cr" : ""}</p>
                                 </article>
                             </section>
 
                             <section className={styles.card2StatsRow}>
                                 <article className={styles.card2Stat}>
                                     <p className={styles.card2StatHeading}>P/E Multiple</p>
-                                    <p className={styles.card2StatValue}>{formatNumberWithCommas(deal?.pe_multiple || "TBD")}{deal?.pe_multiple ? "x" : ""}</p>
+                                    <p className={styles.card2StatValue}>{formatNumberWithCommas(deal?.pe_multiple ?? "TBD")}{(deal?.pe_multiple !== null && deal?.pe_multiple !== undefined && deal?.pe_multiple !== "") ? "x" : ""}</p>
                                 </article>
                                 <article className={styles.card2Stat}>
                                     <p className={styles.card2StatHeading}>Expected Listing</p>
@@ -702,7 +702,7 @@ function DealsTalkContent() {
                                 </article>
                                 <article className={styles.card2Stat}>
                                     <p className={styles.card2StatHeading}>CAGR 3Y</p>
-                                    <p className={styles.card2StatValue}>{formatNumberWithCommas(deal?.cagr_growth_3y_percent || 0)}%</p>
+                                    <p className={styles.card2StatValue}>{formatNumberWithCommas(deal?.cagr_growth_3y_percent ?? 0)}%</p>
                                 </article>
                             </section>
                         </div>

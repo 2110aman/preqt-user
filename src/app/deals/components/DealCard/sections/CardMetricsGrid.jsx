@@ -14,7 +14,7 @@ export default function CardMetricsGrid({ deal, config }) {
     if (!config) return null;
 
     const formatValue = (value, metric) => {
-        if (!value || value === "TBD") return "TBD";
+        if (value === null || value === undefined || value === "" || value === "TBD") return "TBD";
 
         switch (metric.format) {
             case 'currency':
