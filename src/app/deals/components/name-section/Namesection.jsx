@@ -794,7 +794,7 @@ const Namedetailsection = ({ slug, initialDealData }) => {
                     dealData?.key_highlights?.data?.map((item, index) => (
                       <span key={index}>{item}</span>
                     ))}
-                  {!isDarkTheme && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
+                  {!isDarkTheme  && (dealDetails?.data?.deal_type === "public" || dealDetails?.data?.deal_type === "private" || dealDetails?.data?.deal_type === "unlisted" || dealDetails?.data?.deal_type === "ofs") && dealData?.preqt_summary?.status && (
                     <PreqtSummarySection 
                       isPrivateLike={false} 
                       summaryData={dealData?.preqt_summary?.data} 
@@ -1033,7 +1033,7 @@ const PreqtSummarySection = ({ isPrivateLike, summaryData, labelName }) => {
   };
 
   return (
-    <div >
+    <div style={{ width: "100%" }}>
       <h3 style={{ color: theme.titleColor, marginBottom: "12px", marginTop: "10px" ,fontSize: "16px", fontWeight: "500", fontFamily: "Helvetica Neue" }}>
           {labelName || "Preqt Summary"}
         </h3>

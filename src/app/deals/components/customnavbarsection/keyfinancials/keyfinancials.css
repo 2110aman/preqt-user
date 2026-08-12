@@ -895,6 +895,8 @@
 }
 
 .observations-html-content p {
+
+  WORD-WRAP: anywhere;
   /* margin: 0 !important; */
   padding: 0 !important;
 }
