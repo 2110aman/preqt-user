@@ -2,7 +2,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.preqt.club';
 const API_BASE_URL = (process.env.NEXT_PUBLIC_USER_BASE || 'https://api.preqt.com/').replace(/\/$/, "");
 
 // Endpoints
-const DEALS_ENDPOINT = '/admin/api/deals/all-deals/';
+const DEALS_ENDPOINT = '/admin/api/deals/list-all-deals';
 const POSTS_ENDPOINT = '/admin/api/community/posts';
 
 // Priority and Frequency constants
@@ -71,7 +71,9 @@ export async function GET() {
         }
 
         const data = await res.json();
-        const items = Array.isArray(data?.data)
+        const items = Array.isArray(data?.data?.data)
+          ? data.data.data
+          : Array.isArray(data?.data)
           ? data.data
           : Array.isArray(data?.data?.deals)
           ? data.data.deals
@@ -122,6 +124,14 @@ export async function GET() {
     }
   }
 
+  // Sort deals so live deals come first, followed by closed deals, then any remaining
+  const statusPriority = { live: 1, closed: 2 };
+  const sortedDeals = [...dealsResult].sort((a, b) => {
+    const priorityA = statusPriority[a?.status?.toLowerCase()] ?? 3;
+    const priorityB = statusPriority[b?.status?.toLowerCase()] ?? 3;
+    return priorityA - priorityB;
+  });
+
   // Helper to validate and map dynamic routes
   const mapDynamicRoutes = (items, basePath, config) => {
     return items
@@ -142,7 +152,7 @@ export async function GET() {
       });
   };
 
-  const dealUrls = mapDynamicRoutes(dealsResult, '/deals', SEO_CONFIG.dealDetail);
+  const dealUrls = mapDynamicRoutes(sortedDeals, '/deals', SEO_CONFIG.dealDetail);
   const communityUrls = mapDynamicRoutes(postsResult, '/community', SEO_CONFIG.communityDetail);
 
   // 3. Combine and Deduplicate
