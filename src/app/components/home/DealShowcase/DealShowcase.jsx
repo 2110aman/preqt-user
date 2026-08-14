@@ -112,6 +112,7 @@ export default function DealShowcase() {
                 subtitle="INSTITUTIONAL GRADE IPOS"
                 deals={upcomingDeals}
                 redirectUrl="/deals?type=public"
+                disclaimer="Grey Market Premium (GMPs) are shared for knowledge purpose only. PrEqt doesn’t promote or execute the trades."
             />
 
             <DealSection
