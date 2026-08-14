@@ -495,6 +495,9 @@ const Fundamentals = ({ isPrivateDeal }) => {
                             __html: addListClasses(ipoNotes.risk_factor.data),
                           }}
                         />
+                        <p className="pastPerformanceDisclaimer">
+                          * Past performance is not an indicator or guarantee of future returns.
+                        </p>
                       </section>
                     )}
 

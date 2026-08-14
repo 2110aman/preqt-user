@@ -791,6 +791,16 @@ function AllDealsContent() {
                             </div>}
                         </>
                     )}
+                    {(selectedDealType || '').toLowerCase() === "unlisted" && (
+                        <div className={stylesdeals.disclaimerText}>
+                            <svg width="12" height="12" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg" className={stylesdeals.cautionIcon}>
+                                <path d="M7.134 0.884C7.519 0.217 8.481 0.217 8.866 0.884L15.361 12.134C15.746 12.801 15.265 13.632 14.495 13.632H1.505C0.735 13.632 0.254 12.801 0.639 12.134L7.134 0.884Z" fill="#8C7333"/>
+                                <path d="M7.25 4.5H8.75L8.4 8.5H7.6L7.25 4.5Z" fill="#FFFFFF"/>
+                                <circle cx="8" cy="10.6" r="0.9" fill="#FFFFFF"/>
+                            </svg>
+                            <span>Disclaimer: Unlisted shares are unregulated & illiquid. This is NOT investment advice. Please do your own due diligence before investing.</span>
+                        </div>
+                    )}
                 </section>
             </div>
             {showSignin && (

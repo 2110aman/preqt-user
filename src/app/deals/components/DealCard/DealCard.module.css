@@ -23,7 +23,7 @@
     position: relative;
     height: 100%;
     width: 100%;
-    min-width: 340px;
+    min-width: 342px;
     margin: 0 auto;
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05);
 }
@@ -327,7 +327,7 @@
 
 .metricValue {
     font-size: 14px;
-    line-height: 16PX;
+    line-height: 16px;
     color: #1F2937;
     font-weight: 500;
 }
@@ -726,7 +726,7 @@
 
 .heroDivided .metricValue {
     color: #1E293B;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -1443,8 +1443,14 @@
 @media (max-width: 375px) {
     .cardContainer {
         /* width: 32%; */
-        min-width: 310px;
+        min-width: 320px;
     }
+
+    .heroDivided .metricValue {
+    color: #1E293B;
+    font-size: 12px;
+    font-weight: 500;
+}
     
 }
 

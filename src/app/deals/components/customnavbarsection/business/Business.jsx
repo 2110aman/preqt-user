@@ -560,6 +560,9 @@ const Business = ({ isPrivateDeal }) => {
               </div>
             ) : null}
             {renderFiles(business.key_risk_factors.files)}
+            <p className={styles.pastPerformanceDisclaimer}>
+              * Past performance is not an indicator or guarantee of future returns.
+            </p>
           </div>
         ) : null}
       </Dropdown>

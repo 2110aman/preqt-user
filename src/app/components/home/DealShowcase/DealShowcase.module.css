@@ -425,3 +425,23 @@
     
 }
 
+.disclaimerText {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 140%;
+    letter-spacing: 0%;
+    color: #8C7333;
+    margin: 0;
+}
+
+.cautionIcon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    width: 12px;
+    height: 12px;
+}
+
