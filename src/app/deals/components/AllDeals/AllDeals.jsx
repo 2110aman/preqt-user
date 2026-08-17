@@ -30,7 +30,7 @@ function AllDealsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [viewType, setViewType] = useState('grid'); // 'grid' or 'list'
+    const [viewType, setViewType] = useState('list'); // 'grid' or 'list'
     const [showBtn, setShowBtn] = useState(-1);
 
     const [showSignin, setShowSignin] = useState(false);
@@ -84,7 +84,8 @@ function AllDealsContent() {
 
     const dealTypeTabs = [
         { label: "ALL", value: "All" },
-        { label: "Upcoming IPO", value: "Public" },
+        { label: "Upcoming IPO", value: "Upcoming" },
+        { label: "IPO", value: "Public" },
         { label: "Unlisted Shares", value: "Unlisted" },
         { label: "Private Deals", value: "Private" },
         { label: "Startup Deals", value: "Startup" }
@@ -94,7 +95,7 @@ function AllDealsContent() {
         const typeParam = searchParams?.get("type");
         if (typeParam) {
             const matchingTab = dealTypeTabs.find(
-                (tab) => tab.value.toLowerCase() === typeParam.toLowerCase()
+                (tab) => tab.value.toLowerCase() === typeParam.toLowerCase() || tab.label.toLowerCase() === typeParam.toLowerCase()
             );
             if (matchingTab) {
                 setSelectedDealType(matchingTab.value);
@@ -166,7 +167,16 @@ function AllDealsContent() {
         });
 
         // 1. Deal Type (Tabs)
-        if (selectedDealType !== "All") {
+        if (selectedDealType === "Upcoming") {
+            deals = deals.filter(deal => {
+                const type = (deal.deal_type || '').toLowerCase();
+                if (type !== 'public') return false;
+                const statusRaw = (deal.hidden_status || '').toLowerCase();
+                return statusRaw === 'upcoming' || statusRaw === 'up comming' || statusRaw === 'draft' || (statusRaw !== 'live' && statusRaw !== 'closed');
+            });
+        } else if (selectedDealType === "Public") {
+            deals = deals.filter(deal => (deal.deal_type || '').toLowerCase() === 'public');
+        } else if (selectedDealType !== "All") {
             deals = deals.filter(deal => (deal.deal_type || '').toLowerCase() === selectedDealType.toLowerCase());
         }
 
@@ -791,7 +801,7 @@ function AllDealsContent() {
                             </div>}
                         </>
                     )}
-                    {(selectedDealType || '').toLowerCase() === "public" && (
+                    {((selectedDealType || '').toLowerCase() === "public" || (selectedDealType || '').toLowerCase() === "upcoming") && (
                         <div className={stylesdeals.disclaimerText}>
                             <svg width="12" height="12" viewBox="0 0 16 15" fill="none" xmlns="http://www.w3.org/2000/svg" className={stylesdeals.cautionIcon}>
                                 <path d="M7.134 0.884C7.519 0.217 8.481 0.217 8.866 0.884L15.361 12.134C15.746 12.801 15.265 13.632 14.495 13.632H1.505C0.735 13.632 0.254 12.801 0.639 12.134L7.134 0.884Z" fill="#8C7333"/>

@@ -1,5 +1,15 @@
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.preqt.club';
-const API_BASE_URL = (process.env.NEXT_PUBLIC_USER_BASE || 'https://api.preqt.com/').replace(/\/$/, "");
+export const revalidate = 3600;
+
+const BASE_URL = (
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  'https://www.preqt.club'
+).replace(/\/+$/, "");
+
+const API_BASE_URL = (
+  process.env.NEXT_PUBLIC_USER_BASE ||
+  'https://api.preqt.com/'
+).replace(/\/+$/, "");
 
 // Endpoints
 const DEALS_ENDPOINT = '/admin/api/deals/list-all-deals';
@@ -15,6 +25,20 @@ const SEO_CONFIG = {
   communityDetail: { priority: 0.7, changeFrequency: 'daily' },
 };
 
+function escapeXml(unsafe) {
+  if (!unsafe) return "";
+  return String(unsafe).replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+      default: return c;
+    }
+  });
+}
+
 export async function GET() {
   const now = new Date(); // Reused date for consistency
 
@@ -22,14 +46,15 @@ export async function GET() {
   const staticRoutes = [
     { path: '', config: SEO_CONFIG.home },
     { path: '/deals', config: SEO_CONFIG.dealsList },
-    { path: '/community', config: SEO_CONFIG.communityList }, 
+    { path: '/community', config: SEO_CONFIG.communityList },
+    { path: '/market-analysis', config: SEO_CONFIG.dealsList },
     { path: '/privacy-policy', config: SEO_CONFIG.staticPage },
     { path: '/terms-and-condition', config: SEO_CONFIG.staticPage },
     { path: '/become-a-partner', config: SEO_CONFIG.staticPage },
     { path: '/deal-sourcing', config: SEO_CONFIG.staticPage },
     { path: '/support', config: SEO_CONFIG.staticPage },
     { path: '/data-deletion-policy', config: SEO_CONFIG.staticPage },
-    { path: '/events', config: SEO_CONFIG.staticPage },
+    // { path: '/events', config: SEO_CONFIG.staticPage },
   ].map(({ path, config }) => ({
     url: `${BASE_URL}${path}`,
     lastModified: now,
@@ -143,8 +168,9 @@ export async function GET() {
           const parsed = new Date(dateVal);
           if (!isNaN(parsed.getTime())) lastModDate = parsed;
         }
+        const cleanSlug = item.slug.trim().replace(/^\/+|\/+$/g, '');
         return {
-          url: `${BASE_URL}${basePath}/${item.slug.trim()}`,
+          url: `${BASE_URL}${basePath}/${cleanSlug}`,
           lastModified: lastModDate,
           changeFrequency: config.changeFrequency,
           priority: config.priority,
@@ -167,11 +193,11 @@ export async function GET() {
 
   const finalUrls = Array.from(uniqueUrlsMap.values());
 
-  // 4. Generate XML format
+  // 4. Generate XML format with safe escaping
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${finalUrls.map(urlObj => `  <url>
-    <loc>${urlObj.url}</loc>
+    <loc>${escapeXml(urlObj.url)}</loc>
     <lastmod>${urlObj.lastModified.toISOString()}</lastmod>
     <changefreq>${urlObj.changeFrequency}</changefreq>
     <priority>${urlObj.priority}</priority>

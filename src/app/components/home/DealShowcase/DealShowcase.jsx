@@ -54,16 +54,15 @@ export default function DealShowcase() {
                     // FILTER CRITERIA FOR UPCOMING IPOs:
                     // 1. check "deal_type" matches "public"
                     // 2. check "deal_sub_type" is null (or undefined)
-                    //
-                    // Developer Comment: These two checks are made to retrieve and display 
-                    // deals inside the Upcoming IPOs section of the DealShowcase page component.
-                    // If database schema, fields, or specific keys change in the future, 
-                    // modify this filtering block accordingly.
+                    // 3. check "hidden_status" is upcoming (exclude live or closed)
                     // =========================================================================
-                    const filteredUpcoming = deals.filter(deal => 
-                        deal.deal_type?.toLowerCase() === 'public' && 
-                        (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
-                    );
+                    const filteredUpcoming = deals.filter(deal => {
+                        const isPublic = deal.deal_type?.toLowerCase() === 'public';
+                        const isNotFeatured = !deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null';
+                        const statusRaw = (deal.hidden_status || '').toLowerCase();
+                        const isUpcoming = statusRaw !== 'live' && statusRaw !== 'closed';
+                        return isPublic && isNotFeatured && isUpcoming;
+                    });
 
                     setUpcomingDeals(filteredUpcoming);
 
@@ -111,7 +110,7 @@ export default function DealShowcase() {
                 title="Upcoming IPOs"
                 subtitle="INSTITUTIONAL GRADE IPOS"
                 deals={upcomingDeals}
-                redirectUrl="/deals?type=public"
+                redirectUrl="/deals?type=upcoming"
                 disclaimer="Grey Market Premium (GMPs) are shared for knowledge purpose only. PrEqt doesn’t promote or execute the trades."
             />
 

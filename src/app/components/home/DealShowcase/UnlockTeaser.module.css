@@ -408,6 +408,10 @@
    ========================================== */
 .allDealsTeaser {
     height: 250px;
+    width: 100% !important;
+    max-width: 97.5% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
     border-radius: 20px !important;
     padding: 0 48px !important;
     flex-direction: row !important;

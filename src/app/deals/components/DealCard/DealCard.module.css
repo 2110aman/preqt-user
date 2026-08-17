@@ -172,13 +172,22 @@
 
 .leftBadges {
     display: flex;
+    align-items: center;
     gap: 4px;
-    max-height: 27px;
+    min-height: 28px;
+    max-height: 34px;
     overflow: hidden;
     margin-top: 0 !important;
     margin-bottom: auto !important;
     flex-wrap: wrap;
     max-width: calc(100% - 120px);
+}
+
+.listView .leftBadges {
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    flex-wrap: nowrap !important;
 }
 
 .statusDot {
@@ -1148,6 +1157,19 @@
         align-items: center !important;
         width: 100% !important;
         margin-bottom: 4px !important;
+    }
+
+    .mobileHeaderWrapper .headerRow {
+        width: auto !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .mobileHeaderWrapper .leftBadges {
+        max-width: 100% !important;
+        max-height: none !important;
+        overflow: visible !important;
+        flex-wrap: nowrap !important;
     }
 
     .dark .mobileHeaderWrapper {
