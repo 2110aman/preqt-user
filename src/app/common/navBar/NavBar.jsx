@@ -432,9 +432,9 @@ export default function NavBar({ onSigninClick, hasToken }) {
           {/* logout */}
           {accessToken ?
 
-            <AuthAnimatedBtn children="Log Out" onClick={() => { setMenuOpen(false); setShowLogout(true) }} />
+            <AuthAnimatedBtn children="Log Out" onClick={() => { setMenuOpen(false); setShowLogout(true) }} theme="dark" />
             : <div className={`${styles.containerBtn}`}>
-              <AuthAnimatedBtn children="Sign In" onClick={onSigninClick} theme='light' />
+              <AuthAnimatedBtn children="Sign In" onClick={onSigninClick} theme="dark" />
             </div>}
         </div>
         <div className={styles.sidebarSvg}>
@@ -519,7 +519,7 @@ export default function NavBar({ onSigninClick, hasToken }) {
           </Link>
           {/* </div> */}
         </div> : <div className={`${styles.containerBtn}`}>
-          <AuthAnimatedBtn children="Sign In" onClick={onSigninClick} theme="light" />
+          <AuthAnimatedBtn children="Sign In" onClick={onSigninClick} theme={isDarkTheme ? "dark" : "light"} />
         </div>}
       </section>
       {showLogout && <LogoutModal
