@@ -1237,7 +1237,7 @@
 
     /* Hide the default left-aligned status badge in CardHeader */
     .mobileHeaderWrapper .leftBadges>div:first-child {
-        display: none !important;
+        /* display: none !important; */
     }
 
     /* Hide the top-row tags (moved to footer) */
@@ -1401,7 +1401,7 @@
 
 @media (max-width: 480px) {
     .listView .companyName {
-        max-width: 250px !important;
+        max-width: 190px !important;
         overflow: hidden !important;
         white-space: nowrap !important;
         text-overflow: ellipsis !important;
@@ -1416,7 +1416,7 @@
     }
 
     .mobileTagsInline {
-        max-width: 175px !important;
+        max-width: 155px !important;
         overflow: hidden !important;
         white-space: nowrap !important;
         text-overflow: ellipsis !important;
