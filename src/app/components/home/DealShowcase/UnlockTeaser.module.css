@@ -235,7 +235,7 @@
     width: 255px;
     aspect-ratio: 1856 / 2304;
     margin-bottom: 24px;
-    animation: floatAnimation 5s ease-in-out infinite;
+    /* animation: floatAnimation 5s ease-in-out infinite; */
     filter: drop-shadow(0 10px 25px rgba(255, 209, 6, 0.2));
 }
 
