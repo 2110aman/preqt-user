@@ -26,7 +26,7 @@ export default function CardHeader({ deal, layout, isListView }) {
         <div className={styles.headerRow}>
             <div className={styles.leftBadges}>
                 {shouldRenderStatus && (
-                    <Badge color={statusKey} variant="pill">
+                    <Badge color={statusKey} variant="pill" className={styles.headerStatusBadge}>
                         <span className={`${styles.statusDot} ${styles[statusKey]}`} />
                         {statusMap[statusKey]}
                     </Badge>

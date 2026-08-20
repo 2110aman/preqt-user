@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 export default function DealShowcase() {
     const [featuredDeals, setFeaturedDeals] = useState([]);
-    const [upcomingDeals, setUpcomingDeals] = useState([]);
+    const [ipoDeals, setIpoDeals] = useState([]);
     const [unlistedDeals, setUnlistedDeals] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -51,20 +51,16 @@ export default function DealShowcase() {
                     setFeaturedDeals(filteredFeatured);
 
                     // =========================================================================
-                    // FILTER CRITERIA FOR UPCOMING IPOs:
+                    // FILTER CRITERIA FOR IPOs (ALL PUBLIC DEALS: LIVE, UPCOMING, CLOSED):
                     // 1. check "deal_type" matches "public"
                     // 2. check "deal_sub_type" is null (or undefined)
-                    // 3. check "hidden_status" is upcoming (exclude live or closed)
                     // =========================================================================
-                    const filteredUpcoming = deals.filter(deal => {
-                        const isPublic = deal.deal_type?.toLowerCase() === 'public';
-                        const isNotFeatured = !deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null';
-                        const statusRaw = (deal.hidden_status || '').toLowerCase();
-                        const isUpcoming = statusRaw !== 'live' && statusRaw !== 'closed';
-                        return isPublic && isNotFeatured && isUpcoming;
-                    });
+                    const filteredIpos = deals.filter(deal => 
+                        deal.deal_type?.toLowerCase() === 'public' && 
+                        (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
+                    );
 
-                    setUpcomingDeals(filteredUpcoming);
+                    setIpoDeals(filteredIpos);
 
                     // =========================================================================
                     // FILTER CRITERIA FOR UNLISTED SHARES:
@@ -107,10 +103,10 @@ export default function DealShowcase() {
             />
 
             <DealSection
-                title="Upcoming IPOs"
+                title="IPOs"
                 subtitle="INSTITUTIONAL GRADE IPOS"
-                deals={upcomingDeals}
-                redirectUrl="/deals?type=upcoming"
+                deals={ipoDeals}
+                redirectUrl="/deals?type=public"
                 disclaimer="Grey Market Premium (GMPs) are shared for knowledge purpose only. PrEqt doesn’t promote or execute the trades."
             />
 

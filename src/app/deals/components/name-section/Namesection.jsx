@@ -81,8 +81,13 @@ const Namedetailsection = ({ slug, initialDealData }) => {
   // const activeDealFromStore = deal ?? selectedDeal;
   const { setDealDataDetails } = useDealStore();
   const { updateDealType } = useDealType();
-  const authToken = Cookies.get('accessToken') || "";
+  const [authToken, setAuthToken] = useState("");
   const [currentDealType, setCurrenDealType] = useState(initialDealData?.data?.deal_type || "public");
+
+  useEffect(() => {
+    const token = Cookies.get('accessToken') || "";
+    setAuthToken(token);
+  }, []);
 
   useEffect(() => {
     if (initialDealData?.data) {
@@ -109,7 +114,7 @@ const Namedetailsection = ({ slug, initialDealData }) => {
     if (referral && currentDealType != "public") {
       setHideForReferral(!authToken);
     }
-  }, [currentDealType])
+  }, [currentDealType, authToken])
 
 
   useEffect(() => {

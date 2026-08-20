@@ -1235,9 +1235,9 @@
         border-bottom-color: rgba(255, 255, 255, 0.1) !important;
     }
 
-    /* Hide the default left-aligned status badge in CardHeader */
-    .mobileHeaderWrapper .leftBadges>div:first-child {
-        /* display: none !important; */
+    /* Hide the default left-aligned status badge in CardHeader on mobile */
+    .mobileHeaderWrapper .headerStatusBadge {
+        display: none !important;
     }
 
     /* Hide the top-row tags (moved to footer) */
