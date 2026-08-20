@@ -164,6 +164,9 @@ export async function generateMetadata({ params }) {
         title,
         description,
       },
+      alternates: {
+        canonical: `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.preqt.club').replace(/\/+$/, "")}/deals/${encodeURIComponent(slug)}`,
+      },
     };
   } catch (error) {
     console.error("Error fetching metadata:", error);
