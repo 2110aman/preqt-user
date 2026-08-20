@@ -78,6 +78,11 @@ const Namedetailsection = ({ slug, initialDealData }) => {
   };
 
 
+  // Synchronously seed Zustand store if server data is present
+  if (initialDealData?.data && useDealStore.getState().dealDetails?.data?.deal_id !== initialDealData?.data?.deal_id) {
+    useDealStore.setState({ dealDetails: initialDealData });
+  }
+
   // const activeDealFromStore = deal ?? selectedDeal;
   const { setDealDataDetails } = useDealStore();
   const { updateDealType } = useDealType();
@@ -184,7 +189,8 @@ const Namedetailsection = ({ slug, initialDealData }) => {
     }
   }, [isMobile]);
 
-  const dealDetails = useDealStore((state) => state.dealDetails);
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = (dealDetailsFromStore && dealDetailsFromStore.data) ? dealDetailsFromStore : initialDealData;
 
   const fetchSubscriptions = async (dealId) => {
     if (!authToken || !dealId) return;

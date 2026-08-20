@@ -6,11 +6,16 @@ export const runtime = "nodejs";
 const FALLBACK_TITLE = "Preqt Community Post";
 const FALLBACK_DESCRIPTION =
   "Dive into detailed insights, polls, and conversations from the Preqt community.";
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || "https://apistaging.preqt.club/admin/"
-const SITE_URL = ("https://preqt.vercel.app").replace(
-  /\/$/,
-  ""
-);
+const IMAGE_URL = (
+  process.env.NEXT_PUBLIC_IMAGE_URL ||
+  process.env.NEXT_PUBLIC_USER_BASE ||
+  "https://api.preqt.com"
+).replace(/\/+$/, "");
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://www.preqt.club"
+).replace(/\/+$/, "");
 const PUBLISHER_NAME = "Preqt";
 
 const MIN_DESCRIPTION_LENGTH = 75;
@@ -210,7 +215,7 @@ export default async function CommunityPostPage({ params }) {
       </Link>
       <div className={Styles.postDealMainContainer}>
 
-        <PostDetails slug={slug} />
+        <PostDetails slug={slug} initialPost={metadata} />
       </div>
     </>
   );

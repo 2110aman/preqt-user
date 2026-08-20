@@ -24,17 +24,17 @@ const getInitial = (fullName) => {
   return `${first}${last}`.toUpperCase();
 };
 
-const PostDetails = ({ slug }) => {
+const PostDetails = ({ slug, initialPost }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [hasVoted, setHasVoted] = useState(false);
   // const [showDot, setShowDot] = useState(false);
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState(initialPost ? [initialPost] : []);
   const [dotId, setDotId] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentonPost, setCommentonPost] = useState("");
   const [refetch, setRefetch] = useState(false);
   const [currentUser, setCurrentUser] = useState(Cookies.get("investorName"));
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!initialPost);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [showSignin, setShowSignin] = useState(false);
@@ -49,7 +49,7 @@ const PostDetails = ({ slug }) => {
   const [currentTime, setCurrentTime] = useState(null);
   const isFetchingRef = useRef(false);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
-  const [currentPostId, setCurrentPostId] = useState()
+  const [currentPostId, setCurrentPostId] = useState(initialPost?.id || undefined);
   const [commentRefetch, setCommentRefetch] = useState(false);
 
   // Function to calculate time remaining for poll
@@ -485,7 +485,9 @@ const PostDetails = ({ slug }) => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     try {
-      setIsLoading(true);
+      if (!initialPost) {
+        setIsLoading(true);
+      }
       const token = Cookies.get("accessToken");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || '').replace(/\/$/, '');
@@ -498,28 +500,38 @@ const PostDetails = ({ slug }) => {
       const data = await response.json();
       console.log("API Response:", data);
 
-      if (response.ok && data.data.status === 200) {
+      if (response.ok && data.data?.status === 200) {
         setPosts(data.data.data);
-        getAllComments(data.data.data[0].id);
-        setCurrentPostId(data.data.data[0].id);
-      } else if (data.data.status === 404) {
+        if (data.data.data?.[0]?.id) {
+          getAllComments(data.data.data[0].id);
+          setCurrentPostId(data.data.data[0].id);
+        }
+      } else if (data.data?.status === 404) {
         // console.error('Post not found:', data.message)
-        showErrorToast(data.message || "Post not found");
-        setPosts(null);
+        showErrorToast(data?.message || "Post not found");
+        if (!initialPost) setPosts(null);
       } else {
         console.error("API Error:", data);
-        showErrorToast(data.message || "Failed to fetch post");
-        setPosts(null);
+        if (!initialPost) {
+          showErrorToast(data?.message || "Failed to fetch post");
+          setPosts(null);
+        }
       }
     } catch (error) {
       // console.error('Network Error:', error)
-      showErrorToast("Network error: Unable to fetch post");
+      if (!initialPost) {
+        showErrorToast("Network error: Unable to fetch post");
+      }
     } finally {
       setIsLoading(false);
       isFetchingRef.current = false;
     }
   };
   useEffect(() => {
+    if (initialPost?.id) {
+      getAllComments(initialPost.id);
+      setCurrentPostId(initialPost.id);
+    }
     if (slug) {
       getAllPosts();
     }

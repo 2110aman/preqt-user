@@ -40,9 +40,9 @@ function escapeXml(unsafe) {
 }
 
 export async function GET() {
-  const now = new Date(); // Reused date for consistency
+  const STATIC_LASTMOD = new Date("2026-08-01T00:00:00.000Z");
 
-  // 1. Define static routes
+  // 1. Define static routes with stable modification date
   const staticRoutes = [
     { path: '', config: SEO_CONFIG.home },
     { path: '/deals', config: SEO_CONFIG.dealsList },
@@ -57,7 +57,7 @@ export async function GET() {
     // { path: '/events', config: SEO_CONFIG.staticPage },
   ].map(({ path, config }) => ({
     url: `${BASE_URL}${path}`,
-    lastModified: now,
+    lastModified: STATIC_LASTMOD,
     changeFrequency: config.changeFrequency,
     priority: config.priority,
   }));
@@ -162,8 +162,16 @@ export async function GET() {
     return items
       .filter(item => item && item.slug && typeof item.slug === 'string' && item.slug.trim() !== "") // Slug validation
       .map(item => {
-        const dateVal = item.updatedAt || item.updated_at || item.createdAt || item.created_at;
-        let lastModDate = now;
+        const dateVal =
+          item.updatedAt ||
+          item.updated_at ||
+          item.deal_setpData?.updated_at ||
+          item.deal_overview?.updated_at ||
+          item.createdAt ||
+          item.created_at ||
+          item.deal_setpData?.live_at ||
+          item.live_at;
+        let lastModDate = STATIC_LASTMOD;
         if (dateVal) {
           const parsed = new Date(dateVal);
           if (!isNaN(parsed.getTime())) lastModDate = parsed;

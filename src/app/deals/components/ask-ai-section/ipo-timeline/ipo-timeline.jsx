@@ -215,7 +215,7 @@ const Ipotimeline = ({ handleAskAI, handleQuesAns, isPrivateDeal, qaCount }) => 
          <div className="view-details-btn">
               <div className="left-div">
                 <div className="greenDot"></div>
-                <p>We have {totalDeals - 1} new deals</p>
+                <p>{totalDeals > 1 ? `We have ${totalDeals - 1} new deals` : 'Explore new deals'}</p>
               </div>
               <Link className="link" href="/deals">View All Deals</Link>
             </div>

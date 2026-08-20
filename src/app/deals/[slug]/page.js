@@ -4,8 +4,10 @@ import { cache } from "react";
 
 const getDealData = cache(async (slug, token) => {
   try {
+    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
+    if (!baseUrl || !slug) return null;
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/public/detailsbyslug/${slug}`,
+      `${baseUrl}/admin/api/deals/public/detailsbyslug/${encodeURIComponent(slug)}`,
       {
         method: "GET",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
