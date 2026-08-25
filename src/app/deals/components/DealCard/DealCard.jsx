@@ -35,7 +35,6 @@ export default function DealCard({
         let calculated = originalDeal.min_investment_amount_in_inr;
         if (!isNaN(lotSize) && !isNaN(perSharePrice) && !isNaN(lotSizeShare)) {
             calculated = lotSize * perSharePrice * lotSizeShare;
-            console.log("calculated", calculated);
         }
         return {
             ...originalDeal,
@@ -45,9 +44,6 @@ export default function DealCard({
 
     // 1. Determine Variant
     const variantKey = variantOverride || determineVariant(deal, ignoreFeatured);
-    if (variantKey === 'featured_deal') {
-        console.log("originalDeal", originalDeal);
-    }
     const theme = CARD_THEMES[variantKey] || CARD_THEMES.public_standard;
     const layout = CARD_LAYOUTS[variantKey] || CARD_LAYOUTS.public_standard;
     let metrics = METRICS_CONFIG[variantKey] || METRICS_CONFIG.public_standard;

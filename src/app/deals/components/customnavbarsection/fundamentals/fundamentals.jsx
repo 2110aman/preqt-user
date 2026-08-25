@@ -13,7 +13,6 @@ const Fundamentals = ({ isPrivateDeal }) => {
   const [showAll, setShowAll] = useState(true);
   const dealDetails = useDealStore((state) => state.dealDetails);
   const isUnlisted = dealDetails?.data?.deal_type === "unlisted";
-  console.log("dealDetails5", dealDetails);
 
   const [openStates, setOpenStates] = useState({
     "IPO key Highlights": dealDetails?.data?.ipoch_highlights?.status ? true : false,

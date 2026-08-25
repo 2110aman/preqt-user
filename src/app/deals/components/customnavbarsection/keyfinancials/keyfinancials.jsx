@@ -1505,12 +1505,7 @@ const Keyfinancials = ({ isPrivateDeal = false, dealDetails: dealDetailsProp }) 
   };
 
   const financialData = getFinancialData();
-
-  console.log("dealDetails?.data?.key_financials", dealDetails?.data?.financial_highlights);
-  console.log("financialData", financialData);
-
   const data = financialData.length > 0 ? financialData : (isPrivateDeal ? [] : []);
-  console.log("data", data);
 
   const performanceArray = dealDetails?.data?.financial_highlights?.financial_performance?.data || [];
   const hasWorkingCapitalData = performanceArray.some(item => {

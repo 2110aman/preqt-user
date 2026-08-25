@@ -303,7 +303,6 @@ const Namedetailsection = ({ slug, initialDealData }) => {
 
       // Even if res.ok is true, the server may return a JSON error object (status: 500 inside body)
       const data = await res.json();
-      console.log("✅ Deal fetched on client:", data);
 
       // --- Redirect on specific token error returned inside JSON body ---
       const tokenErrorMessage =
@@ -425,8 +424,7 @@ const Namedetailsection = ({ slug, initialDealData }) => {
   }, [dealId]);
 
 
-  const liveAt = dealDetails?.data?.deal_setpData?.live_at
-  console.log("The Detail of Deals i got", liveAt)
+  const liveAt = dealDetails?.data?.deal_setpData?.live_at;
 
   function daysUntilLive(liveAt) {
     const liveDate = new Date(liveAt);

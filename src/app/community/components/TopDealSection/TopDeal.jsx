@@ -195,7 +195,6 @@ const TopDeal = () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/public/get/top/deals/`)
       const payload = await res.json()
       const list = payload.data || []
-      console.log("list2", list)
       setTotalDealss(payload.pagination?.totalRecords || list?.length || 0)
       setDeals(Array.isArray(list) ? list : [])
     } catch (e) {
@@ -205,9 +204,6 @@ const TopDeal = () => {
     }
   }
   useEffect(() => { fetchTopDeals() }, [])
-  useEffect(() => {
-    console.log("deal2", deals)
-  }, [deals])
 
   const fetchRandomPoll = async () => {
     try {

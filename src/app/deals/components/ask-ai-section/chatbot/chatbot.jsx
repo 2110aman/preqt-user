@@ -17,9 +17,6 @@ const Chatbot = ({ onBack, showInModal = false, onClose, isPrivate, isPrivateLik
   const dealDetails = useDealStore((state) => state.dealDetails);
   const dealDocumentName = dealDetails?.data?.deal_setpData?.boat_document_name;
   const { investor } = useUserContext();
-  console.log("Deal Details on chatbot : ", dealDetails)
-
-  console.log("Deal DOcument name : ", dealDocumentName)
 
 
   // Map of deals to documents
