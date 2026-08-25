@@ -57,7 +57,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                             {shouldShowTooltip(isccps && dealData?.price_per_ccps?.status ? dealData?.price_per_ccps?.tool_tip : dealData?.issue_price_per_share?.tool_tip) && (
                                 <OverlayTrigger
                                     placement="top-start"
-                                    container={document.body}
+                                    container={typeof document !== "undefined" ? document.body : undefined}
                                     delay={{ show: 250, hide: 400 }}
                                     overlay={renderTooltip(isccps && dealData?.price_per_ccps?.status ? dealData?.price_per_ccps?.tool_tip : dealData.issue_price_per_share.tool_tip)}
                                 >
@@ -113,7 +113,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                         {shouldShowTooltip(dealData?.gmp?.tool_tip) && (
                                             <OverlayTrigger
                                                 placement={isSmallScreen ? "top-start" : "top-end"}
-                                                container={document.body}
+                                                container={typeof document !== "undefined" ? document.body : undefined}
                                                 delay={{ show: 250, hide: 400 }}
                                                 overlay={renderTooltip(dealData.gmp.tool_tip)}
                                             >
@@ -140,7 +140,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                         {shouldShowTooltip(dealData?.estimated_gain_loss?.tool_tip) && (
                                             <OverlayTrigger
                                                 placement={isSmallScreen ? "top-start" : "top-end"}
-                                                container={document.body}
+                                                container={typeof document !== "undefined" ? document.body : undefined}
                                                 delay={{ show: 250, hide: 400 }}
                                                 overlay={renderTooltip(dealData.estimated_gain_loss.tool_tip)}
                                             >
@@ -184,7 +184,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                 {shouldShowTooltip(dealData?.lot_size?.tool_tip) && (
                                     <OverlayTrigger
                                         placement={isSmallScreen ? "top-start" : "top-end"}
-                                        container={document.body}
+                                        container={typeof document !== "undefined" ? document.body : undefined}
                                         delay={{ show: 250, hide: 400 }}
                                         overlay={renderTooltip(dealData.lot_size.tool_tip)}
                                     >
@@ -237,7 +237,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
                                         {shouldShowTooltip(dealData?.issue_size?.tool_tip) && (
                                             <OverlayTrigger
                                                 placement={isSmallScreen ? "top-start" : "top-end"}
-                                                container={document.body}
+                                                container={typeof document !== "undefined" ? document.body : undefined}
                                                 delay={{ show: 250, hide: 400 }}
                                                 overlay={renderTooltip(dealData.issue_size.tool_tip)}
                                             >

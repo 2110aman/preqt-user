@@ -192,7 +192,7 @@ export default async function CommunityPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <PostDealcontainer />
+      <PostDealcontainer initialPosts={posts} initialNoPosts={noPosts} />
     </>
   );
 }

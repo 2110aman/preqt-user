@@ -21,9 +21,9 @@ import FilterPopup from "./FilterPopup";
 import DealCard from "../DealCard";
 import UnlockTeaser from "@/app/components/home/DealShowcase/UnlockTeaser";
 
-function AllDealsContent() {
-    const [loading, setLoading] = useState(true);
-    const [allDeals, setAllDeals] = useState([]);
+function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
+    const [loading, setLoading] = useState(!initialDeals || initialDeals.length === 0);
+    const [allDeals, setAllDeals] = useState(initialDeals);
     const [error, setError] = useState([]);
     const { setSelectedDeal, appliedFilters, setAppliedFilters, selectedDealType, setSelectedDealType } = useDealStore();
     const authToken = Cookies.get('accessToken'); // or from cookies
@@ -515,14 +515,23 @@ function AllDealsContent() {
 
 
 
+    useEffect(() => {
+        if (initialDeals && initialDeals.length > 0) {
+            const loadedCount = initialDeals.length;
+            const total = initialPagination?.totalRecords || 0;
+            setHasMore(total > loadedCount);
+            setLoading(false);
+        }
+    }, [initialDeals, initialPagination]);
+
     const fetchDeals = async (page) => {
         try {
-            if (page === 1) {
+            if (page === 1 && (!initialDeals || initialDeals.length === 0)) {
                 setLoading(true);
             }
             const token = Cookies.get('accessToken');
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=50&page=${page}`,
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=100&page=${page}`,
                 {
                     method: "GET",
                     headers: {
@@ -546,7 +555,7 @@ function AllDealsContent() {
                 setAllDeals((prev) => [...prev, ...deals]);
             }
 
-            const loadedCount = (page - 1) * 50 + deals.length;
+            const loadedCount = (page - 1) * 100 + deals.length;
             setHasMore((pagination.totalRecords || 0) > loadedCount);
         } catch (err) {
             console.error("Fetch error in AllDeals:", err);
@@ -558,6 +567,9 @@ function AllDealsContent() {
     };
 
     useEffect(() => {
+        if (currPage === 1 && initialDeals && initialDeals.length > 0) {
+            return; // Already pre-fetched via SSR
+        }
         fetchDeals(currPage);
     }, [currPage]);
 
@@ -904,10 +916,10 @@ function AllDealsContent() {
 }
 
 
-export default function AllDeals() {
+export default function AllDeals({ initialDeals = [], initialPagination = {} }) {
     return (
         <Suspense fallback={<Loader />}>
-            <AllDealsContent />
+            <AllDealsContent initialDeals={initialDeals} initialPagination={initialPagination} />
         </Suspense>
     );
 } 

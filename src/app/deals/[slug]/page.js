@@ -134,19 +134,36 @@ export async function generateMetadata({ params }) {
         ? `${dealName}, Deals, Investments, Opportunities`
         : "Deals, Investments, Opportunities";
 
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+
     return {
       title,
       description,
       keywords,
+      alternates: {
+        canonical: `${siteUrl}/deals/${slug}`,
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
       openGraph: {
         title,
         description,
+        url: `${siteUrl}/deals/${slug}`,
         siteName: "PrEqt",
         locale: "en_IN",
         type: "website",
         images: [
           {
-            url: "/favicon.png",
+            url: `${siteUrl}/favicon.png`,
             width: 1200,
             height: 630,
             alt: `${dealName} - primary preview`,
@@ -163,9 +180,6 @@ export async function generateMetadata({ params }) {
         card: "summary_large_image",
         title,
         description,
-      },
-      alternates: {
-        canonical: `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.preqt.club').replace(/\/+$/, "")}/deals/${encodeURIComponent(slug)}`,
       },
     };
   } catch (error) {
@@ -184,9 +198,66 @@ export default async function DealPage({ params }) {
   const token = cookieStore.get("accessToken")?.value;
 
   const initialDealData = await getDealData(slug, token);
+  const dealData = initialDealData?.data || initialDealData;
+  const dealName =
+    dealData?.company_name ||
+    dealData?.deal_setpData?.company_name ||
+    dealData?.deal_overview?.company_name ||
+    "Deal Details";
+
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Deals",
+        "item": `${siteUrl}/deals`,
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": dealName,
+        "item": `${siteUrl}/deals/${slug}`,
+      },
+    ],
+  };
+
+  const financialProductSchema = {
+    "@context": "https://schema.org",
+    "@type": "FinancialProduct",
+    "name": dealName,
+    "description":
+      dealData?.deal_setpData?.tag_line?.data ||
+      dealData?.tag_line ||
+      `Explore ${dealName} investment opportunity on PrEqt.`,
+    "url": `${siteUrl}/deals/${slug}`,
+    "provider": {
+      "@type": "Organization",
+      "name": "PrEqt",
+      "url": siteUrl,
+    },
+  };
 
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(financialProductSchema) }}
+      />
       <Namedetailsection slug={slug} initialDealData={initialDealData} />
     </div>
   );
