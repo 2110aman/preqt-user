@@ -123,8 +123,9 @@ const CommentSection = ({
     }
 
     try {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${postId}/comments/${commentId}/reply`,
+        `${baseUrl}/admin/api/community/posts/${postId}/comments/${commentId}/reply`,
         {
           method: "POST",
           headers: {
@@ -154,8 +155,9 @@ const CommentSection = ({
 
   const handleDeleteComment = async (commentId) => {
     try {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/comments/${commentId}`,
+        `${baseUrl}/admin/api/community/comments/${commentId}`,
         {
           headers: {
             Authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -167,17 +169,13 @@ const CommentSection = ({
       const data = await response.json();
 
       if (response.ok) {
-        setCommentsList((prev) =>
-          prev.filter((comment) => comment.id !== commentId)
-        );
-        showSuccessToast("Comment deleted successfully");
-   setCommentRefetch(!commentRefetch);
-        // setRefetch && setRefetch(!refetch);
+        showSuccessToast("Comment deleted successfully!");
+        setCommentRefetch && setCommentRefetch(!commentRefetch);
       } else {
         showErrorToast("Failed to delete comment");
       }
     } catch (error) {
-      // noop
+      showErrorToast("Network error: Unable to delete comment");
     }
   };
 
@@ -191,7 +189,8 @@ const CommentSection = ({
       .slice(0, 2);
   };
 
-  const submitComment = async (postIdArg) => {
+  const submitComment = async (e, postIdArg) => {
+    e?.preventDefault();
     const idToUse = postIdArg ?? postId;
     console.log("[CommentSection] submitComment called", { postIdArg, postId, idToUse, commentonPost });
     if (!commentonPost.trim()) {
@@ -199,9 +198,10 @@ const CommentSection = ({
       return;
     }
     try {
-      console.log("[CommentSection] Making API call to:", `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${idToUse}/comment`);
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
+      console.log("[CommentSection] Making API call to:", `${baseUrl}/admin/api/community/posts/${idToUse}/comment`);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${idToUse}/comment`,
+        `${baseUrl}/admin/api/community/posts/${idToUse}/comment`,
         {
           method: "POST",
           headers: {

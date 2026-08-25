@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useDeals } from "@/app/context/DealContext";
+import { formatDealCountText } from "@/app/utils/formatUtils";
 
 const Ipotimeline = ({ handleAskAI, handleQuesAns, isPrivateDeal, qaCount }) => {
   const dealDetails = useDealStore((state) => state.dealDetails);
@@ -215,7 +216,7 @@ const Ipotimeline = ({ handleAskAI, handleQuesAns, isPrivateDeal, qaCount }) => 
          <div className="view-details-btn">
               <div className="left-div">
                 <div className="greenDot"></div>
-                <p>{totalDeals > 1 ? `We have ${totalDeals - 1} new deals` : 'Explore new deals'}</p>
+                 <p>{formatDealCountText(totalDeals, "remaining")}</p>
               </div>
               <Link className="link" href="/deals">View All Deals</Link>
             </div>

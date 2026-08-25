@@ -10,12 +10,13 @@ import Cookies from "js-cookie";
 import SigninPopup from "@/app/sign-in/SigninPopup";
 import OtpPopup from "@/app/otp/OtpPopup";
 
-const Valuation = ({ isPrivateDeal, isccps, isofs }) => {
+const Valuation = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsProp }) => {
   const [showChatBot, setShowChatBot] = useState(false);
   const [showSignin, setShowSignin] = useState(false);
   const [otpPayload, setOtpPayload] = useState(null);
   const authToken = Cookies.get("accessToken") || "";
-  const dealDetails = useDealStore((state) => state.dealDetails);
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
   const dealData = dealDetails?.data?.deal_setpData;
 
   const minLots = Number(dealData?.min_investment?.data?.lot_size) || 1;
@@ -190,13 +191,13 @@ const Valuation = ({ isPrivateDeal, isccps, isofs }) => {
           )}
 
           <div className="ccps-deals-data-wrapper">
-            <CcpsDealsData isccps={isccps} />
+            <CcpsDealsData isccps={isccps} dealDetails={dealDetails} />
           </div>
 
         </>
 
       ) : (
-        <AiIpoOverview isPrivateDeal={isPrivateDeal} isccps={isccps} isofs={isofs} />
+        <AiIpoOverview isPrivateDeal={isPrivateDeal} isccps={isccps} isofs={isofs} dealDetails={dealDetails} />
       )}
 
     </div>

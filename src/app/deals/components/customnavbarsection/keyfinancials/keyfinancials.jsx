@@ -1361,10 +1361,11 @@ const WorkingCapitalSection = ({ isPrivateDeal, data }) => {
   );
 };
 
-const Keyfinancials = ({ isPrivateDeal = false }) => {
+const Keyfinancials = ({ isPrivateDeal = false, dealDetails: dealDetailsProp }) => {
 
 
-  const dealDetails = useDealStore((state) => state.dealDetails);
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
 
   const transformFinancialData = (apiData) => {
     try {

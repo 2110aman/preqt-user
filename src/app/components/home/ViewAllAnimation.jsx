@@ -3,6 +3,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import styles from "./viewAll.module.css";
 import { useDeals } from "@/app/context/DealContext";
+import { formatDealCountText } from "@/app/utils/formatUtils";
 
 const ViewAllAnimation = () => {
   const router = useRouter();
@@ -14,7 +15,7 @@ const ViewAllAnimation = () => {
       <div className={styles.newDeals}>
         <div className={styles.newDealsHeading}>
           <div className={styles.greenDot}></div>
-          <div className={styles.plusDeals}>We have {totalDeals} new deals</div>
+          <div className={styles.plusDeals}>{formatDealCountText(totalDeals)}</div>
         </div>
 
         <div

@@ -179,12 +179,13 @@ const getPeerArray = (peer) => {
 };
 
 
-const Industry = ({ isPrivateDeal }) => {
+const Industry = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
   const [showGrowth, setShowGrowth] = useState(true);
   const [showPolicy, setShowPolicy] = useState(true);
   const [showPeer, setShowPeer] = useState(true);
 
-  const dealDetails = useDealStore((state) => state.dealDetails);
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
   const overview = dealDetails?.data?.industry_overview ?? {};
   const isOfs = dealDetails?.data?.deal_type === "ofs";
   const companyName = dealDetails?.data?.deal_setpData?.company_name || "Company";

@@ -825,9 +825,9 @@ const Namedetailsection = ({ slug, initialDealData }) => {
 
               {!hideForReferral && <div>
 
-                <IPOCollapse isPrivateDeal={isDarkTheme} isccps={isccps} isofs={isofs} />
+                <IPOCollapse isPrivateDeal={isDarkTheme} isccps={isccps} isofs={isofs} dealDetails={dealDetails} />
 
-                <Valuation isPrivateDeal={isPrivateDeal} isccps={isccps}  isofs={isofs}/>
+                <Valuation isPrivateDeal={isPrivateDeal} isccps={isccps} isofs={isofs} dealDetails={dealDetails} />
 
                 {(!isMobile || isPrivateLike) && (
                   <Shares isPrivateDeal={isPrivateLike} isccps={isccps}  isofs={isofs}/>
@@ -955,10 +955,10 @@ const Namedetailsection = ({ slug, initialDealData }) => {
         </div>
         <div className="secondhalf">
           {isMobile ? (
-            hideForReferral ? "" : <Customnavbar isPrivateDeal={isDarkTheme} />
+            hideForReferral ? "" : <Customnavbar isPrivateDeal={isDarkTheme} dealDetails={dealDetails} />
 
           ) :
-            hideForReferral ? " " : <PrivateDealDetails isPrivateDeal={isDarkTheme} />}
+            hideForReferral ? " " : <PrivateDealDetails isPrivateDeal={isDarkTheme} dealDetails={dealDetails} />}
         </div>
       </div>
       {/* <QuestionAnswer /> */}

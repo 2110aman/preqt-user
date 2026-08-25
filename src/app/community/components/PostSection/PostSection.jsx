@@ -53,6 +53,7 @@ const PostSection = ({
   const [showOtp, setShowOtp] = useState(false);
   const [otpEmail, setOtpEmail] = useState("");
   const [otpSource, setOtpSource] = useState(""); // 'signin' | 'signup'
+  const [otpPayload, setOtpPayload] = useState(null);
   const [showSignupType, setShowSignupType] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [signinEmail, setSigninEmail] = useState("");
@@ -101,10 +102,8 @@ const PostSection = ({
   // Function to calculate time remaining for poll
   const getTimeRemaining = (expiresAt) => {
     if (!expiresAt) return 'Poll ended';
-    if (!currentTime) return 'Updating...';
-
     const expiryDate = new Date(expiresAt);
-    const now = currentTime;
+    const now = currentTime || new Date();
 
     if (isNaN(expiryDate.getTime())) return 'Invalid date';
 
@@ -169,7 +168,8 @@ const PostSection = ({
       } else {
         setIsLoading(true);
       }
-      let api = `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts?page=${pageParam}`;
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || '').replace(/\/$/, '');
+      let api = `${baseUrl}/admin/api/community/posts?page=${pageParam}`;
       if (limit) {
         api += "&limit=3";
       } else {
@@ -179,15 +179,23 @@ const PostSection = ({
       if (type) {
         api += `&type=${encodeURIComponent(type)}`;
       }
-      const response = await fetch(api, {
-        headers: {
-          'Authorization': `Bearer ${Cookies.get('accessToken')}`
-        }
-      })
-      const data = await response.json()
+      const token = Cookies.get('accessToken');
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const response = await fetch(api, { headers });
+      const data = await response.json();
       console.log('PostSection getAllPosts response:', data);
 
-      const rawPosts = Array.isArray(data?.data) ? data.data : [];
+      const rawPosts = Array.isArray(data?.data?.data)
+        ? data.data.data
+        : Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.data?.posts)
+        ? data.data.posts
+        : Array.isArray(data?.posts)
+        ? data.posts
+        : Array.isArray(data)
+        ? data
+        : [];
       const normalizedPosts = rawPosts.map(post => ({
         ...post,
         isLiked: !!(post.isLiked || post.is_liked), // Normalize to boolean, checking both keys
@@ -203,15 +211,13 @@ const PostSection = ({
 
       setPosts(prev => {
         const postsToSet = append ? [...prev, ...normalizedPosts] : normalizedPosts;
-        // console.log('PostSection Posts Update:', { limit, pageSize, postsCount: postsToSet.length });
-        // Strictly enforce limit on frontend if needed, though API should handle it
         if (limit && postsToSet.length > pageSize) {
           return postsToSet.slice(0, pageSize);
         }
         return postsToSet;
-      })
+      });
       if (normalizedPosts.length < pageSize) {
-        setHasMore(false)
+        setHasMore(false);
       }
       if (append) {
         setIsFetchingMore(false);
@@ -227,7 +233,8 @@ const PostSection = ({
 
   const handleLike = async (e, id) => {
     e.stopPropagation();
-    if (!Cookies.get('accessToken')) {
+    const token = Cookies.get('accessToken');
+    if (!token) {
       setShowSignin(true);
       return;
     }
@@ -239,7 +246,7 @@ const PostSection = ({
           return {
             ...post,
             isLiked: !post.isLiked,
-            likesCount: post.isLiked ? post.likesCount - 1 : post.likesCount + 1
+            likesCount: post.isLiked ? Math.max(0, post.likesCount - 1) : post.likesCount + 1
           };
         }
         return post;
@@ -247,9 +254,10 @@ const PostSection = ({
     });
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${id}/like`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || '').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/admin/api/community/posts/${id}/like`, {
         headers: {
-          'Authorization': `Bearer ${Cookies.get('accessToken')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
         method: 'POST',
@@ -260,8 +268,6 @@ const PostSection = ({
       });
 
       const data = await response.json();
-      // const data = await response.json(); // Already declared above
-      // console.log('Like API response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to like/unlike');
@@ -276,7 +282,7 @@ const PostSection = ({
             return {
               ...post,
               isLiked: !post.isLiked, // Revert isLiked status
-              likesCount: !post.isLiked ? post.likesCount - 1 : post.likesCount + 1 // Revert count
+              likesCount: !post.isLiked ? Math.max(0, post.likesCount - 1) : post.likesCount + 1 // Revert count
             };
           }
           return post;
@@ -323,7 +329,8 @@ const PostSection = ({
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${postId}/comment`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || '').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/admin/api/community/posts/${postId}/comment`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${Cookies.get('accessToken')}`,
@@ -364,7 +371,8 @@ const PostSection = ({
 
   const handleShare = async (e, id) => {
     e.stopPropagation();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${id}/share`, {
+    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || '').replace(/\/$/, '');
+    const response = await fetch(`${baseUrl}/admin/api/community/posts/${id}/share`, {
       headers: {
         'Authorization': `Bearer ${Cookies.get('accessToken')}`
       }
@@ -454,7 +462,8 @@ const PostSection = ({
     setIsVoting(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/polls/${postId}/vote`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || '').replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/admin/api/community/polls/${postId}/vote`, {
         headers: {
           'Authorization': `Bearer ${Cookies.get('accessToken')}`,
           'Content-Type': 'application/json'
@@ -504,13 +513,14 @@ const PostSection = ({
 
 
   useEffect(() => {
-    if (hasInitialPayload) {
+    const token = Cookies.get('accessToken');
+    if (hasInitialPayload && !token) {
       setIsLoading(false);
       setNoPosts(initialNoPosts);
       return;
     }
 
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !token) {
       const savedState = sessionStorage.getItem('communityFeedState');
       if (savedState) {
         try {
@@ -534,8 +544,18 @@ const PostSection = ({
       }
     }
 
-    getAllPosts(1, false)
-  }, [])
+    getAllPosts(1, false);
+  }, []);
+
+  useEffect(() => {
+    const handleTokenChange = () => {
+      if (Cookies.get('accessToken')) {
+        getAllPosts(1, false);
+      }
+    };
+    window.addEventListener('tokenChanged', handleTokenChange);
+    return () => window.removeEventListener('tokenChanged', handleTokenChange);
+  }, []);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -831,13 +851,26 @@ const PostSection = ({
                       <div className={Styles.postTitle}>
                         {post?.title}
                       </div>
-                      <div className={Styles.tagContainer}>
-                        {post?.tags?.map((tag, index) => (
-                          <span key={index} className={Styles.tag}>
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
+                      {(() => {
+                        const rawTags = post?.tags || post?.hashtags || [];
+                        const tagsList = Array.isArray(rawTags) 
+                          ? rawTags 
+                          : (typeof rawTags === 'string' ? rawTags.split(',').map(s => s.trim()) : []);
+                        if (tagsList.length === 0) return null;
+                        return (
+                          <div className={Styles.tagContainer}>
+                            {tagsList.map((tag, index) => {
+                              const tagName = typeof tag === 'string' ? tag : (tag?.name || tag?.title || tag?.tag_name || '');
+                              if (!tagName) return null;
+                              return (
+                                <span key={index} className={Styles.tag}>
+                                  {tagName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
 
                       {/* <p className={Styles.postDescription}>{post?.content}</p> */}
                       <div style={{ width: '100%' }}>
@@ -950,11 +983,15 @@ const PostSection = ({
         <SigninPopup
           show={showSignin}
           onHide={() => setShowSignin(false)}
-          onShowOtp={(email) => {
+          onShowOtp={(payload) => {
             setShowSignin(false);
-            setOtpEmail(email);
-            setOtpSource('signin');
-            setShowOtp(true);
+            if (typeof payload === 'object' && payload !== null) {
+              setOtpPayload({ ...payload, flow: 'signin' });
+            } else {
+              setOtpEmail(payload);
+              setOtpSource('signin');
+              setShowOtp(true);
+            }
           }}
           onShowSignUp={() => {
             setShowSignin(false);
@@ -963,19 +1000,39 @@ const PostSection = ({
           onEmailSubmit={(email) => setSigninEmail(email)}
         />
 
-        <OtpPopup
-          show={showOtp}
-          email={otpEmail}
-          handleClose={() => setShowOtp(false)}
-          handleBack={() => {
-            setShowOtp(false);
-            if (otpSource === 'signup') {
-              setShowSignupForm(true);
-            } else if (otpSource === 'signin') {
-              setShowSignin(true);
-            }
-          }}
-        />
+        {otpPayload ? (
+          <OtpPopup
+            {...otpPayload}
+            show
+            handleClose={() => setOtpPayload(null)}
+            handleBack={() => {
+              const flow = otpPayload.flow;
+              setOtpPayload(null);
+              if (flow === 'signup') {
+                setShowSignupForm(true);
+              } else {
+                setShowSignin(true);
+              }
+            }}
+            onVerified={() => {
+              setOtpPayload(null);
+            }}
+          />
+        ) : (
+          <OtpPopup
+            show={showOtp}
+            email={otpEmail}
+            handleClose={() => setShowOtp(false)}
+            handleBack={() => {
+              setShowOtp(false);
+              if (otpSource === 'signup') {
+                setShowSignupForm(true);
+              } else if (otpSource === 'signin') {
+                setShowSignin(true);
+              }
+            }}
+          />
+        )}
 
         <SignupTypePopup
           show={showSignupType}
@@ -997,11 +1054,15 @@ const PostSection = ({
             setShowSignupForm(false);
             setShowSignupType(true);
           }}
-          onShowOtp={(email) => {
+          onShowOtp={(payload) => {
             setShowSignupForm(false);
-            setOtpEmail(email);
-            setOtpSource('signup');
-            setShowOtp(true);
+            if (typeof payload === 'object' && payload !== null) {
+              setOtpPayload({ ...payload, flow: 'signup' });
+            } else {
+              setOtpEmail(payload);
+              setOtpSource('signup');
+              setShowOtp(true);
+            }
           }}
           setSignupEmail={setSignupEmail}
         />

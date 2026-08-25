@@ -61,7 +61,7 @@ const Shares = ({ isPrivateDeal, isccps }) => {
           <line y1="7.5" x2="286" y2="7.5" stroke="#E5E7EB" />
         </svg>
 
-        <span className="total-shares">{formatNumber(totalShares)} Cr. shares</span>
+        <span className="total-shares">{formatNumber(totalShares)} shares</span>
 
         <svg width="287" height="16" viewBox="0 0 287 16" fill="none">
           <line y1="7.5" x2="286" y2="7.5" stroke="#E5E7EB" />
@@ -75,7 +75,7 @@ const Shares = ({ isPrivateDeal, isccps }) => {
           <span className="dot new-shares-dot"></span>
           <div>
             <p className="label-title"> {isccps ? "Promoters (Pre-Issue)" : "Outstanding Shares (Pre-Issue)"}</p>
-            <p className="label-value">{formatNumber(outstandingPreIssue)} Cr shares</p>
+            <p className="label-value">{formatNumber(outstandingPreIssue)} shares</p>
           </div>
         </div>
 
@@ -83,7 +83,7 @@ const Shares = ({ isPrivateDeal, isccps }) => {
           <span className="dot old-shares-dot "></span>
           <div>
             <p className="label-title">{isccps ? "Others" : "New Issue Shares"} </p>
-            <p className="label-value">{formatNumber(newIssueShares)} Cr. shares</p>
+            <p className="label-value">{formatNumber(newIssueShares)} shares</p>
           </div>
         </div>
       </div>

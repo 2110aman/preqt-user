@@ -34,30 +34,42 @@ export default function HeroBanner() {
   const [signupEmail, setSignupEmail] = useState("");
   const [otpEmail, setOtpEmail] = useState(""); // ✅ single email for OTP
   const [otpSource, setOtpSource] = useState(""); // 'signin' | 'signup'
+  const [otpPayload, setOtpPayload] = useState(null);
 
   const handleSigninOpen = () => setShowSignin(true);
   const handleSigninClose = () => setShowSignin(false);
 
-  const handleOtpClose = () => setShowOtp(false);
+  const handleOtpClose = () => {
+    setShowOtp(false);
+    setOtpPayload(null);
+  };
 
   const handleSignupTypeOpen = () => setShowSignupType(true);
 
   // Called from Signup form
-  const handleSignupShowOtp = (email) => {
-    setSignupEmail(email);
-    setOtpEmail(email); // ✅ send to OTP popup
-    setOtpSource("signup");
+  const handleSignupShowOtp = (payload) => {
     setShowSignupForm(false);
-    setShowOtp(true);
+    if (typeof payload === "object" && payload !== null) {
+      setOtpPayload({ ...payload, flow: "signup" });
+    } else {
+      setSignupEmail(payload);
+      setOtpEmail(payload);
+      setOtpSource("signup");
+      setShowOtp(true);
+    }
   };
 
   // Called from Signin form
-  const handleSigninShowOtp = (email) => {
-    setSigninEmail(email);
-    setOtpEmail(email); // ✅ send to OTP popup
-    setOtpSource("signin");
+  const handleSigninShowOtp = (payload) => {
     setShowSignin(false);
-    setShowOtp(true);
+    if (typeof payload === "object" && payload !== null) {
+      setOtpPayload({ ...payload, flow: "signin" });
+    } else {
+      setSigninEmail(payload);
+      setOtpEmail(payload);
+      setOtpSource("signin");
+      setShowOtp(true);
+    }
   };
 
 
@@ -240,23 +252,44 @@ export default function HeroBanner() {
       />
 
       {/* OTP Popup */}
-      <OtpPopup
-        show={showOtp}
-        email={otpEmail} // ✅ always send correct email
-        handleClose={handleOtpClose}
-        handleBack={() => {
-          handleOtpClose();
-          if (otpSource === "signup") {
-            setShowSignupForm(true);
-          } else if (otpSource === "signin") {
-            setShowSignin(true);
-          }
-        }}
-        onVerified={() => {
-          handleOtpClose();
-          router.refresh();
-        }}
-      />
+      {otpPayload ? (
+        <OtpPopup
+          {...otpPayload}
+          show
+          handleClose={handleOtpClose}
+          handleBack={() => {
+            const flow = otpPayload.flow;
+            handleOtpClose();
+            if (flow === "signup") {
+              setShowSignupForm(true);
+            } else {
+              setShowSignin(true);
+            }
+          }}
+          onVerified={() => {
+            handleOtpClose();
+            router.refresh();
+          }}
+        />
+      ) : (
+        <OtpPopup
+          show={showOtp}
+          email={otpEmail}
+          handleClose={handleOtpClose}
+          handleBack={() => {
+            handleOtpClose();
+            if (otpSource === "signup") {
+              setShowSignupForm(true);
+            } else if (otpSource === "signin") {
+              setShowSignin(true);
+            }
+          }}
+          onVerified={() => {
+            handleOtpClose();
+            router.refresh();
+          }}
+        />
+      )}
 
       {/* Signup Type Selection */}
       <SignupTypePopup

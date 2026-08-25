@@ -8,8 +8,9 @@ import Shareholding from "./fundraise/Shareholding";
 import Documentation from "./documentation/page";
 import "./customnavbar.css";
 
-const Customnavbar = ({ isPrivateDeal, isccps }) => {
-  const dealDetails = useDealStore((state) => state.dealDetails);
+const Customnavbar = ({ isPrivateDeal, isccps, dealDetails: dealDetailsProp }) => {
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
 
   const hasOverview = useMemo(() => {
     const dealOverview = dealDetails?.data?.deal_overview;
@@ -268,7 +269,7 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
           <div ref={contentRefs["Overview"]} className="tab-section-mobile">
             <h2 className="tab-section-title-mobile">Overview</h2>
             <div className="tab-content-wrapper">
-              <Overview isPrivateDeal={isPrivateDeal} />
+              <Overview isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
             </div>
           </div>
         )}
@@ -277,7 +278,7 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
           <div ref={contentRefs["Business"]} className="tab-section-mobile">
             <h2 className="tab-section-title-mobile">Business</h2>
             <div className="tab-content-wrapper">
-              <Business isPrivateDeal={isPrivateDeal} />
+              <Business isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
             </div>
           </div>
         )}
@@ -285,14 +286,14 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
         <div ref={contentRefs["Industry Overview"]} className="tab-section-mobile">
           <h2 className="tab-section-title-mobile">Industry Overview</h2>
           <div className="tab-content-wrapper">
-            <Industry isPrivateDeal={isPrivateDeal} />
+            <Industry isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
           </div>
         </div>
 
         <div ref={contentRefs["Financial Highlights"]} className="tab-section-mobile">
           <h2 className="tab-section-title-mobile">Financial Highlights</h2>
           <div className="tab-content-wrapper">
-            <Keyfinancials isPrivateDeal={isPrivateDeal} />
+            <Keyfinancials isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
           </div>
         </div>
 
@@ -300,7 +301,7 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
           <div ref={contentRefs["Fundraise/Future Plans"]} className="tab-section-mobile">
             <h2 className="tab-section-title-mobile">Fundraise/Future Plans</h2>
             <div className="tab-content-wrapper">
-              <Shareholding isPrivateDeal={isPrivateDeal} isccps={isccps} />
+              <Shareholding isPrivateDeal={isPrivateDeal} isccps={isccps} dealDetails={dealDetails} />
             </div>
           </div>
         )}
@@ -308,7 +309,7 @@ const Customnavbar = ({ isPrivateDeal, isccps }) => {
         <div ref={contentRefs["Documentation"]} className="tab-section-mobile">
           <h2 className="tab-section-title-mobile">Documentation</h2>
           <div className="tab-content-wrapper">
-            <Documentation isPrivateDeal={isPrivateDeal} />
+            <Documentation isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
           </div>
         </div>
       </div>

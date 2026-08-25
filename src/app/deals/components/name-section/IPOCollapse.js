@@ -4,11 +4,12 @@ import { Collapse, Table, OverlayTrigger, Tooltip } from "react-bootstrap";
 import styles from './IPOCollapse.module.css'
 import { useDealStore } from "@/store/dealStore";
 
-const IPOCollapse = ({ isPrivateDeal, isccps, isofs }) => {
+const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsProp }) => {
     const [open, setOpen] = useState(true);
 
 
-    const dealDetails = useDealStore((state) => state.dealDetails);
+    const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+    const dealDetails = dealDetailsProp || dealDetailsFromStore;
     const dealData = dealDetails?.data?.deal_setpData;
     const isUnlisted = dealDetails?.data?.deal_type === "unlisted";
 

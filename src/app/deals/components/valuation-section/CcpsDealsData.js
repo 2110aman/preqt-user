@@ -6,9 +6,10 @@ import { useDealStore } from "@/store/dealStore";
 import Link from "next/link";
 import { Valuation, RevenueIcon, PatIcon, PeMultiple } from "../name-section/svgicon";
 
-const CcpsDealsData = () => {
+const CcpsDealsData = ({ isccps, dealDetails: dealDetailsProp }) => {
     const [isMobile, setIsMobile] = useState(false);
-    const dealDetails = useDealStore((state) => state.dealDetails);
+    const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+    const dealDetails = dealDetailsProp || dealDetailsFromStore;
     const dealData = dealDetails?.data?.deal_setpData || {};
 
     useEffect(() => {
@@ -135,8 +136,17 @@ const CcpsDealsData = () => {
                 </h6>
 
                 {isLink ? (
-                    <Link href={displayValue} target="_blank" style={{ color: "#f9d65c" }}>
-                        {displayValue}
+                    <Link
+                        href={
+                            typeof displayValue === "string" && (displayValue.startsWith("http://") || displayValue.startsWith("https://"))
+                                ? displayValue
+                                : `https://${displayValue}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "#f9d65c" }}
+                    >
+                        {displayValue.replace(/^https?:\/\//, '').replace(/\/$/, '')}
                     </Link>
                 ) : (
                     <span>{displayValue}</span>

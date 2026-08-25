@@ -36,16 +36,19 @@ export const DealsProvider = ({ children }) => {
         const deals = responseData.data || [];
         const pagination = responseData.pagination || {};
 
+        const rawTotal = Number(pagination.totalRecords);
+        const safeTotal = !isNaN(rawTotal) && rawTotal > 0 ? rawTotal : (deals.length || 0);
+
         setAllDeals(deals);
-        setTotalDeals(pagination.totalRecords || 0);
+        setTotalDeals(safeTotal);
 
         setHasMore(
-          pagination.totalRecords >
-          (currPage - 1) * 50 + deals.length
+          safeTotal > (currPage - 1) * 50 + deals.length
         );
       } catch (err) {
         console.error("Fetch error:", err);
         setError(err.message);
+        setTotalDeals(0);
       } finally {
         setLoading(false);
       }

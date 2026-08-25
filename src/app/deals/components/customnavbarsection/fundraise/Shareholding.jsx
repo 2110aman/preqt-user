@@ -5,12 +5,13 @@ import styles from "./Shareholding.module.css";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useDealStore } from "@/store/dealStore";
 
-export default function Shareholding({ isPrivateDeal}) {
+export default function Shareholding({ isPrivateDeal, dealDetails: dealDetailsProp }) {
   const [showshareholding, setShowshareholding] = useState(true);
   const [preprogressbar, setPreprogressbar] = useState(0);
   const [postprogressbar, setPostprogressbar] = useState(0);
 
-  const dealDetails = useDealStore((state) => state.dealDetails);
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
   const shareholdingPattern =
     dealDetails?.data?.fundraise_future_plans?.shareholding_pattern || {};
 

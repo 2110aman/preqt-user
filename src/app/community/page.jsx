@@ -1,7 +1,7 @@
 import PostDealcontainer from "./components/PostDealContainer/PostDealcontainer";
 
 export const revalidate = 300;
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 50;
 const REVALIDATE_SECONDS = revalidate;
 const FALLBACK_DESCRIPTION =
   "Join the Preqt community for exclusive market talks, live polls, and pre-IPO investing insights.";
@@ -72,7 +72,6 @@ async function fetchCommunityPosts({ limitToOne = false } = {}) {
   const params = new URLSearchParams({
     page: "1",
     limit: String(limitToOne ? 1 : PAGE_SIZE),
-    type: 'post',
   });
   try {
     const response = await fetch(
@@ -88,7 +87,24 @@ async function fetchCommunityPosts({ limitToOne = false } = {}) {
     }
 
     const payload = await response.json();
-    const posts = Array.isArray(payload?.data) ? payload.data : [];
+    const rawPosts = Array.isArray(payload?.data?.data)
+      ? payload.data.data
+      : Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload?.data?.posts)
+      ? payload.data.posts
+      : Array.isArray(payload?.posts)
+      ? payload.posts
+      : Array.isArray(payload)
+      ? payload
+      : [];
+
+    const posts = rawPosts.map((post) => ({
+      ...post,
+      isLiked: !!(post.isLiked || post.is_liked),
+      likesCount: Number(post.likesCount) || 0,
+    }));
+
     return { posts, noPosts: posts.length === 0 };
   } catch (error) {
     // console.error("Community page fetch error:", error);  

@@ -14,8 +14,9 @@ import { useDealStore } from "@/store/dealStore";
 
 
 
-const Overview = ({ isPrivateDeal }) => {
-  const dealDetails = useDealStore((state) => state.dealDetails);
+const Overview = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
   const dealType = dealDetails?.data?.deal_type;
   const isPrivateLike = isPrivateDeal || dealType === "ofs" || dealType === "ccps" || dealType === "unlisted";
   const isDarkTheme = isPrivateDeal || dealType === "ofs" || dealType === "ccps";

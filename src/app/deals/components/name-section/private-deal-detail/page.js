@@ -19,7 +19,7 @@ const sectionComponents = {
   documentation: Documentation
 };
 
-export default function PrivateDealDetails({ isPrivateDeal }) {
+export default function PrivateDealDetails({ isPrivateDeal, dealDetails: dealDetailsProp }) {
   const [activeSection, setActiveSection] = useState(null);
   const sectionRefs = useRef({});
   const manualScrollRef = useRef(false);
@@ -27,7 +27,8 @@ export default function PrivateDealDetails({ isPrivateDeal }) {
   const manualRafRef = useRef(null);
   const cancelListenersRef = useRef(null);
   const manualMaxTimeoutRef = useRef(null);
-  const dealDetails = useDealStore((state) => state.dealDetails);
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
 
   // ✅ Filter only valid sections based on API response
   const sections = useMemo(() => {
@@ -245,7 +246,7 @@ export default function PrivateDealDetails({ isPrivateDeal }) {
             >
               <h2 className={styles.detailslabel}>{section.label}</h2>
               {Component ? (
-                <Component isPrivateDeal={isPrivateDeal} />
+                <Component isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
               ) : (
                 <p>Missing component for {section.label}</p>
               )}

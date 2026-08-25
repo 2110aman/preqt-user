@@ -4,8 +4,9 @@ import Pitchdeck from "../overview/pitch-deck-section/pitchdeck";
 import styles from "./page.module.css";
 import { useDealStore } from "@/store/dealStore";
 
-export default function Documentation({ isPrivateDeal }) {
-  const dealDetails = useDealStore((state) => state.dealDetails);
+export default function Documentation({ isPrivateDeal, dealDetails: dealDetailsProp }) {
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
 
   const isofs = dealDetails?.data?.deal_type === "ofs";
   const isPrivateLike = isPrivateDeal || isofs;

@@ -167,7 +167,7 @@ useEffect(() => {
 
       
       if (token) {
-        Cookies.set("accessToken", token, { path: "/", expires: 7 });
+        Cookies.set("accessToken", token, { path: "/" });
         window.dispatchEvent(new Event("tokenChanged"));
       }
       if (investor) {

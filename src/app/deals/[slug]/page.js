@@ -1,21 +1,28 @@
 import Namedetailsection from "../components/name-section/Namesection";
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { notFound } from "next/navigation";
 
 const getDealData = cache(async (slug, token) => {
   try {
-    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
+    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "https://apistaging.preqt.club").replace(/\/$/, "");
     if (!baseUrl || !slug) return null;
     const res = await fetch(
       `${baseUrl}/admin/api/deals/public/detailsbyslug/${encodeURIComponent(slug)}`,
       {
         method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         next: { revalidate: 60 },
       }
     );
     if (res.ok) {
-      return await res.json();
+      const data = await res.json();
+      if (data?.data) {
+        return data;
+      }
     }
   } catch (error) {
     console.error("Error fetching deal on server:", error);
@@ -198,6 +205,10 @@ export default async function DealPage({ params }) {
   const token = cookieStore.get("accessToken")?.value;
 
   const initialDealData = await getDealData(slug, token);
+  if (!initialDealData) {
+    notFound();
+  }
+
   const dealData = initialDealData?.data || initialDealData;
   const dealName =
     dealData?.company_name ||

@@ -146,8 +146,9 @@ const dummyServices = [
   { name: "Service Z", uploadedFileData: { path: "public/assets/pictures/default.png", mimeType: "image/png" } },
 ];
 
-const Business = ({ isPrivateDeal }) => {
-  const dealDetails = useDealStore((state) => state.dealDetails);
+const Business = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
   const business = dealDetails?.data?.business;
   const companyName = dealDetails?.data?.deal_setpData?.company_name || "Company"; // ✅ Fallback for missing name
 

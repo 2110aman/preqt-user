@@ -1,11 +1,13 @@
 .container {
   max-width: 100%;
-  padding: 20px;
   background: #fff;
   border-radius: 12px;
   position: sticky;
   top: 10px;
-
+  max-height: calc(100vh - 20px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .headar{
   max-width: 100%;

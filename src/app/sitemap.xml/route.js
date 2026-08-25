@@ -40,35 +40,13 @@ function escapeXml(unsafe) {
 }
 
 export async function GET() {
-  const STATIC_LASTMOD = new Date("2026-08-01T00:00:00.000Z");
-
-  // 1. Define static routes with stable modification date
-  const staticRoutes = [
-    { path: '', config: SEO_CONFIG.home },
-    { path: '/deals', config: SEO_CONFIG.dealsList },
-    { path: '/community', config: SEO_CONFIG.communityList },
-    { path: '/market-analysis', config: SEO_CONFIG.dealsList },
-    { path: '/privacy-policy', config: SEO_CONFIG.staticPage },
-    { path: '/terms-and-condition', config: SEO_CONFIG.staticPage },
-    { path: '/become-a-partner', config: SEO_CONFIG.staticPage },
-    { path: '/deal-sourcing', config: SEO_CONFIG.staticPage },
-    { path: '/support', config: SEO_CONFIG.staticPage },
-    { path: '/data-deletion-policy', config: SEO_CONFIG.staticPage },
-    // { path: '/events', config: SEO_CONFIG.staticPage },
-  ].map(({ path, config }) => ({
-    url: `${BASE_URL}${path}`,
-    lastModified: STATIC_LASTMOD,
-    changeFrequency: config.changeFrequency,
-    priority: config.priority,
-  }));
-
   // Fetch with pagination and timeout
   async function fetchAllPages(endpoint, extraParams = {}, type = "item") {
     let allData = [];
     let page = 1;
     let hasMore = true;
     const limit = 500;
-    const MAX_PAGES = 50; // Safety limit to prevent infinite loops
+    const MAX_PAGES = 50; // Safety limit
 
     while (hasMore && page <= MAX_PAGES) {
       const params = new URLSearchParams({ ...extraParams, limit: String(limit), page: String(page) });
@@ -81,7 +59,6 @@ export async function GET() {
           next: { revalidate: 3600 }
         });
 
-        // Next.js Edge safe timeout
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Request Timeout')), 15000)
         );
@@ -92,7 +69,7 @@ export async function GET() {
           if (process.env.NODE_ENV === 'development') {
             console.warn(`[Sitemap] Failed to fetch ${type}, URL: ${apiUrl}, Status: ${res.status}`);
           }
-          break; // Stop fetching on error
+          break;
         }
 
         const data = await res.json();
@@ -110,7 +87,6 @@ export async function GET() {
 
         if (Array.isArray(items) && items.length > 0) {
           allData = [...allData, ...items];
-          // Check if we got less than limit, meaning we're on the last page
           if (items.length < limit) {
             hasMore = false;
           } else {
@@ -123,18 +99,14 @@ export async function GET() {
         if (process.env.NODE_ENV === 'development') {
           console.warn(`[Sitemap] Error fetching ${type} from ${apiUrl}:`, error.message);
         }
-        break; // Stop on error
+        break;
       }
-    }
-
-    if (page > MAX_PAGES && process.env.NODE_ENV === 'development') {
-      console.warn(`[Sitemap] Safety limit reached: fetched ${MAX_PAGES} pages for ${type}`);
     }
 
     return allData;
   }
 
-  // 2. Parallel fetching
+  // 1. Parallel fetching for dynamic content
   let dealsResult = [];
   let postsResult = [];
 
@@ -149,7 +121,7 @@ export async function GET() {
     }
   }
 
-  // Sort deals so live deals come first, followed by closed deals, then any remaining
+  // Sort deals so live deals come first
   const statusPriority = { live: 1, closed: 2 };
   const sortedDeals = [...dealsResult].sort((a, b) => {
     const priorityA = statusPriority[a?.status?.toLowerCase()] ?? 3;
@@ -157,29 +129,39 @@ export async function GET() {
     return priorityA - priorityB;
   });
 
+  const extractItemDate = (item) => {
+    const dateVal =
+      item.updatedAt ||
+      item.updated_at ||
+      item.updated_on ||
+      item.deal_setpData?.updated_at ||
+      item.deal_overview?.updated_at ||
+      item.createdAt ||
+      item.created_at ||
+      item.created_on ||
+      item.deal_setpData?.created_at ||
+      item.deal_overview?.created_at ||
+      item.deal_setpData?.live_at ||
+      item.live_at ||
+      item.published_at ||
+      item.date;
+
+    if (dateVal) {
+      const parsed = new Date(dateVal);
+      if (!isNaN(parsed.getTime())) return parsed;
+    }
+    return new Date("2026-08-20T00:00:00.000Z");
+  };
+
   // Helper to validate and map dynamic routes
   const mapDynamicRoutes = (items, basePath, config) => {
     return items
-      .filter(item => item && item.slug && typeof item.slug === 'string' && item.slug.trim() !== "") // Slug validation
+      .filter(item => item && item.slug && typeof item.slug === 'string' && item.slug.trim() !== "")
       .map(item => {
-        const dateVal =
-          item.updatedAt ||
-          item.updated_at ||
-          item.deal_setpData?.updated_at ||
-          item.deal_overview?.updated_at ||
-          item.createdAt ||
-          item.created_at ||
-          item.deal_setpData?.live_at ||
-          item.live_at;
-        let lastModDate = STATIC_LASTMOD;
-        if (dateVal) {
-          const parsed = new Date(dateVal);
-          if (!isNaN(parsed.getTime())) lastModDate = parsed;
-        }
         const cleanSlug = item.slug.trim().replace(/^\/+|\/+$/g, '');
         return {
           url: `${BASE_URL}${basePath}/${cleanSlug}`,
-          lastModified: lastModDate,
+          lastModified: extractItemDate(item),
           changeFrequency: config.changeFrequency,
           priority: config.priority,
         };
@@ -188,6 +170,36 @@ export async function GET() {
 
   const dealUrls = mapDynamicRoutes(sortedDeals, '/deals', SEO_CONFIG.dealDetail);
   const communityUrls = mapDynamicRoutes(postsResult, '/community', SEO_CONFIG.communityDetail);
+
+  // Compute latest content timestamps for aggregate index pages
+  const latestDealDate = dealUrls.length > 0
+    ? new Date(Math.max(...dealUrls.map(d => d.lastModified.getTime())))
+    : new Date("2026-08-25T00:00:00.000Z");
+
+  const latestPostDate = communityUrls.length > 0
+    ? new Date(Math.max(...communityUrls.map(c => c.lastModified.getTime())))
+    : new Date("2026-08-25T00:00:00.000Z");
+
+  const latestSiteDate = new Date(Math.max(latestDealDate.getTime(), latestPostDate.getTime()));
+
+  // 2. Define static routes with accurate, real modification dates
+  const staticRoutes = [
+    { path: '/', config: SEO_CONFIG.home, lastMod: latestSiteDate },
+    { path: '/deals', config: SEO_CONFIG.dealsList, lastMod: latestDealDate },
+    { path: '/community', config: SEO_CONFIG.communityList, lastMod: latestPostDate },
+    { path: '/market-analysis', config: SEO_CONFIG.dealsList, lastMod: latestDealDate },
+    { path: '/privacy-policy', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/terms-and-condition', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/become-a-partner', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/deal-sourcing', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/support', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/data-deletion-policy', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
+  ].map(({ path, config, lastMod }) => ({
+    url: path === '/' ? `${BASE_URL}/` : `${BASE_URL}${path}`,
+    lastModified: lastMod,
+    changeFrequency: config.changeFrequency,
+    priority: config.priority,
+  }));
 
   // 3. Combine and Deduplicate
   const allUrls = [...staticRoutes, ...dealUrls, ...communityUrls];
@@ -201,7 +213,7 @@ export async function GET() {
 
   const finalUrls = Array.from(uniqueUrlsMap.values());
 
-  // 4. Generate XML format with safe escaping
+  // 4. Generate XML format
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${finalUrls.map(urlObj => `  <url>

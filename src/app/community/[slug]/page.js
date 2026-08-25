@@ -1,7 +1,8 @@
 import Link from "next/link";
 import PostDetails from "../components/PostDetails";
-import Styles from './page.module.css'
+import Styles from './page.module.css';
 import sharp from "sharp";
+import { notFound } from "next/navigation";
 export const runtime = "nodejs";
 const FALLBACK_TITLE = "Preqt Community Post";
 const FALLBACK_DESCRIPTION =
@@ -68,7 +69,9 @@ async function fetchPostBySlug(slug) {
     );
     if (!res.ok) return null;
     const payload = await res.json();
-    return payload?.data?.data?.[0] ?? null;
+    const rawData = payload?.data?.data ?? payload?.data ?? payload;
+    const post = Array.isArray(rawData) ? rawData[0] : (rawData?.posts?.[0] ?? rawData);
+    return post ?? null;
   } catch (error) {
     console.error("Failed to fetch post by slug:", error);
     return null;
@@ -182,6 +185,9 @@ export default async function CommunityPostPage({ params }) {
   const { slug: rawSlug } = await params;
   const slug = normalizeSlug(rawSlug);
   const metadata = await fetchPostBySlug(slug);
+  if (!metadata) {
+    notFound();
+  }
   return (
     <>
       {metadata?.title && (

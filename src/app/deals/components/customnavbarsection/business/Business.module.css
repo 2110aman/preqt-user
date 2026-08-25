@@ -155,7 +155,7 @@
   display: inline-block;
   color:#64748b;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   margin: 10px 0px;
   margin-bottom: unset;
 }
@@ -264,18 +264,16 @@ font-weight: 400;
 line-height: 20px;
 margin-bottom: 5px;
 }
-.businessModal strong{
-  /* color: var(--Gray-400, #9CA3AF); */
-font-family: "Helvetica Neue";
-font-size: text-sm;
-font-style: normal;
-font-weight: var(--font-weight-font-normal, 400);
-line-height: leading-5; /* 142.857% */
-margin-bottom: unset !important;
+.businessModal strong,
+.businessModal b {
+  font-weight: 700 !important;
+  margin-bottom: unset !important;
 }
 
-.privateDeal .businessModal strong{
+.privateDeal .businessModal strong,
+.privateDeal .businessModal b {
   color: var(--Gray-400, #9CA3AF);
+  font-weight: 700 !important;
 }
 
 .privateDeal .businessModal p{

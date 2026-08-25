@@ -41,6 +41,7 @@ const PostDetails = ({ slug, initialPost }) => {
   const [showOtp, setShowOtp] = useState(false);
   const [otpEmail, setOtpEmail] = useState("");
   const [otpSource, setOtpSource] = useState(""); // 'signin' | 'signup'
+  const [otpPayload, setOtpPayload] = useState(null);
   const [showSignupType, setShowSignupType] = useState(false);
   const [showSignupForm, setShowSignupForm] = useState(false);
   const [signinEmail, setSigninEmail] = useState("");
@@ -55,10 +56,8 @@ const PostDetails = ({ slug, initialPost }) => {
   // Function to calculate time remaining for poll
   const getTimeRemaining = (expiresAt) => {
     if (!expiresAt) return "Poll ended";
-    if (!currentTime) return "Updating...";
-
     const expiryDate = new Date(expiresAt);
-    const now = currentTime;
+    const now = currentTime || new Date();
 
     if (isNaN(expiryDate.getTime())) return "Invalid date";
 
@@ -160,8 +159,9 @@ const PostDetails = ({ slug, initialPost }) => {
 
     try {
       // Hit the API
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${id}/like`,
+        `${baseUrl}/admin/api/community/posts/${id}/like`,
         {
           headers: {
             Authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -208,8 +208,9 @@ const PostDetails = ({ slug, initialPost }) => {
       setShowSignin(true);
       return;
     }
+    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${id}/comments`,
+      `${baseUrl}/admin/api/community/posts/${id}/comments`,
       {
         headers: {
           Authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -229,8 +230,9 @@ const PostDetails = ({ slug, initialPost }) => {
 
   const handleShare = async (e, id) => {
     e.stopPropagation();
+    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${id}/share`,
+      `${baseUrl}/admin/api/community/posts/${id}/share`,
       {
         headers: {
           Authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -316,8 +318,9 @@ const PostDetails = ({ slug, initialPost }) => {
     });
 
     try {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/polls/${postId}/vote`,
+        `${baseUrl}/admin/api/community/polls/${postId}/vote`,
         {
           headers: {
             Authorization: `Bearer ${Cookies.get("accessToken")}`,
@@ -366,8 +369,9 @@ const PostDetails = ({ slug, initialPost }) => {
 
       const token = Cookies.get("accessToken");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${postId}/comments`,
+        `${baseUrl}/admin/api/community/posts/${postId}/comments`,
         {
           headers,
         }
@@ -432,8 +436,9 @@ const PostDetails = ({ slug, initialPost }) => {
     }
 
     try {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/posts/${postId}/comment`,
+        `${baseUrl}/admin/api/community/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
@@ -500,14 +505,16 @@ const PostDetails = ({ slug, initialPost }) => {
       const data = await response.json();
       console.log("API Response:", data);
 
-      if (response.ok && data.data?.status === 200) {
-        setPosts(data.data.data);
-        if (data.data.data?.[0]?.id) {
-          getAllComments(data.data.data[0].id);
-          setCurrentPostId(data.data.data[0].id);
+      const rawList = data?.data?.data ?? data?.data ?? data;
+      const fetchedPosts = Array.isArray(rawList) ? rawList : (rawList ? [rawList] : []);
+
+      if (response.ok && fetchedPosts.length > 0) {
+        setPosts(fetchedPosts);
+        if (fetchedPosts[0]?.id) {
+          getAllComments(fetchedPosts[0].id);
+          setCurrentPostId(fetchedPosts[0].id);
         }
-      } else if (data.data?.status === 404) {
-        // console.error('Post not found:', data.message)
+      } else if (data.data?.status === 404 || data?.status === 404) {
         showErrorToast(data?.message || "Post not found");
         if (!initialPost) setPosts(null);
       } else {
@@ -823,6 +830,27 @@ const PostDetails = ({ slug, initialPost }) => {
                       >
                         <ImageSlide images={post?.mediaUrl} title={post?.title} />
                       </div>
+
+                      {(() => {
+                        const rawTags = post?.tags || post?.hashtags || post?.tag_names || [];
+                        const tagsList = Array.isArray(rawTags) 
+                          ? rawTags 
+                          : (typeof rawTags === 'string' ? rawTags.split(',').map(s => s.trim()) : []);
+                        if (tagsList.length === 0) return null;
+                        return (
+                          <div className={Styles.postTagsContainer} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '14px', marginBottom: '12px' }}>
+                            {tagsList.map((tag, idx) => {
+                              const tagName = typeof tag === 'string' ? tag : (tag?.name || tag?.title || tag?.tag_name || '');
+                              if (!tagName) return null;
+                              return (
+                                <span key={idx} className={Styles.postTagItem} style={{ background: 'rgba(100, 116, 139, 0.12)', color: '#475569', padding: '4px 12px', borderRadius: '16px', fontSize: '13px', fontWeight: '500' }}>
+                                  #{tagName.replace(/^#/, '')}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
                       {/* <Image
                     src="/assets/pictures/preqtCandidImage.png"
                     alt="Post image"
@@ -1013,11 +1041,15 @@ const PostDetails = ({ slug, initialPost }) => {
       <SigninPopup
         show={showSignin}
         onHide={() => setShowSignin(false)}
-        onShowOtp={(email) => {
+        onShowOtp={(payload) => {
           setShowSignin(false);
-          setOtpEmail(email);
-          setOtpSource("signin");
-          setShowOtp(true);
+          if (typeof payload === 'object' && payload !== null) {
+            setOtpPayload({ ...payload, flow: 'signin' });
+          } else {
+            setOtpEmail(payload);
+            setOtpSource('signin');
+            setShowOtp(true);
+          }
         }}
         onShowSignUp={() => {
           setShowSignin(false);
@@ -1026,19 +1058,39 @@ const PostDetails = ({ slug, initialPost }) => {
         onEmailSubmit={(email) => setSigninEmail(email)}
       />
 
-      <OtpPopup
-        show={showOtp}
-        email={otpEmail}
-        handleClose={() => setShowOtp(false)}
-        handleBack={() => {
-          setShowOtp(false);
-          if (otpSource === "signup") {
-            setShowSignupForm(true);
-          } else if (otpSource === "signin") {
-            setShowSignin(true);
-          }
-        }}
-      />
+      {otpPayload ? (
+        <OtpPopup
+          {...otpPayload}
+          show
+          handleClose={() => setOtpPayload(null)}
+          handleBack={() => {
+            const flow = otpPayload.flow;
+            setOtpPayload(null);
+            if (flow === 'signup') {
+              setShowSignupForm(true);
+            } else {
+              setShowSignin(true);
+            }
+          }}
+          onVerified={() => {
+            setOtpPayload(null);
+          }}
+        />
+      ) : (
+        <OtpPopup
+          show={showOtp}
+          email={otpEmail}
+          handleClose={() => setShowOtp(false)}
+          handleBack={() => {
+            setShowOtp(false);
+            if (otpSource === "signup") {
+              setShowSignupForm(true);
+            } else if (otpSource === "signin") {
+              setShowSignin(true);
+            }
+          }}
+        />
+      )}
 
       <SignupTypePopup
         show={showSignupType}
@@ -1060,11 +1112,15 @@ const PostDetails = ({ slug, initialPost }) => {
           setShowSignupForm(false);
           setShowSignupType(true);
         }}
-        onShowOtp={(email) => {
+        onShowOtp={(payload) => {
           setShowSignupForm(false);
-          setOtpEmail(email);
-          setOtpSource("signup");
-          setShowOtp(true);
+          if (typeof payload === 'object' && payload !== null) {
+            setOtpPayload({ ...payload, flow: 'signup' });
+          } else {
+            setOtpEmail(payload);
+            setOtpSource('signup');
+            setShowOtp(true);
+          }
         }}
         setSignupEmail={setSignupEmail}
       />

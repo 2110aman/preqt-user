@@ -11,6 +11,7 @@ import SignupFormPopup from '../../../signup-form/SignupFormPopup'
 import Link from 'next/link'
 import { showSuccessToast, showErrorToast } from '../../../components/ToastProvider'
 import { useDeals } from '@/app/context/DealContext'
+import { formatDealCountText } from '@/app/utils/formatUtils';
 import { formatDate } from "@/app/utils/FormatDate";
 import UnlockTeaser from '@/app/components/home/DealShowcase/UnlockTeaser';
 import RatingBadge from '@/app/deals/components/DealCard/ui/RatingBadge';
@@ -210,7 +211,8 @@ const TopDeal = () => {
 
   const fetchRandomPoll = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/get/random/polls`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
+      const response = await fetch(`${baseUrl}/admin/api/community/get/random/polls`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Cookies.get('accessToken')}`,
@@ -411,7 +413,8 @@ const TopDeal = () => {
     setIsVoting(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_USER_BASE}/admin/api/community/polls/${postId}/vote`, {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
+      const response = await fetch(`${baseUrl}/admin/api/community/polls/${postId}/vote`, {
         headers: {
           'Authorization': `Bearer ${Cookies.get('accessToken')}`,
           'Content-Type': 'application/json'
@@ -496,15 +499,11 @@ const TopDeal = () => {
           <div className={Styles.tagContainer}>
             {(() => {
               let totalChars = 0;
-              return (postTags || []).filter(tag => {
-                if (totalChars + (tag?.length || 0) <= 20) {
-                  totalChars += (tag?.length || 0);
-                  return true;
-                }
-                return false;
-              }).map((tag, index) => (
-                <span key={index} className={Styles.tag}>{tag}</span>
-              ));
+              return (postTags || []).map((tag, index) => {
+                const tagName = typeof tag === 'string' ? tag : (tag?.name || tag?.title || tag?.tag_name || '');
+                if (!tagName) return null;
+                return <span key={index} className={Styles.tag}>{tagName}</span>;
+              });
             })()}
           </div>
         </div>
@@ -609,7 +608,7 @@ const TopDeal = () => {
               <div className={Styles.greenDot}></div>
 
 
-              <div className={Styles.plusDeals}>We have {totalDeals} new deals</div>
+              <div className={Styles.plusDeals}>{formatDealCountText(totalDeals)}</div>
             </div>
 
             {/* view all button */}

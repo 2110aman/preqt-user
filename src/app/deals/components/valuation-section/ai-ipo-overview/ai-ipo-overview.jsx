@@ -12,12 +12,13 @@ import Shares from "../../shares-section/shares";
 // Local-only utility to normalize deal payloads for different deal types
 
 
-const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
+const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsProp }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isBelow920, setIsBelow920] = useState(false);
   const [expandedFields, setExpandedFields] = useState(true);
   const [open, setOpen] = useState(false);
-  const dealDetails = useDealStore((state) => state.dealDetails);
+  const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
+  const dealDetails = dealDetailsProp || dealDetailsFromStore;
   const dealData = dealDetails?.data?.deal_setpData;
 
   const dealType = dealDetails?.data?.deal_type;
@@ -305,7 +306,16 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps }) => {
         </h6>
 
         {isLink && displayValue !== "-" && displayValue !== "TBD" ? (
-          <Link href={displayValue} target="_blank" style={{ color: isDarkTheme ? "#f9d65c" : "#B59131" }}>
+          <Link
+            href={
+              typeof displayValue === "string" && (displayValue.startsWith("http://") || displayValue.startsWith("https://"))
+                ? displayValue
+                : `https://${displayValue}`
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: isDarkTheme ? "#f9d65c" : "#B59131" }}
+          >
             {displayValue.replace(/^https?:\/\//, '').replace(/\/$/, '')}
           </Link>
         ) : (
