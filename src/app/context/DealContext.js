@@ -19,7 +19,7 @@ export const DealsProvider = ({ children }) => {
 
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=50&page=${currPage}`,
+          `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=30&page=${currPage}`,
           {
             headers: {
               "Content-Type": "application/json",

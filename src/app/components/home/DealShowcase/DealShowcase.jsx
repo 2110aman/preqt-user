@@ -18,7 +18,7 @@ export default function DealShowcase() {
             try {
                 const token = Cookies.get('accessToken');
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=50&page=1`,
+                    `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=1000&page=1`,
                     {
                         method: "GET",
                         headers: {

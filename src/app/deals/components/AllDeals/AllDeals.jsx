@@ -329,10 +329,13 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
     }, [searchParams, router]);
 
     useEffect(() => {
-        if (allDeals.length === 0) return;
+        if (!allDeals || allDeals.length === 0) return;
 
         allDeals.forEach((deal) => {
-            fetchRepliesCount(deal.id, deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "unlisted");
+            const type = (deal?.deal_type || "").toLowerCase();
+            if (type === "public" || type === "unlisted") {
+                fetchRepliesCount(deal.id, type === "unlisted");
+            }
         });
     }, [allDeals]);
 
@@ -518,8 +521,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
     useEffect(() => {
         if (initialDeals && initialDeals.length > 0) {
             const loadedCount = initialDeals.length;
-            const total = initialPagination?.totalRecords || 0;
-            setHasMore(total > loadedCount);
+            const total = Number(initialPagination?.totalRecords || initialPagination?.total || 0);
+            setHasMore(total > 0 ? total > loadedCount : loadedCount >= 30);
             setLoading(false);
         }
     }, [initialDeals, initialPagination]);
@@ -531,7 +534,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
             }
             const token = Cookies.get('accessToken');
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=100&page=${page}`,
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=30&page=${page}`,
                 {
                     method: "GET",
                     headers: {
@@ -555,8 +558,9 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
                 setAllDeals((prev) => [...prev, ...deals]);
             }
 
-            const loadedCount = (page - 1) * 100 + deals.length;
-            setHasMore((pagination.totalRecords || 0) > loadedCount);
+            const loadedCount = (page - 1) * 30 + deals.length;
+            const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
+            setHasMore(totalRecords > 0 ? totalRecords > loadedCount : deals.length >= 30);
         } catch (err) {
             console.error("Fetch error in AllDeals:", err);
             setError(err.message || "Failed to fetch deals");
@@ -575,15 +579,15 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
 
 
     useEffect(() => {
-        if (!hasMore) return; // stop if no more pages
+        if (!hasMore || loading || loadMore) return; // stop if no more pages or currently fetching
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && !loading) {
+                if (entries[0].isIntersecting && !loading && !loadMore) {
+                    setLoadMore(true);
                     setCurrPage((prev) => prev + 1);
-                    setLoadMore(true)
                 }
             },
-            { threshold: 1.0 } // triggers when fully visible
+            { threshold: 0.1 } // triggers pre-fetch when user reaches the 5th deal from the bottom
         );
 
         if (hasMoreRef.current) observer.observe(hasMoreRef.current);
@@ -591,7 +595,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
         return () => {
             if (hasMoreRef.current) observer.unobserve(hasMoreRef.current);
         };
-    }, [hasMore, loading]);
+    }, [hasMore, loading, loadMore, allDeals]);
 
 
 
@@ -774,19 +778,26 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
                                 <div className={`row g-0 ${styles.dealsRow} ${viewType === 'list' ? stylesdeals.listView : ""}`}>
                                     {dealsToRender && dealsToRender.length > 0 ? (
                                         <>
-                                            {dealsToRender.map((deal, index) => (
-                                                <div key={deal.id} className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}>
-                                                    <DealCard
-                                                        deal={deal}
-                                                        isAuthenticated={!!authToken}
-                                                        onLoginClick={handleSigninOpen}
-                                                        qaCount={qaCounts[deal.id] || 0}
-                                                        replies={replies[deal.id]}
-                                                        isListView={viewType === 'list'}
-                                                        ignoreFeatured={true}
-                                                    />
-                                                </div>
-                                            ))}
+                                            {dealsToRender.map((deal, index) => {
+                                                const isTriggerItem = index === Math.max(0, dealsToRender.length - 5);
+                                                return (
+                                                    <div
+                                                        key={deal.id}
+                                                        ref={isTriggerItem ? hasMoreRef : null}
+                                                        className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}
+                                                    >
+                                                        <DealCard
+                                                            deal={deal}
+                                                            isAuthenticated={!!authToken}
+                                                            onLoginClick={handleSigninOpen}
+                                                            qaCount={qaCounts[deal.id] || 0}
+                                                            replies={replies[deal.id]}
+                                                            isListView={viewType === 'list'}
+                                                            ignoreFeatured={true}
+                                                        />
+                                                    </div>
+                                                );
+                                            })}
                                             {viewType === 'grid' && selectedDealType === "All" && (
                                                 <div className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
                                                     <UnlockTeaser isGridCard={true} isAllDeals={true} />
@@ -809,8 +820,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
                                 hasMore && loadMore &&
                                 <LoadMoreLoader />
                             }
-                            {hasMore && <div ref={hasMoreRef} style={{ height: "1px" }} >
-                            </div>}
+                            {hasMore && dealsToRender.length === 0 && <div ref={hasMoreRef} style={{ height: "1px" }} />}
                         </>
                     )}
                     {((selectedDealType || '').toLowerCase() === "public" || (selectedDealType || '').toLowerCase() === "upcoming") && (

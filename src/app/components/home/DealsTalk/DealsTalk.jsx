@@ -141,7 +141,7 @@ function DealsTalkContent() {
             */
 
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=50&page=1`,
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=1000&page=1`,
                 {
                     headers: {
                         "Content-Type": "application/json",
