@@ -15,9 +15,25 @@ const faqData = [
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState(0);
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqData.map((item) => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer,
+      },
+    })),
+  };
 
   return (
     <section className={styles.mainContainer}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className={styles.card}>
         <header className={styles.headingWrap}>
           <h2 className={styles.heading}>

@@ -44,9 +44,20 @@ const Customnavbar = ({ isPrivateDeal, isccps, dealDetails: dealDetailsProp }) =
 
     const hasProducts = Array.isArray(productsObj?.data) && productsObj.data.length > 0;
     const hasServices = Array.isArray(servicesObj?.data) && servicesObj.data.length > 0;
-    const hasGeo = !!(business?.geographical_presence?.status && business.geographical_presence.data);
-    const hasModel = !!(business?.business_model?.status && business.business_model.data);
-    const hasChannel = !!(business?.sales_channel?.status && business.sales_channel.data);
+    const checkData = (node) => {
+      if (!node || node.status === false) return false;
+      const d = node.data;
+      if (typeof d === "string") return d.trim().length > 0;
+      if (Array.isArray(d)) return d.length > 0;
+      if (Array.isArray(d?.data)) return d.data.length > 0;
+      if (d?.content && String(d.content).trim().length > 0) return true;
+      if (Array.isArray(node.files) && node.files.length > 0) return true;
+      return false;
+    };
+
+    const hasGeo = checkData(business?.geographical_presence);
+    const hasModel = checkData(business?.business_model);
+    const hasChannel = checkData(business?.sales_channel);
     const hasClients = !!(business?.clients?.status && Array.isArray(business.clients.data) && business.clients.data.length > 0);
     const hasRisk = !!(
       business?.key_risk_factors?.status &&

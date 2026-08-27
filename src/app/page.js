@@ -192,6 +192,20 @@ export default async function Page() {
     },
   };
 
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: PUBLISHER_NAME,
+    url: SITE_URL,
+    logo: PUBLISHER_LOGO,
+    description: pageDescription,
+    sameAs: [
+      process.env.NEXT_PUBLIC_FACEBOOK_URL,
+      process.env.NEXT_PUBLIC_TWITTER_URL,
+      process.env.NEXT_PUBLIC_LINKEDIN_URL,
+    ].filter(Boolean),
+  };
+
   // ✅ If logged in (token present), show HomeComponent
   if (accessToken) {
     return (
@@ -199,6 +213,10 @@ export default async function Page() {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
         />
         <HomeComponent />
       </>
@@ -211,6 +229,10 @@ export default async function Page() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
       {/* <LandingPage /> */}
       <HeroBanner />

@@ -1755,7 +1755,7 @@ const Keyfinancials = ({ isPrivateDeal = false, dealDetails: dealDetailsProp }) 
       )}
 
       {/* Working Capital */}
-      {(hasWorkingCapitalData || dealDetails?.data?.financial_highlights?.financial_performance?.status) && (
+      {(hasWorkingCapitalData || (dealDetails?.data?.financial_highlights?.working_capital?.status && Array.isArray(dealDetails?.data?.financial_highlights?.working_capital?.data) && dealDetails.data.financial_highlights.working_capital.data.length > 0)) && (
         <div className="section">
           <div
             className="section-header"

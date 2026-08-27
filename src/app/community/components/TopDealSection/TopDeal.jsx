@@ -260,7 +260,7 @@ const TopDeal = () => {
       const response = await fetch(`${baseUrl}/admin/api/community/posts/slug/${encodeURIComponent(slug)}`, {
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${Cookies.get('accessToken') || ''}`,
+          ...(Cookies.get('accessToken') ? { 'Authorization': `Bearer ${Cookies.get('accessToken')}` } : {}),
         },
         cache: 'no-store',
       });
@@ -631,21 +631,12 @@ const TopDeal = () => {
                   {/* logo */}
                   <article className={Styles.preqtLogoContainer}>
                     <img src="/assets/pictures/preqtLogo.svg" alt="preqt logo" title="preqt logo" className={Styles.logoImage} />
-                    <p className={`${Styles.PreqtLogoHeading} ${Styles.onDesktopView}`}>{'Preqt' || 'N/A'}</p>
-                    <p className={`${Styles.PreqtLogoHeading} ${Styles.onMobileView}`}>{'Preqt' || 'N/A'}</p>
-                    <div className={`${Styles.timerClockAndHoursLeft} ${Styles.onMobileView}`}>
-                      <img src="/assets/pictures/timerClock.svg" alt="timer clock" title="timer clock" />
-                      <p className={Styles.HoursLeft}>
-                        {getTimeRemaining(post?.pollExpiresAt)}
-                      </p>
-                    </div>
+                    <p className={Styles.PreqtLogoHeading}>{'Preqt' || 'N/A'}</p>
                   </article>
 
                   {/* time */}
                   <article className={Styles.TimeContainer}>
-                    <div className={`${Styles.timerClockAndHoursLeft} ${Styles.onDesktopView}`}>
-                      {/* <img src="/assets/pictures/timerClock2.svg" alt="timer" title="timer" /> */}
-
+                    <div className={Styles.timerClockAndHoursLeft}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                         <path d="M6.66699 1.33203H9.33366" stroke="#EF4444" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
                         <path d="M8 9.33203L10 7.33203" stroke="#EF4444" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />

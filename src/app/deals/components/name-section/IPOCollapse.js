@@ -40,6 +40,66 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
         </Tooltip>
     );
 
+    const extractStringValue = (val) => {
+        if (val === null || val === undefined) return "";
+        if (val instanceof Date) return val.toISOString();
+        if (typeof val === "object") {
+            if ("data" in val && val.data !== null && val.data !== undefined) {
+                return extractStringValue(val.data);
+            }
+            if ("value" in val && val.value !== null && val.value !== undefined) {
+                return extractStringValue(val.value);
+            }
+            if ("as_of_date" in val && val.as_of_date) {
+                return extractStringValue(val.as_of_date);
+            }
+            if ("date" in val && val.date) {
+                return extractStringValue(val.date);
+            }
+            return "";
+        }
+        return String(val);
+    };
+
+    const formatAsOfDate = (dateVal) => {
+        if (!dateVal) return "";
+        if (dateVal instanceof Date) {
+            const day = dateVal.getDate();
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[dateVal.getMonth()];
+            const year = dateVal.getFullYear();
+            return `${day} ${month} ${year}`;
+        }
+        const str = extractStringValue(dateVal);
+        if (!str || str.trim() === "") return "";
+        const d = new Date(str);
+        if (isNaN(d.getTime())) {
+            return str;
+        }
+        const day = d.getDate();
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const month = monthNames[d.getMonth()];
+        const year = d.getFullYear();
+        return `${day} ${month} ${year}`;
+    };
+
+    const rawAsOfDate =
+        dealData?.per_share_price?.as_of_date ||
+        dealData?.per_share_price?.date ||
+        dealData?.issue_price_per_share?.as_of_date ||
+        dealData?.issue_price_per_share?.date ||
+        dealData?.price_per_ccps?.as_of_date ||
+        dealData?.price_per_ccps?.date ||
+        dealData?.as_of_date ||
+        dealData?.asOfDate ||
+        dealDetails?.data?.updatedAt ||
+        dealDetails?.data?.updated_at ||
+        dealDetails?.data?.createdAt ||
+        dealDetails?.data?.created_at;
+
+    const formattedDate = formatAsOfDate(rawAsOfDate);
+    const asOfDateText = formattedDate || formatAsOfDate(new Date());
+
     return (
         <div className={`${isPrivateDeal ? styles.privateipo : ''} ${styles.ipocllapseWrapper || ''}`}>
             <div
@@ -101,6 +161,12 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                 </h5>
                             )
                         )}
+
+                        {asOfDateText && (
+                            <div className={styles.asOfDateText}>
+                                As of {asOfDateText}
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -129,6 +195,11 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                             "-"
                                         )}
                                     </h5>
+                                    {asOfDateText && (
+                                        <div className={styles.asOfDateText}>
+                                            As of {asOfDateText}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

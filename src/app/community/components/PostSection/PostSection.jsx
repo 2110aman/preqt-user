@@ -91,6 +91,68 @@ const PostSection = ({
   };
 
 
+  const fetchInlinePoll = async () => {
+    try {
+      const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "").replace(/\/$/, "");
+      const token = Cookies.get("accessToken");
+      const res = await fetch(`${baseUrl}/admin/api/community/get/random/polls`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const payload = await res.json();
+        const pollData = payload?.data?.data || payload?.data;
+        if (pollData && pollData.id) {
+          const totalVotes = pollData?.pollOptions?.reduce(
+            (sum, option) => sum + (option?.votesCount || 0),
+            0
+          ) || 0;
+
+          const normalizedOptions = pollData?.pollOptions?.map((option) => {
+            const votes = option?.votesCount || 0;
+            const percent = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+            return {
+              ...option,
+              votesPercent: percent,
+            };
+          }) || [];
+
+          const pollPost = {
+            ...pollData,
+            type: "poll",
+            isInlinePoll: true,
+            pollOptions: normalizedOptions,
+            totalVotes: totalVotes || pollData?.totalVotes || 0,
+          };
+
+          setPosts((prevPosts) => {
+            if (!prevPosts || prevPosts.some((p) => p.id === pollPost.id)) {
+              return prevPosts;
+            }
+            const combined = [...prevPosts, pollPost];
+            combined.sort((a, b) => {
+              const timeA = new Date(a?.createdAt || a?.created_at || 0).getTime();
+              const timeB = new Date(b?.createdAt || b?.created_at || 0).getTime();
+              return timeB - timeA;
+            });
+            return combined;
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch inline poll:", e);
+    }
+  };
+
+  useEffect(() => {
+    if (posts && posts.length > 0 && !posts.some((p) => p.type === "poll")) {
+      fetchInlinePoll();
+    }
+  }, [posts.length]);
+
   useEffect(() => {
     if (onLoadingChange) {
       console.log('PostSection → notifying layout', { isLoading, noPosts });
@@ -610,7 +672,7 @@ const PostSection = ({
         ) : (
 
           posts.map((post) => (
-            <div className={Styles.postwrapperBorder} key={post.id}>
+            <div className={`${Styles.postwrapperBorder} ${post.isInlinePoll ? Styles.mobileOnlyPoll : ""}`} key={post.id}>
               {post.type === 'poll' ? (
                 <div className={`${Styles.IndividualPostContainer} ${resetSpace && Styles.resetSpace}`} onClick={() => viewPostDetails(post.slug)}>
                   <div className={Styles.votingContainer2}>
@@ -621,21 +683,12 @@ const PostSection = ({
                         {/* logo */}
                         <article className={Styles.preqtLogoContainer}>
                           <img src="/assets/pictures/preqtLogo.svg" alt="preqt logo" title="preqt logo" className={Styles.logoImage} />
-                          <p className={`${Styles.PreqtLogoHeading} ${Styles.onDesktopView}`}>{'PrEqt' || 'N/A'}</p>
-                          <p className={`${Styles.PreqtLogoHeading} ${Styles.onMobileView}`}>{'PrEqt' || 'N/A'}</p>
-                          <div className={`${Styles.timerClockAndHoursLeft} ${Styles.onMobileView}`}>
-                            <img src="/assets/pictures/timerClock.svg" alt="timer clock" title="timer clock" />
-                            <p className={Styles.HoursLeft}>
-                              {getTimeRemaining(post?.pollExpiresAt)}
-                            </p>
-                          </div>
+                          <p className={Styles.PreqtLogoHeading}>{'PrEqt' || 'N/A'}</p>
                         </article>
 
                         {/* time */}
                         <article className={Styles.TimeContainer}>
-                          <div className={`${Styles.timerClockAndHoursLeft} ${Styles.onDesktopView}`}>
-                            {/* <img src="/assets/pictures/timerClock2.svg" alt="timer" title="timer" /> */}
-
+                          <div className={Styles.timerClockAndHoursLeft}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                               <path d="M6.66699 1.33203H9.33366" stroke="#EF4444" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
                               <path d="M8 9.33203L10 7.33203" stroke="#EF4444" strokeWidth="1.33333" strokeLinecap="round" strokeLinejoin="round" />
@@ -839,8 +892,7 @@ const PostSection = ({
                       {/* logo */}
                       <article className={Styles.preqtLogoContainer}>
                         <Image src="/assets/pictures/preqtLogo.svg" alt="preqt logo" title="preqt logo" className={Styles.logoImage} height={42} width={42} />
-                        <p className={`${Styles.PreqtLogoHeading} ${Styles.onDesktopView}`}>{'PrEqt' || 'N/A'}</p>
-                        <p className={`${Styles.PreqtLogoHeading} ${Styles.onMobileView}`}>{'PrEqt' || 'N/A'}</p>
+                        <p className={Styles.PreqtLogoHeading}>{'PrEqt' || 'N/A'}</p>
                       </article>
 
                       {/* time */}

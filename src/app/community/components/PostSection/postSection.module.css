@@ -1206,3 +1206,13 @@ line-height: leading-5; /* 142.857% */
   height: 35px;
   }
 }
+
+.mobileOnlyPoll {
+  display: block;
+}
+
+@media (min-width: 993px) {
+  .mobileOnlyPoll {
+    display: none !important;
+  }
+}

@@ -1,4 +1,5 @@
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const BASE_URL = (
   process.env.NEXT_PUBLIC_BASE_URL ||
@@ -131,13 +132,13 @@ export async function GET() {
 
   const extractItemDate = (item) => {
     const dateVal =
-      item.updatedAt ||
       item.updated_at ||
-      item.updated_on ||
       item.deal_setpData?.updated_at ||
       item.deal_overview?.updated_at ||
-      item.createdAt ||
+      item.updatedAt ||
+      item.updated_on ||
       item.created_at ||
+      item.createdAt ||
       item.created_on ||
       item.deal_setpData?.created_at ||
       item.deal_overview?.created_at ||
@@ -150,11 +151,11 @@ export async function GET() {
       const parsed = new Date(dateVal);
       if (!isNaN(parsed.getTime())) return parsed;
     }
-    return new Date("2026-08-20T00:00:00.000Z");
+    return new Date();
   };
 
   // Helper to validate and map dynamic routes
-  const mapDynamicRoutes = (items, basePath, config) => {
+  const mapDynamicRoutes = (items, basePath) => {
     return items
       .filter(item => item && item.slug && typeof item.slug === 'string' && item.slug.trim() !== "")
       .map(item => {
@@ -162,43 +163,39 @@ export async function GET() {
         return {
           url: `${BASE_URL}${basePath}/${cleanSlug}`,
           lastModified: extractItemDate(item),
-          changeFrequency: config.changeFrequency,
-          priority: config.priority,
         };
       });
   };
 
-  const dealUrls = mapDynamicRoutes(sortedDeals, '/deals', SEO_CONFIG.dealDetail);
-  const communityUrls = mapDynamicRoutes(postsResult, '/community', SEO_CONFIG.communityDetail);
+  const dealUrls = mapDynamicRoutes(sortedDeals, '/deals');
+  const communityUrls = mapDynamicRoutes(postsResult, '/community');
 
   // Compute latest content timestamps for aggregate index pages
   const latestDealDate = dealUrls.length > 0
     ? new Date(Math.max(...dealUrls.map(d => d.lastModified.getTime())))
-    : new Date("2026-08-25T00:00:00.000Z");
+    : new Date();
 
   const latestPostDate = communityUrls.length > 0
     ? new Date(Math.max(...communityUrls.map(c => c.lastModified.getTime())))
-    : new Date("2026-08-25T00:00:00.000Z");
+    : new Date();
 
   const latestSiteDate = new Date(Math.max(latestDealDate.getTime(), latestPostDate.getTime()));
 
   // 2. Define static routes with accurate, real modification dates
   const staticRoutes = [
-    { path: '/', config: SEO_CONFIG.home, lastMod: latestSiteDate },
-    { path: '/deals', config: SEO_CONFIG.dealsList, lastMod: latestDealDate },
-    { path: '/community', config: SEO_CONFIG.communityList, lastMod: latestPostDate },
-    { path: '/market-analysis', config: SEO_CONFIG.dealsList, lastMod: latestDealDate },
-    { path: '/privacy-policy', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
-    { path: '/terms-and-condition', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
-    { path: '/become-a-partner', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
-    { path: '/deal-sourcing', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
-    { path: '/support', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
-    { path: '/data-deletion-policy', config: SEO_CONFIG.staticPage, lastMod: new Date("2026-08-15T00:00:00.000Z") },
-  ].map(({ path, config, lastMod }) => ({
+    { path: '/', lastMod: latestSiteDate },
+    { path: '/deals', lastMod: latestDealDate },
+    { path: '/community', lastMod: latestPostDate },
+    { path: '/market-analysis', lastMod: latestDealDate },
+    { path: '/privacy-policy', lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/terms-and-condition', lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/become-a-partner', lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/deal-sourcing', lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/support', lastMod: new Date("2026-08-15T00:00:00.000Z") },
+    { path: '/data-deletion-policy', lastMod: new Date("2026-08-15T00:00:00.000Z") },
+  ].map(({ path, lastMod }) => ({
     url: path === '/' ? `${BASE_URL}/` : `${BASE_URL}${path}`,
     lastModified: lastMod,
-    changeFrequency: config.changeFrequency,
-    priority: config.priority,
   }));
 
   // 3. Combine and Deduplicate
@@ -213,14 +210,12 @@ export async function GET() {
 
   const finalUrls = Array.from(uniqueUrlsMap.values());
 
-  // 4. Generate XML format
+  // 4. Generate XML format (clean loc and lastmod tags only)
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${finalUrls.map(urlObj => `  <url>
     <loc>${escapeXml(urlObj.url)}</loc>
     <lastmod>${urlObj.lastModified.toISOString()}</lastmod>
-    <changefreq>${urlObj.changeFrequency}</changefreq>
-    <priority>${urlObj.priority}</priority>
   </url>`).join('\n')}
 </urlset>`;
 

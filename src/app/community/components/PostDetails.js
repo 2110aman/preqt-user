@@ -24,16 +24,36 @@ const getInitial = (fullName) => {
   return `${first}${last}`.toUpperCase();
 };
 
+const normalizePostData = (post) => {
+  if (!post) return null;
+  const currentUserId = typeof window !== "undefined" ? Cookies.get("investorId") : null;
+  const rawLikes = post.likesCount ?? post.likes_count ?? post.like_count ?? (Array.isArray(post.likes) ? post.likes.length : undefined);
+  const likesCount = rawLikes !== undefined && rawLikes !== null ? Number(rawLikes) : 0;
+  const isLiked = !!(
+    post.isLiked ||
+    post.is_liked ||
+    (currentUserId && Array.isArray(post.likes) && post.likes.some((l) => (typeof l === "string" ? l === currentUserId : l?.userId === currentUserId || l?.user_id === currentUserId)))
+  );
+  return {
+    ...post,
+    isLiked,
+    likesCount: isNaN(likesCount) ? 0 : likesCount,
+  };
+};
+
 const PostDetails = ({ slug, initialPost }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [hasVoted, setHasVoted] = useState(false);
   // const [showDot, setShowDot] = useState(false);
-  const [posts, setPosts] = useState(initialPost ? [initialPost] : []);
+  const [posts, setPosts] = useState(() => (initialPost ? [normalizePostData(initialPost)] : []));
   const [dotId, setDotId] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentonPost, setCommentonPost] = useState("");
   const [refetch, setRefetch] = useState(false);
-  const [currentUser, setCurrentUser] = useState(Cookies.get("investorName"));
+  const [currentUser, setCurrentUser] = useState("");
+  const [mounted, setMounted] = useState(false);
+  const [investorName, setInvestorName] = useState("");
+  const [investorEmail, setInvestorEmail] = useState("");
   const [isLoading, setIsLoading] = useState(!initialPost);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
@@ -509,7 +529,7 @@ const PostDetails = ({ slug, initialPost }) => {
       const fetchedPosts = Array.isArray(rawList) ? rawList : (rawList ? [rawList] : []);
 
       if (response.ok && fetchedPosts.length > 0) {
-        setPosts(fetchedPosts);
+        setPosts(fetchedPosts.map(normalizePostData));
         if (fetchedPosts[0]?.id) {
           getAllComments(fetchedPosts[0].id);
           setCurrentPostId(fetchedPosts[0].id);
@@ -535,14 +555,23 @@ const PostDetails = ({ slug, initialPost }) => {
     }
   };
   useEffect(() => {
+    setMounted(true);
+    const name = Cookies.get("investorName") || "";
+    setCurrentUser(name);
+    setInvestorName(name);
+    try {
+      const inv = Cookies.get("investor") ? JSON.parse(Cookies.get("investor")) : null;
+      if (inv?.email) setInvestorEmail(inv.email);
+    } catch (_e) {}
+
     if (initialPost?.id) {
+      setPosts([normalizePostData(initialPost)]);
       getAllComments(initialPost.id);
       setCurrentPostId(initialPost.id);
-    }
-    if (slug) {
+    } else if (slug) {
       getAllPosts();
     }
-  }, [slug]);
+  }, [slug, initialPost]);
 
   return (
     <>
@@ -613,19 +642,12 @@ const PostDetails = ({ slug, initialPost }) => {
                             title="Preqt logo"
                             className={Styles.logoImage}
                           />
-                          <h1 className={Styles.PreqtLogoHeading}>{'Preqt' || 'N/A'}</h1>
-                          <div className={`${Styles.timerClockAndHoursLeft} ${Styles.onMobileView}`}>
-                            <img src="/assets/pictures/timerClock.svg" alt="Timer icon" title="Countdown timer" />
-                            <p className={Styles.HoursLeft}>
-                              {getTimeRemaining(post?.pollExpiresAt)}
-                            </p>
-                          </div>
-
+                          <span className={Styles.PreqtLogoHeading}>{'Preqt' || 'N/A'}</span>
                         </article>
 
                         {/* time */}
                         <article className={Styles.TimeContainer}>
-                          <div className={`${Styles.timerClockAndHoursLeft} ${Styles.onDesktopView}`}>
+                          <div className={Styles.timerClockAndHoursLeft}>
                             <img src="/assets/pictures/timerClock.svg" alt="Timer icon" title="Countdown timer" />
                             <p className={Styles.HoursLeft}>
                               {getTimeRemaining(post?.pollExpiresAt)}
@@ -797,7 +819,7 @@ const PostDetails = ({ slug, initialPost }) => {
                           title="Preqt logo"
                           className={Styles.logoImage}
                         />
-                        <h1 className={Styles.PreqtLogoHeading}>{'Preqt' || 'N/A'}</h1>
+                        <span className={Styles.PreqtLogoHeading}>{'Preqt' || 'N/A'}</span>
                       </article>
 
                       {/* time */}
@@ -809,11 +831,9 @@ const PostDetails = ({ slug, initialPost }) => {
                     <div
                       className={`${Styles.postsAndDescriptionContainer} ${Styles.postsAndDescriptionContainer_details}`}
                     >
-                      <div className={Styles.postTitle}>
+                      <h1 className={Styles.postTitle}>
                         {post?.title}
-
-
-                      </div>
+                      </h1>
                       {typeof post?.content === "string" && post.content.trim() ? (
                         <div
                           className={`${Styles.postText} ${Styles.postText_details}`}
@@ -933,8 +953,8 @@ const PostDetails = ({ slug, initialPost }) => {
                     className={Styles.commentComposer}
                   >
                     <div className={Styles.commentComposerHeader}>
-                      <span className={Styles.nameInitial}>
-                        {getInitial(Cookies.get("investorName")) || "A"}
+                      <span className={Styles.nameInitial} suppressHydrationWarning>
+                        {getInitial(mounted ? investorName : "") || "A"}
                       </span>
                       <div className={Styles.commentComposerPlaceholderContainer}>
                         <div className={Styles.commentComposerPlaceholder}>
@@ -946,24 +966,15 @@ const PostDetails = ({ slug, initialPost }) => {
                 ) : (
                   <div className={Styles.commentComposer}>
                     <div className={Styles.commentComposerUserRow}>
-                      <span className={Styles.nameInitial}>
-                        {getInitial(Cookies.get("investorName")) || "G/U"}
+                      <span className={Styles.nameInitial} suppressHydrationWarning>
+                        {getInitial(mounted ? investorName : "") || "G/U"}
                       </span>
                       <div style={{ display: "flex", flexDirection: "column" }}>
-                        <span className={Styles.commentComposerUserName}>
-                          {Cookies.get("investorName") || "Guest User"}
+                        <span className={Styles.commentComposerUserName} suppressHydrationWarning>
+                          {(mounted && investorName) || "Guest User"}
                         </span>
-                        <span className={Styles.commentComposerUserEmail}>
-                          {(() => {
-                            try {
-                              const inv = Cookies.get("investor")
-                                ? JSON.parse(Cookies.get("investor"))
-                                : null;
-                              return inv?.email || "your.email@example.com";
-                            } catch {
-                              return "your.email@example.com";
-                            }
-                          })()}
+                        <span className={Styles.commentComposerUserEmail} suppressHydrationWarning>
+                          {(mounted && investorEmail) || "your.email@example.com"}
                         </span>
                       </div>
                     </div>

@@ -71,8 +71,25 @@ export default function Faq({ forPartner = false, forFundraise = false }) {
   const leftColumnData = !forPartner && !forFundraise ? dataToRender.slice(0, 3) : [];
   const rightColumnData = !forPartner && !forFundraise ? dataToRender.slice(3, 6) : [];
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": dataToRender.map((item) => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer,
+      },
+    })),
+  };
+
   return (
     <div className={styles.faqContainer}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {forPartner || forFundraise ? (
         <div style={{ margin: 'auto 20px' }}>
           {dataToRender.map((item) => (

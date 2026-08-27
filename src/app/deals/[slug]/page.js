@@ -71,12 +71,6 @@ export async function generateMetadata({ params }) {
     const dealTypeLabel =
       dealTypeMap[rawDealType.toLowerCase()] || rawDealType || "";
 
-    const title = dealName
-      ? dealTypeLabel
-        ? `${dealName} - ${dealTypeLabel}`
-        : dealName
-      : "Deal Details";
-
     const rawSummary =
       dealData?.deal_setpData?.preqt_summary?.data ||
       dealData?.preqt_summary?.data ||
@@ -97,12 +91,16 @@ export async function generateMetadata({ params }) {
       ? rawTagline.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
       : "";
 
+    const title = dealName
+      ? `${dealName} Unlisted Share Price | PrEqt`
+      : "Deal Details | PrEqt";
+
     const description =
       cleanSummary ||
       cleanTagline ||
       (dealName
-        ? `Discover ${dealName} on PrEqt`
-        : "Explore detailed deal information.");
+        ? `Discover ${dealName} unlisted share price, valuation, key financials, and investment analysis on PrEqt.`
+        : "Explore detailed deal information on PrEqt.");
 
     const rawTags = Array.isArray(dealData?.deal_setpData?.tags?.data)
       ? dealData.deal_setpData.tags.data
@@ -243,6 +241,16 @@ export default async function DealPage({ params }) {
     ],
   };
 
+  const priceVal =
+    dealData?.deal_setpData?.per_share_price?.data ||
+    dealData?.deal_setpData?.issue_price_per_share?.data?.from ||
+    dealData?.per_share_price?.data;
+
+  const rawDateVal =
+    dealData?.deal_setpData?.per_share_price?.as_of_date ||
+    dealData?.updatedAt ||
+    dealData?.createdAt;
+
   const financialProductSchema = {
     "@context": "https://schema.org",
     "@type": "FinancialProduct",
@@ -257,6 +265,18 @@ export default async function DealPage({ params }) {
       "name": "PrEqt",
       "url": siteUrl,
     },
+    ...(priceVal
+      ? {
+          "offers": {
+            "@type": "Offer",
+            "price": priceVal,
+            "priceCurrency": "INR",
+            "validFrom": rawDateVal
+              ? new Date(rawDateVal).toISOString()
+              : new Date().toISOString(),
+          },
+        }
+      : {}),
   };
 
   return (

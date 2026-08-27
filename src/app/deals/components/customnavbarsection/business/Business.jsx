@@ -322,7 +322,18 @@ const Business = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
     );
   }
 
-  if (business?.business_model?.status) {
+const hasNodeData = (node) => {
+  if (!node || node.status === false) return false;
+  const d = node.data;
+  if (typeof d === "string") return d.trim().length > 0;
+  if (Array.isArray(d)) return d.length > 0;
+  if (Array.isArray(d?.data)) return d.data.length > 0;
+  if (d?.content && String(d.content).trim().length > 0) return true;
+  if (Array.isArray(node.files) && node.files.length > 0) return true;
+  return false;
+};
+
+  if (hasNodeData(business?.business_model)) {
     activeSections.push(
       <Dropdown
         key="model"
@@ -367,7 +378,7 @@ const Business = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
     );
   }
 
-  if (business?.geographical_presence?.status) {
+  if (hasNodeData(business?.geographical_presence)) {
     activeSections.push(
       <Dropdown
         key="geo"
@@ -407,7 +418,7 @@ const Business = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
     );
   }
 
-  if (business?.sales_channel?.status) {
+  if (hasNodeData(business?.sales_channel)) {
     activeSections.push(
       <Dropdown
         key="sales"
@@ -488,7 +499,7 @@ const Business = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
     );
   }
 
-  if (business?.key_risk_factors?.status) {
+  if (hasNodeData(business?.key_risk_factors)) {
     activeSections.push(
       <Dropdown
         key="key_risk_factors"
@@ -581,7 +592,7 @@ const Business = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
       {activeSections.map((section, index) => (
         <React.Fragment key={index}>
           {section}
-          <hr className={styles.hr} />
+          {index < activeSections.length - 1 && <hr className={styles.hr} />}
         </React.Fragment>
       ))}
     </div>

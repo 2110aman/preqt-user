@@ -14,7 +14,6 @@ import Styles from './imageSide.module.css'
 import { Pagination, Autoplay } from 'swiper/modules';
 
 export default function ImageSlide({ images, title }) {
-     const [carouselItems, setCarouselItems] = useState([])
      const baseLabel = (title || "Community media").replace(/<[^>]*>/g, "").trim() || "Community media"
 
      // Helper function to convert API paths to absolute URLs
@@ -66,6 +65,8 @@ export default function ImageSlide({ images, title }) {
 
       return []
     }
+
+    const [carouselItems, setCarouselItems] = useState(() => normalizeImages(images))
 
     useEffect(() => {
        setCarouselItems(normalizeImages(images))
