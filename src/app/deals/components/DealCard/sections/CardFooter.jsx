@@ -1,8 +1,59 @@
-import React from 'react';
+"use client";
+import React, { useState, useEffect, useRef } from 'react';
+import Cookies from 'js-cookie';
 import AvatarGroup from '../ui/AvatarGroup';
 import RatingBadge from '../ui/RatingBadge';
 import CardTags from './CardTags';
 import styles from '../DealCard.module.css';
+
+// In-memory session cache and deduplication map
+const globalQaCache = new Map();
+const globalInFlightPromises = new Map();
+
+export async function fetchDealQaData(dealId, isPrivateDeal) {
+    if (!dealId) return null;
+    if (globalQaCache.has(dealId)) {
+        return globalQaCache.get(dealId);
+    }
+    if (globalInFlightPromises.has(dealId)) {
+        return globalInFlightPromises.get(dealId);
+    }
+
+    const promise = (async () => {
+        try {
+            const rawBase = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+            const baseUrl = rawBase.replace(/\/$/, "");
+            const token = isPrivateDeal ? Cookies.get("accessToken") : null;
+
+            const res = await fetch(`${baseUrl}/admin/api/dashboard/replies-count/${dealId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const result = {
+                count: data?.data?.count || 0,
+                replies: data,
+            };
+            globalQaCache.set(dealId, result);
+            return result;
+        } catch (err) {
+            console.error("Error fetching lazy QA for deal:", dealId, err);
+            const fallback = { count: 0, replies: null };
+            globalQaCache.set(dealId, fallback);
+            return fallback;
+        } finally {
+            globalInFlightPromises.delete(dealId);
+        }
+    })();
+
+    globalInFlightPromises.set(dealId, promise);
+    return promise;
+}
 
 function daysUntilLive(liveAt) {
     const liveDate = new Date(liveAt);
@@ -32,14 +83,66 @@ const getInitials = (questions = []) => {
     });
 };
 
-export default function CardFooter({ deal, qaCount, replies, isListView }) {
-    const finalQaCount = qaCount !== undefined ? qaCount : (deal?.qa_count || 0);
+export default function CardFooter({ deal, qaCount: propQaCount, replies: propReplies, isListView }) {
+    const dealId = deal?.id || deal?.deal_id;
+    const isPrivateDeal = deal?.deal_type === "private" || deal?.deal_type === "ccps" || deal?.deal_type === "unlisted";
+
+    const [lazyData, setLazyData] = useState(() => {
+        if (propQaCount !== undefined && propQaCount !== null) {
+            return { count: propQaCount, replies: propReplies };
+        }
+        if (dealId && globalQaCache.has(dealId)) {
+            return globalQaCache.get(dealId);
+        }
+        return { count: deal?.qa_count || 0, replies: propReplies || null };
+    });
+
+    const footerRef = useRef(null);
+
+    useEffect(() => {
+        if (propQaCount !== undefined && propQaCount !== null) {
+            setLazyData({ count: propQaCount, replies: propReplies });
+            return;
+        }
+
+        if (!dealId) return;
+
+        if (globalQaCache.has(dealId)) {
+            setLazyData(globalQaCache.get(dealId));
+            return;
+        }
+
+        const currentRef = footerRef.current;
+        if (!currentRef) return;
+
+        // Viewport IntersectionObserver: Only fetch when card is in/near viewport
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    observer.disconnect();
+                    fetchDealQaData(dealId, isPrivateDeal).then((data) => {
+                        if (data) setLazyData(data);
+                    });
+                }
+            },
+            { rootMargin: "150px" } // Pre-fetch 150px before entering screen for seamless UX
+        );
+
+        observer.observe(currentRef);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [dealId, propQaCount, propReplies, isPrivateDeal]);
+
+    const finalQaCount = lazyData.count !== undefined ? lazyData.count : (deal?.qa_count || 0);
     const hasQA = finalQaCount > 0;
-    const initials = getInitials(replies?.data?.questions_by || []);
+    const finalReplies = lazyData.replies || propReplies;
+    const initials = getInitials(finalReplies?.data?.questions_by || []);
     const finalInitials = initials && initials.length > 0 ? initials : (deal?.dummy_initials || []);
 
     return (
-        <div className={styles.footer}>
+        <div ref={footerRef} className={styles.footer}>
             <div className={styles.qaContainer}>
                 {hasQA ? (
                     <>

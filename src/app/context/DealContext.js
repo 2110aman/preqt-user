@@ -19,7 +19,7 @@ export const DealsProvider = ({ children }) => {
 
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=30&page=${currPage}`,
+          `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=${currPage}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -43,7 +43,7 @@ export const DealsProvider = ({ children }) => {
         setTotalDeals(safeTotal);
 
         setHasMore(
-          safeTotal > (currPage - 1) * 50 + deals.length
+          safeTotal > (currPage - 1) * 20 + deals.length
         );
       } catch (err) {
         console.error("Fetch error:", err);

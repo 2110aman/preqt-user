@@ -95,7 +95,7 @@ const getInitialDeals = cache(async () => {
   try {
     const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
     const baseUrl = rawBaseUrl.replace(/\/$/, "");
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=30&page=1`, {
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=20&page=1`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },

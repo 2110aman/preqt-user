@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import Cookies from 'js-cookie';
@@ -8,17 +8,87 @@ import DealCard from '@/app/deals/components/DealCard';
 import Link from 'next/link';
 
 export default function DealShowcase() {
+    const [allDeals, setAllDeals] = useState([]);
     const [featuredDeals, setFeaturedDeals] = useState([]);
     const [ipoDeals, setIpoDeals] = useState([]);
     const [unlistedDeals, setUnlistedDeals] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
 
+    // Q&A state & cache
+    const [qaCounts, setQaCounts] = useState({});
+    const [replies, setReplies] = useState({});
+    const fetchedQaIds = useRef(new Set());
+    const isFetchingRef = useRef(false);
+
+    // Filter deals into categories
+    const processDeals = (dealsList) => {
+        const filteredFeatured = dealsList.filter(deal => 
+            (deal.deal_type?.toLowerCase() === 'public' || 
+             deal.deal_type?.toLowerCase() === 'unlisted') && 
+            deal.deal_sub_type?.toLowerCase() === 'featured'
+        );
+
+        const filteredIpos = dealsList.filter(deal => 
+            deal.deal_type?.toLowerCase() === 'public' && 
+            (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
+        );
+
+        const filteredUnlisted = dealsList.filter(deal => 
+            deal.deal_type?.toLowerCase() === 'unlisted' && 
+            (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
+        );
+
+        setFeaturedDeals(filteredFeatured);
+        setIpoDeals(filteredIpos);
+        setUnlistedDeals(filteredUnlisted);
+    };
+
+    // Fetch Q&A replies count for newly received deals
+    const fetchRepliesForDeals = (dealsList = []) => {
+        dealsList.forEach((deal) => {
+            const dealId = deal?.id;
+            if (!dealId || fetchedQaIds.current.has(dealId)) return;
+            fetchedQaIds.current.add(dealId);
+
+            const isPrivateDeal = deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "unlisted";
+            const token = isPrivateDeal ? Cookies.get("accessToken") : null;
+
+            fetch(`${process.env.NEXT_PUBLIC_USER_BASE}admin/api/dashboard/replies-count/${dealId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            })
+                .then((res) => (res.ok ? res.json() : null))
+                .then((data) => {
+                    if (data) {
+                        setQaCounts((prev) => ({
+                            ...prev,
+                            [dealId]: data?.data?.count || 0,
+                        }));
+                        setReplies((prev) => ({
+                            ...prev,
+                            [dealId]: data,
+                        }));
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error fetching QA count for deal:", dealId, err);
+                });
+        });
+    };
+
+    // Initial Fetch (Page 1 with limit=20)
     useEffect(() => {
-        const fetchShowcaseDeals = async () => {
+        const fetchInitialDeals = async () => {
             try {
                 const token = Cookies.get('accessToken');
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=1000&page=1`,
+                    `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=1`,
                     {
                         method: "GET",
                         headers: {
@@ -31,53 +101,13 @@ export default function DealShowcase() {
                 if (res.ok) {
                     const responseData = await res.json();
                     const deals = responseData.data || [];
+                    const pagination = responseData.pagination || {};
 
-                    // =========================================================================
-                    // FILTER CRITERIA FOR FEATURED DEALS:
-                    // 1. check "deal_type" matches "public", "unlisted"
-                    // 2. check "deal_sub_type" matches "featured"
-                    //
-                    // Developer Comment: These checks are made to retrieve and display 
-                    // deals inside the Featured Deals section of the DealShowcase page component.
-                    // If database schema, fields, or specific keys change in the future, 
-                    // modify this filtering block accordingly.
-                    // =========================================================================
-                    const filteredFeatured = deals.filter(deal => 
-                        (deal.deal_type?.toLowerCase() === 'public' || 
-                         deal.deal_type?.toLowerCase() === 'unlisted') && 
-                        deal.deal_sub_type?.toLowerCase() === 'featured'
-                    );
+                    setAllDeals(deals);
+                    processDeals(deals);
 
-                    setFeaturedDeals(filteredFeatured);
-
-                    // =========================================================================
-                    // FILTER CRITERIA FOR IPOs (ALL PUBLIC DEALS: LIVE, UPCOMING, CLOSED):
-                    // 1. check "deal_type" matches "public"
-                    // 2. check "deal_sub_type" is null (or undefined)
-                    // =========================================================================
-                    const filteredIpos = deals.filter(deal => 
-                        deal.deal_type?.toLowerCase() === 'public' && 
-                        (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
-                    );
-
-                    setIpoDeals(filteredIpos);
-
-                    // =========================================================================
-                    // FILTER CRITERIA FOR UNLISTED SHARES:
-                    // 1. check "deal_type" matches "unlisted"
-                    // 2. check "deal_sub_type" is null (or undefined)
-                    //
-                    // Developer Comment: These two checks are made to retrieve and display 
-                    // deals inside the Unlisted Shares section of the DealShowcase page component.
-                    // If database schema, fields, or specific keys change in the future, 
-                    // modify this filtering block accordingly.
-                    // =========================================================================
-                    const filteredUnlisted = deals.filter(deal => 
-                        deal.deal_type?.toLowerCase() === 'unlisted' && 
-                        (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
-                    );
-
-                    setUnlistedDeals(filteredUnlisted);
+                    const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
+                    setHasMore(totalRecords > 0 ? totalRecords > deals.length : deals.length >= 20);
                 }
             } catch (error) {
                 console.error("Error fetching deals for landing showcase:", error);
@@ -86,8 +116,59 @@ export default function DealShowcase() {
             }
         };
 
-        fetchShowcaseDeals();
+        fetchInitialDeals();
     }, []);
+
+    // Load next page on scroll/swipe
+    const fetchMoreDeals = useCallback(async () => {
+        if (!hasMore || loadingMore || isFetchingRef.current) return;
+        isFetchingRef.current = true;
+        setLoadingMore(true);
+
+        const nextPage = page + 1;
+        try {
+            const token = Cookies.get('accessToken');
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=${nextPage}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` }),
+                    },
+                }
+            );
+
+            if (res.ok) {
+                const responseData = await res.json();
+                const newDeals = responseData.data || [];
+                const pagination = responseData.pagination || {};
+
+                if (newDeals.length > 0) {
+                    setAllDeals((prev) => {
+                        const existingIds = new Set(prev.map((d) => d.id));
+                        const uniqueNew = newDeals.filter((d) => !existingIds.has(d.id));
+                        const combined = [...prev, ...uniqueNew];
+                        processDeals(combined);
+                        return combined;
+                    });
+
+                    setPage(nextPage);
+
+                    const loadedCount = nextPage * 20;
+                    const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
+                    setHasMore(totalRecords > 0 ? totalRecords > loadedCount : newDeals.length >= 20);
+                } else {
+                    setHasMore(false);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading more showcase deals:", error);
+        } finally {
+            isFetchingRef.current = false;
+            setLoadingMore(false);
+        }
+    }, [hasMore, loadingMore, page]);
 
     if (loading) {
         return null;
@@ -100,6 +181,9 @@ export default function DealShowcase() {
                 subtitle="HIGHEST CONVICTION OPPORTUNITY"
                 deals={featuredDeals}
                 variantOverride="featured_deal"
+                qaCounts={qaCounts}
+                replies={replies}
+                onReachEnd={fetchMoreDeals}
             />
 
             <DealSection
@@ -108,6 +192,9 @@ export default function DealShowcase() {
                 deals={ipoDeals}
                 redirectUrl="/deals?type=public"
                 disclaimer="Grey Market Premium (GMPs) are shared for knowledge purpose only. PrEqt doesn’t promote or execute the trades."
+                qaCounts={qaCounts}
+                replies={replies}
+                onReachEnd={fetchMoreDeals}
             />
 
             <DealSection
@@ -116,6 +203,9 @@ export default function DealShowcase() {
                 deals={unlistedDeals}
                 redirectUrl="/deals?type=unlisted"
                 disclaimer="Disclaimer: Unlisted shares are unregulated & illiquid. This is NOT investment advice. Please do your own due diligence before investing."
+                qaCounts={qaCounts}
+                replies={replies}
+                onReachEnd={fetchMoreDeals}
             />
         </div>
     );
@@ -163,7 +253,7 @@ function FallbackCard() {
     );
 }
 
-function DealSection({ title, subtitle, deals, children, redirectUrl, titleColorClass, variantOverride, disclaimer }) {
+function DealSection({ title, subtitle, deals, children, redirectUrl, titleColorClass, variantOverride, disclaimer, qaCounts, replies, onReachEnd }) {
     const hasDeals = deals && deals.length > 0;
 
     return (
@@ -207,13 +297,28 @@ function DealSection({ title, subtitle, deals, children, redirectUrl, titleColor
                                 spaceBetween: 34,
                             },
                         }}
-                        loop={deals.length >= 2}
+                        loop={false}
                         grabCursor={true}
                         className={styles.cardRow}
+                        onReachEnd={() => {
+                            onReachEnd?.();
+                        }}
+                        onSlideChange={(swiper) => {
+                            if (swiper.isEnd || (swiper.slides && swiper.activeIndex >= swiper.slides.length - 3)) {
+                                onReachEnd?.();
+                            }
+                        }}
                     >
                         {deals.map(deal => (
                             <SwiperSlide key={deal.id} className={styles.cardWrapper}>
-                                <DealCard deal={deal} isAuthenticated={true} isListView={false} variantOverride={variantOverride} />
+                                <DealCard
+                                    deal={deal}
+                                    isAuthenticated={true}
+                                    isListView={false}
+                                    variantOverride={variantOverride}
+                                    qaCount={qaCounts?.[deal.id]}
+                                    replies={replies?.[deal.id]}
+                                />
                             </SwiperSlide>
                         ))}
                     </Swiper>
@@ -231,4 +336,3 @@ function DealSection({ title, subtitle, deals, children, redirectUrl, titleColor
         </div>
     );
 }
-

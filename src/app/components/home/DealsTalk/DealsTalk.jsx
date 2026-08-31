@@ -191,11 +191,15 @@ function DealsTalkContent() {
         handleFetchTopDeals()
     }, [])
 
+    const fetchedQaDealIds = useRef(new Set());
+
     useEffect(() => {
         if (allTopDeals.length === 0) return;
 
         allTopDeals.forEach((deal) => {
-            fetchRepliesCount(deal.id, deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "ofs");
+            if (deal?.id && !fetchedQaDealIds.current.has(deal.id)) {
+                fetchRepliesCount(deal.id, deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "ofs");
+            }
         });
 
         // Check if there are more slides after deals are loaded
@@ -213,10 +217,10 @@ function DealsTalkContent() {
             // For non-loop mode, check isEnd
             if (swiper.params.loop) {
                 // With loop enabled, check if actual slides count is greater than slidesPerView
-                const slidesPerView = swiper.params.slidesPerView;
-                // Use the actual deals count (allTopDeals.length) instead of counting DOM elements
-                // Compare with slidesPerView directly (can be decimal like 1.5, 2.3, etc.)
-                // If we have more slides than can be displayed, show the arrow
+                // Note: swiper.slides includes duplicated loop slides, so check allTopDeals.length
+                const slidesPerView = typeof swiper.params.slidesPerView === 'number' 
+                    ? swiper.params.slidesPerView 
+                    : (window.innerWidth >= 1200 ? 3 : window.innerWidth >= 768 ? 2 : 1);
                 setHasMoreSlides(allTopDeals.length > slidesPerView);
             } else {
                 setHasMoreSlides(!swiper.isEnd);

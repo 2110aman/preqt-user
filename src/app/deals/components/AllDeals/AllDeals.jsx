@@ -351,55 +351,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         router.replace(nextUrl);
     }, [searchParams, router]);
 
-    useEffect(() => {
-        if (!allDeals || allDeals.length === 0) return;
-
-        allDeals.forEach((deal) => {
-            const type = (deal?.deal_type || "").toLowerCase();
-            if (type === "public" || type === "unlisted") {
-                fetchRepliesCount(deal.id, type === "unlisted");
-            }
-        });
-    }, [allDeals]);
-
-
-    const fetchRepliesCount = async (dealId, isPrivateDeal) => {
-        if (!dealId) return;
-
-        try {
-            setCountLoading(true);
-            const token = isPrivateDeal ? Cookies.get("accessToken") : null;
-
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/dashboard/replies-count/${dealId}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        ...(token && { Authorization: `Bearer ${token}` }),
-                    },
-                }
-            );
-
-            if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-            const data = await res.json();
-
-            setQaCounts((prev) => ({
-                ...prev,
-                [dealId]: data?.data?.count || 0,
-            }));
-
-            // Store replies data per deal ID
-            setReplies((prev) => ({
-                ...prev,
-                [dealId]: data,
-            }));
-        } catch (err) {
-            console.error("Error fetching replies count:", err);
-        } finally {
-            setCountLoading(false);
-        }
-    };
+    // Q&A counts and replies are now lazily loaded per visible card via CardFooter's Viewport IntersectionObserver
 
     function daysUntilLive(liveAt) {
         const liveDate = new Date(liveAt);
@@ -545,7 +497,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         if (initialDeals && initialDeals.length > 0) {
             const loadedCount = initialDeals.length;
             const total = Number(initialPagination?.totalRecords || initialPagination?.total || 0);
-            setHasMore(total > 0 ? total > loadedCount : loadedCount >= 30);
+            setHasMore(total > 0 ? total > loadedCount : loadedCount >= 20);
             setLoading(false);
         }
     }, [initialDeals, initialPagination]);
@@ -557,7 +509,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             }
             const token = Cookies.get('accessToken');
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=30&page=${page}`,
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=${page}`,
                 {
                     method: "GET",
                     headers: {
@@ -581,9 +533,9 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 setAllDeals((prev) => [...prev, ...deals]);
             }
 
-            const loadedCount = (page - 1) * 30 + deals.length;
+            const loadedCount = (page - 1) * 20 + deals.length;
             const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
-            setHasMore(totalRecords > 0 ? totalRecords > loadedCount : deals.length >= 30);
+            setHasMore(totalRecords > 0 ? totalRecords > loadedCount : deals.length >= 20);
         } catch (err) {
             console.error("Fetch error in AllDeals:", err);
             setError(err.message || "Failed to fetch deals");
@@ -813,7 +765,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                                             deal={deal}
                                                             isAuthenticated={!!authToken}
                                                             onLoginClick={handleSigninOpen}
-                                                            qaCount={qaCounts[deal.id] || 0}
+                                                            qaCount={qaCounts[deal.id]}
                                                             replies={replies[deal.id]}
                                                             isListView={viewType === 'list'}
                                                             ignoreFeatured={true}
