@@ -12,21 +12,44 @@
 }
 
 .loaderSection {
-  flex: 1;
+  /* flex: 1; */
   width: 100%;
+  min-height: 90vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.lottieLoader {
+  width: 100%;
+  max-width: 680px;
+  height: auto;
 }
 
 .loaderSection img {
-  max-width: 150px;
+  width: 250px;
   width: 100%;
 }
 
 @media(max-width:768px){
     .CommingSoonMainContainer img{
         height: auto;
+    }
+
+    .loaderSection {
+        padding: 200px 8px;
+    }
+
+    .lottieLoader {
+        width: 100% !important;
+        max-width: 100% !important;
+        transform: scale(1.8);
+    }
+
+    .loaderSection img {
+        max-width: 320px;
+        width: 90%;
     }
 }

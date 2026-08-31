@@ -10,7 +10,7 @@ const Loader = () => {
             <Lottie 
                 animationData={loaderAnimation} 
                 loop={true} 
-                style={{ width: "100%", maxWidth: "480px", height: "100vh" }} 
+                className={styles.lottieLoader}
             />
         </div>
     )
