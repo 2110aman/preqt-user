@@ -560,17 +560,17 @@ const Namedetailsection = ({ slug, initialDealData }) => {
       const appStoreUrl = "https://apps.apple.com/in/app/preqt/id6751903472";
 
       if (isAndroid) {
-        // Android Intent: attempts to open installed app; falls back to Play Store if not installed
-        const intentUrl = `intent://deals/${dealSlug}#Intent;scheme=preqt;package=com.preqt.app;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end`;
+        // Android App Link Intent: Chrome matches com.preqt.app with https://www.preqt.club/deals/*
+        const host = window.location.host.includes("preqt.club") ? window.location.host : "www.preqt.club";
+        const intentUrl = `intent://${host}/deals/${dealSlug}#Intent;scheme=https;package=com.preqt.app;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end`;
         window.location.href = intentUrl;
       } else if (isIOS) {
-        // iOS Custom Scheme: attempts to open installed app; falls back to App Store if app is not present
+        // iOS: Universal link / Custom Scheme attempt with fallback
         const customSchemeUrl = `preqt://deals/${dealSlug}`;
         const startTime = Date.now();
         window.location.href = customSchemeUrl;
 
         setTimeout(() => {
-          // If the app successfully opened, the web page will be in background / hidden
           if (!document.hidden && Date.now() - startTime < 2000) {
             window.location.href = appStoreUrl;
           }
