@@ -571,8 +571,8 @@ const Namedetailsection = ({ slug, initialDealData }) => {
 
     // 1. Attempt to launch the installed app directly
     if (isAndroid) {
-      // Direct intent for com.preqt.app
-      window.location.href = `intent://deals/${dealSlug}#Intent;scheme=preqt;package=com.preqt.app;end`;
+      // Matches AndroidManifest.xml: scheme=https, host=www.preqt.club, pathPrefix=/deals
+      window.location.href = `intent://www.preqt.club/deals/${dealSlug}#Intent;scheme=https;package=com.preqt.app;end`;
     } else if (isIOS) {
       window.location.href = `preqt://deals/${dealSlug}`;
     }
