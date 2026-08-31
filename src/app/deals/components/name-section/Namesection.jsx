@@ -184,10 +184,12 @@ const Namedetailsection = ({ slug, initialDealData }) => {
 
 
   useEffect(() => {
-    if (isMobile) {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    if (typeof document !== "undefined") {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
     }
-  }, [isMobile]);
+  }, [slug]);
 
   const dealDetailsFromStore = useDealStore((state) => state.dealDetails);
   const dealDetails = (dealDetailsFromStore && dealDetailsFromStore.data) ? dealDetailsFromStore : initialDealData;

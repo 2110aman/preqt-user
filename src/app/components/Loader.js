@@ -7,7 +7,11 @@ import styles from './commingsoon.module.css' // comment
 const Loader = () => {
     return (
         <div className={styles.loaderSection}>
-            <Lottie animationData={loaderAnimation} loop={true} style={{ height: 450, width: 850 }} />
+            <Lottie 
+                animationData={loaderAnimation} 
+                loop={true} 
+                style={{ width: "100%", maxWidth: "480px", height: "100vh" }} 
+            />
         </div>
     )
 }

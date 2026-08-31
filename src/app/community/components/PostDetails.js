@@ -438,6 +438,14 @@ const PostDetails = ({ slug, initialPost }) => {
     setRefetch(false);
   }, [refetch, slug]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    if (typeof document !== "undefined") {
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, [slug]);
+
   // Update current time every second for poll countdown
   useEffect(() => {
     setCurrentTime(new Date());
