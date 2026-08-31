@@ -170,10 +170,6 @@ export default function DealShowcase() {
         }
     }, [hasMore, loadingMore, page]);
 
-    if (loading) {
-        return null;
-    }
-
     return (
         <div className={styles.showcaseContainer}>
             <DealSection
@@ -184,6 +180,7 @@ export default function DealShowcase() {
                 qaCounts={qaCounts}
                 replies={replies}
                 onReachEnd={fetchMoreDeals}
+                loading={loading}
             />
 
             <DealSection
@@ -195,6 +192,7 @@ export default function DealShowcase() {
                 qaCounts={qaCounts}
                 replies={replies}
                 onReachEnd={fetchMoreDeals}
+                loading={loading}
             />
 
             <DealSection
@@ -206,6 +204,7 @@ export default function DealShowcase() {
                 qaCounts={qaCounts}
                 replies={replies}
                 onReachEnd={fetchMoreDeals}
+                loading={loading}
             />
         </div>
     );
@@ -253,7 +252,7 @@ function FallbackCard() {
     );
 }
 
-function DealSection({ title, subtitle, deals, children, redirectUrl, titleColorClass, variantOverride, disclaimer, qaCounts, replies, onReachEnd }) {
+function DealSection({ title, subtitle, deals, children, redirectUrl, titleColorClass, variantOverride, disclaimer, qaCounts, replies, onReachEnd, loading }) {
     const hasDeals = deals && deals.length > 0;
 
     return (
@@ -287,7 +286,15 @@ function DealSection({ title, subtitle, deals, children, redirectUrl, titleColor
 
             {children}
 
-            {hasDeals ? (
+            {loading ? (
+                <div className={styles.cardRowWrapper}>
+                    <div style={{ display: 'flex', gap: '34px', overflow: 'hidden' }}>
+                        <div className={styles.cardSkeleton} />
+                        <div className={styles.cardSkeleton} />
+                        <div className={styles.cardSkeleton} />
+                    </div>
+                </div>
+            ) : hasDeals ? (
                 <div className={styles.cardRowWrapper}>
                     <Swiper
                         slidesPerView="auto"
