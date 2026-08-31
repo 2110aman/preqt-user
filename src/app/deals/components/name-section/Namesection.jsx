@@ -549,36 +549,49 @@ const Namedetailsection = ({ slug, initialDealData }) => {
     // Only mobile devices
     if (!isAndroid && !isIOS) return;
 
-    // Prevent redirect loop (per session/tab)
+    // Prevent redirect loop (per deal session)
     const hasRedirected = sessionStorage.getItem(`appDeepLinkAttempted_${slug}`);
     if (hasRedirected) return;
     sessionStorage.setItem(`appDeepLinkAttempted_${slug}`, "true");
 
-    const timer = setTimeout(() => {
-      const dealSlug = encodeURIComponent(slug);
-      const playStoreUrl = "https://play.google.com/store/apps/details?id=com.preqt.app";
-      const appStoreUrl = "https://apps.apple.com/in/app/preqt/id6751903472";
+    const dealSlug = encodeURIComponent(slug);
+    const playStoreUrl = "https://play.google.com/store/apps/details?id=com.preqt.app";
+    const appStoreUrl = "https://apps.apple.com/in/app/preqt/id6751903472";
+    const storeUrl = isAndroid ? playStoreUrl : appStoreUrl;
 
-      if (isAndroid) {
-        // Android App Link Intent: Chrome matches com.preqt.app with https://www.preqt.club/deals/*
-        const host = window.location.host.includes("preqt.club") ? window.location.host : "www.preqt.club";
-        const intentUrl = `intent://${host}/deals/${dealSlug}#Intent;scheme=https;package=com.preqt.app;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end`;
-        window.location.href = intentUrl;
-      } else if (isIOS) {
-        // iOS: Universal link / Custom Scheme attempt with fallback
-        const customSchemeUrl = `preqt://deals/${dealSlug}`;
-        const startTime = Date.now();
-        window.location.href = customSchemeUrl;
-
-        setTimeout(() => {
-          if (!document.hidden && Date.now() - startTime < 2000) {
-            window.location.href = appStoreUrl;
-          }
-        }, 1200);
+    let appOpened = false;
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        appOpened = true;
       }
-    }, 600);
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
-    return () => clearTimeout(timer);
+    const startTime = Date.now();
+
+    // 1. Attempt to launch the installed app directly
+    if (isAndroid) {
+      // Direct intent for com.preqt.app
+      window.location.href = `intent://deals/${dealSlug}#Intent;scheme=preqt;package=com.preqt.app;end`;
+    } else if (isIOS) {
+      window.location.href = `preqt://deals/${dealSlug}`;
+    }
+
+    // 2. Fallback to Store ONLY if app is NOT installed and page remains visible
+    const timer = setTimeout(() => {
+      const elapsed = Date.now() - startTime;
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+
+      // If document is not hidden, the mobile OS did not open any native app
+      if (!document.hidden && !appOpened && elapsed < 2500) {
+        window.location.href = storeUrl;
+      }
+    }, 1500);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [slug]);
 
 
