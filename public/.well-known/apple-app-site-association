@@ -4,7 +4,7 @@
     "details": [
       {
         "appID": "NCQUR5ZGSQ.com.preqt.app",
-        "paths": ["/deals/* " ,"*" ]
+        "paths": ["/deals/*", "*"]
       }
     ]
   },

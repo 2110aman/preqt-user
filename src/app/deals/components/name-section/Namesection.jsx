@@ -539,36 +539,47 @@ const Namedetailsection = ({ slug, initialDealData }) => {
     }
   }, [dealData?.company_logo?.[0]?.path]);
 
- useEffect(() => {
-  if (typeof window === "undefined") return;
+  useEffect(() => {
+    if (typeof window === "undefined" || !slug) return;
 
-  const ua = navigator.userAgent.toLowerCase();
-  const isAndroid = /android/.test(ua);
-  const isIOS = /iphone|ipad|ipod/.test(ua);
+    const ua = navigator.userAgent.toLowerCase();
+    const isAndroid = /android/.test(ua);
+    const isIOS = /iphone|ipad|ipod/.test(ua);
 
-  // Only mobile users
-  if (!isAndroid && !isIOS) return;
+    // Only mobile devices
+    if (!isAndroid && !isIOS) return;
 
-  // Prevent redirect loop (per tab)
-  const hasRedirected = sessionStorage.getItem("storeRedirectDone");
-  if (hasRedirected) return;
+    // Prevent redirect loop (per session/tab)
+    const hasRedirected = sessionStorage.getItem(`appDeepLinkAttempted_${slug}`);
+    if (hasRedirected) return;
+    sessionStorage.setItem(`appDeepLinkAttempted_${slug}`, "true");
 
-  sessionStorage.setItem("storeRedirectDone", "true");
+    const timer = setTimeout(() => {
+      const dealSlug = encodeURIComponent(slug);
+      const playStoreUrl = "https://play.google.com/store/apps/details?id=com.preqt.app";
+      const appStoreUrl = "https://apps.apple.com/in/app/preqt/id6751903472";
 
-  // Delay for Safari stability & UX
-  const timer = setTimeout(() => {
-    if (isAndroid) {
-      window.location.href =
-        "https://play.google.com/store/apps/details?id=com.preqt.app&hl=en_IN";
-    } else if (isIOS) {
-      window.location.href =
-        "https://apps.apple.com/in/app/preqt/id6751903472";
-    }
-  }, 700);
+      if (isAndroid) {
+        // Android Intent: attempts to open installed app; falls back to Play Store if not installed
+        const intentUrl = `intent://deals/${dealSlug}#Intent;scheme=preqt;package=com.preqt.app;S.browser_fallback_url=${encodeURIComponent(playStoreUrl)};end`;
+        window.location.href = intentUrl;
+      } else if (isIOS) {
+        // iOS Custom Scheme: attempts to open installed app; falls back to App Store if app is not present
+        const customSchemeUrl = `preqt://deals/${dealSlug}`;
+        const startTime = Date.now();
+        window.location.href = customSchemeUrl;
 
-  // Cleanup (React best practice)
-  return () => clearTimeout(timer);
-}, []);
+        setTimeout(() => {
+          // If the app successfully opened, the web page will be in background / hidden
+          if (!document.hidden && Date.now() - startTime < 2000) {
+            window.location.href = appStoreUrl;
+          }
+        }, 1200);
+      }
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [slug]);
 
 
   if (loading || mainLoader) {
