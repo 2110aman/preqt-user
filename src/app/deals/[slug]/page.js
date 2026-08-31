@@ -1,7 +1,113 @@
 import Namedetailsection from "../components/name-section/Namesection";
+import AllDeals from "../components/AllDeals/AllDeals";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { notFound } from "next/navigation";
+
+export const DEAL_CATEGORIES = {
+  "upcoming-ipo": {
+    type: "Upcoming",
+    label: "Upcoming IPO",
+    title: "Upcoming IPO Deals & Issues | PrEqt",
+    description: "Discover upcoming IPOs and pre-IPO investment opportunities on PrEqt. Access live analytics, timeline tracking, and issue size details.",
+    canonicalPath: "/deals/upcoming-ipo",
+  },
+  "upcoming": {
+    type: "Upcoming",
+    label: "Upcoming IPO",
+    title: "Upcoming IPO Deals & Issues | PrEqt",
+    description: "Discover upcoming IPOs and pre-IPO investment opportunities on PrEqt. Access live analytics, timeline tracking, and issue size details.",
+    canonicalPath: "/deals/upcoming-ipo",
+  },
+  "upcoming-ipos": {
+    type: "Upcoming",
+    label: "Upcoming IPO",
+    title: "Upcoming IPO Deals & Issues | PrEqt",
+    description: "Discover upcoming IPOs and pre-IPO investment opportunities on PrEqt. Access live analytics, timeline tracking, and issue size details.",
+    canonicalPath: "/deals/upcoming-ipo",
+  },
+  "ipo": {
+    type: "Public",
+    label: "IPO Deals",
+    title: "Live IPO Deals & Investment Opportunities | PrEqt",
+    description: "Access verified IPO opportunities with live GMP, valuation scores, financials, and company analytics on PrEqt.",
+    canonicalPath: "/deals/ipo",
+  },
+  "public": {
+    type: "Public",
+    label: "IPO Deals",
+    title: "Live IPO Deals & Investment Opportunities | PrEqt",
+    description: "Access verified IPO opportunities with live GMP, valuation scores, financials, and company analytics on PrEqt.",
+    canonicalPath: "/deals/ipo",
+  },
+  "ipos": {
+    type: "Public",
+    label: "IPO Deals",
+    title: "Live IPO Deals & Investment Opportunities | PrEqt",
+    description: "Access verified IPO opportunities with live GMP, valuation scores, financials, and company analytics on PrEqt.",
+    canonicalPath: "/deals/ipo",
+  },
+  "unlisted-shares": {
+    type: "Unlisted",
+    label: "Unlisted Shares",
+    title: "Unlisted Shares & Pre-IPO Investments | PrEqt",
+    description: "Invest in verified unlisted company shares, explore valuations, price trends, and financial reports on PrEqt.",
+    canonicalPath: "/deals/unlisted-shares",
+  },
+  "unlisted": {
+    type: "Unlisted",
+    label: "Unlisted Shares",
+    title: "Unlisted Shares & Pre-IPO Investments | PrEqt",
+    description: "Invest in verified unlisted company shares, explore valuations, price trends, and financial reports on PrEqt.",
+    canonicalPath: "/deals/unlisted-shares",
+  },
+  "private-deals": {
+    type: "Private",
+    label: "Private Deals",
+    title: "Exclusive Private Equity Deals | PrEqt",
+    description: "Explore institutional-grade private equity opportunities and exclusive co-investment deals on PrEqt.",
+    canonicalPath: "/deals/private-deals",
+  },
+  "private": {
+    type: "Private",
+    label: "Private Deals",
+    title: "Exclusive Private Equity Deals | PrEqt",
+    description: "Explore institutional-grade private equity opportunities and exclusive co-investment deals on PrEqt.",
+    canonicalPath: "/deals/private-deals",
+  },
+  "startup-deals": {
+    type: "Startup",
+    label: "Startup Deals",
+    title: "Curated Startup Deals & Venture Investments | PrEqt",
+    description: "Invest in high-growth startups and venture-backed companies. Verified deal flow for early-stage capital.",
+    canonicalPath: "/deals/startup-deals",
+  },
+  "startup": {
+    type: "Startup",
+    label: "Startup Deals",
+    title: "Curated Startup Deals & Venture Investments | PrEqt",
+    description: "Invest in high-growth startups and venture-backed companies. Verified deal flow for early-stage capital.",
+    canonicalPath: "/deals/startup-deals",
+  },
+};
+
+const getInitialDeals = cache(async () => {
+  try {
+    const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+    const baseUrl = rawBaseUrl.replace(/\/$/, "");
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=30&page=1`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      next: { revalidate: 60 },
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (error) {
+    console.error("Error fetching initial deals for category SSR:", error);
+  }
+  return { data: [], pagination: {} };
+});
 
 const getDealData = cache(async (slug, token) => {
   try {
@@ -32,6 +138,53 @@ const getDealData = cache(async (slug, token) => {
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+
+  // 1. Check if slug matches a Deal Category
+  const categoryConfig = DEAL_CATEGORIES[slug?.toLowerCase()];
+  if (categoryConfig) {
+    return {
+      title: categoryConfig.title,
+      description: categoryConfig.description,
+      alternates: {
+        canonical: `${siteUrl}${categoryConfig.canonicalPath}`,
+      },
+      openGraph: {
+        title: categoryConfig.title,
+        description: categoryConfig.description,
+        url: `${siteUrl}${categoryConfig.canonicalPath}`,
+        siteName: "PrEqt",
+        locale: "en_IN",
+        type: "website",
+        images: [
+          {
+            url: `${siteUrl}/logo.png`,
+            width: 1200,
+            height: 630,
+            alt: categoryConfig.title,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: categoryConfig.title,
+        description: categoryConfig.description,
+        images: [`${siteUrl}/logo.png`],
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
+    };
+  }
+
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
 
@@ -199,6 +352,42 @@ export async function generateMetadata({ params }) {
 
 export default async function DealPage({ params }) {
   const { slug } = await params;
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+
+  // 1. Check if slug is a Deal Category (e.g. /deals/upcoming-ipo, /deals/unlisted-shares, /deals/ipo)
+  const categoryConfig = DEAL_CATEGORIES[slug?.toLowerCase()];
+  if (categoryConfig) {
+    const initialDealsData = await getInitialDeals();
+    const deals = initialDealsData?.data || [];
+    const pagination = initialDealsData?.pagination || {};
+
+    const itemListSchema = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": `PrEqt ${categoryConfig.label} Deals`,
+      "description": categoryConfig.description,
+      "numberOfItems": deals.length,
+      "itemListElement": deals.map((deal, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "url": `${siteUrl}/deals/${deal.slug || ""}`,
+        "name": deal.company_name || "Investment Opportunity",
+        "description": deal.tag_line || deal.company_intro || `${deal.company_name} deal details on PrEqt.`,
+      })),
+    };
+
+    return (
+      <div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+        />
+        <AllDeals initialDeals={deals} initialPagination={pagination} initialCategory={categoryConfig.type} />
+      </div>
+    );
+  }
+
+  // 2. Otherwise render individual Deal Detail Page
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken")?.value;
 
@@ -213,8 +402,6 @@ export default async function DealPage({ params }) {
     dealData?.deal_setpData?.company_name ||
     dealData?.deal_overview?.company_name ||
     "Deal Details";
-
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",

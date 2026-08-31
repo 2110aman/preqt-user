@@ -185,6 +185,11 @@ export async function GET() {
   const staticRoutes = [
     { path: '/', lastMod: latestSiteDate },
     { path: '/deals', lastMod: latestDealDate },
+    { path: '/deals/upcoming-ipo', lastMod: latestDealDate },
+    { path: '/deals/ipo', lastMod: latestDealDate },
+    { path: '/deals/unlisted-shares', lastMod: latestDealDate },
+    { path: '/deals/private-deals', lastMod: latestDealDate },
+    { path: '/deals/startup-deals', lastMod: latestDealDate },
     { path: '/community', lastMod: latestPostDate },
     { path: '/market-analysis', lastMod: latestDealDate },
     { path: '/privacy-policy', lastMod: new Date("2026-08-15T00:00:00.000Z") },

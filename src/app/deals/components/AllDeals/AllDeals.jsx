@@ -21,11 +21,16 @@ import FilterPopup from "./FilterPopup";
 import DealCard from "../DealCard";
 import UnlockTeaser from "@/app/components/home/DealShowcase/UnlockTeaser";
 
-function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
+function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCategory = null }) {
+    const [localCategory, setLocalCategory] = useState(initialCategory || null);
     const [loading, setLoading] = useState(!initialDeals || initialDeals.length === 0);
     const [allDeals, setAllDeals] = useState(initialDeals);
     const [error, setError] = useState([]);
-    const { setSelectedDeal, appliedFilters, setAppliedFilters, selectedDealType, setSelectedDealType } = useDealStore();
+    const { setSelectedDeal, appliedFilters, setAppliedFilters, selectedDealType: storeDealType, setSelectedDealType } = useDealStore();
+    
+    // Guarantee synchronous initial category on first render without flash of "All"
+    const selectedDealType = localCategory !== null ? localCategory : (initialCategory || storeDealType || "All");
+
     const authToken = Cookies.get('accessToken'); // or from cookies
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -83,13 +88,31 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
     };
 
     const dealTypeTabs = [
-        { label: "ALL", value: "All" },
-        { label: "Upcoming IPO", value: "Upcoming" },
-        { label: "IPO", value: "Public" },
-        { label: "Unlisted Shares", value: "Unlisted" },
-        { label: "Private Deals", value: "Private" },
-        { label: "Startup Deals", value: "Startup" }
+        { label: "ALL", value: "All", slug: "" },
+        { label: "Upcoming IPO", value: "Upcoming", slug: "upcoming-ipo" },
+        { label: "IPO", value: "Public", slug: "ipo" },
+        { label: "Unlisted Shares", value: "Unlisted", slug: "unlisted-shares" },
+        { label: "Private Deals", value: "Private", slug: "private-deals" },
+        { label: "Startup Deals", value: "Startup", slug: "startup-deals" }
     ];
+
+    useEffect(() => {
+        if (initialCategory) {
+            setLocalCategory(initialCategory);
+            setSelectedDealType(initialCategory);
+        }
+    }, [initialCategory, setSelectedDealType]);
+
+    const handleTabSelect = (tab) => {
+        setLocalCategory(tab.value);
+        setSelectedDealType(tab.value);
+        if (typeof window !== "undefined") {
+            const newPath = tab.slug ? `/deals/${tab.slug}` : "/deals";
+            if (window.location.pathname !== newPath) {
+                window.history.pushState(null, "", newPath);
+            }
+        }
+    };
 
     useEffect(() => {
         const typeParam = searchParams?.get("type");
@@ -637,7 +660,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
                                         <div
                                             key={tab.value}
                                             className={`${stylesdeals.tabItem} ${selectedDealType === tab.value ? stylesdeals.activeTab : ""}`}
-                                            onClick={() => setSelectedDealType(tab.value)}
+                                            onClick={() => handleTabSelect(tab)}
                                         >
                                             {tab.label}
                                         </div>
@@ -723,7 +746,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
                                                     key={tab.value}
                                                     className={`${stylesdeals.dropdownItem} ${selectedDealType === tab.value ? stylesdeals.dropdownItemActive : ""}`}
                                                     onClick={() => {
-                                                        setSelectedDealType(tab.value);
+                                                        handleTabSelect(tab);
                                                         setShowDealTypeDropdown(false);
                                                     }}
                                                 >
@@ -926,10 +949,10 @@ function AllDealsContent({ initialDeals = [], initialPagination = {} }) {
 }
 
 
-export default function AllDeals({ initialDeals = [], initialPagination = {} }) {
+export default function AllDeals({ initialDeals = [], initialPagination = {}, initialCategory = null }) {
     return (
         <Suspense fallback={<Loader />}>
-            <AllDealsContent initialDeals={initialDeals} initialPagination={initialPagination} />
+            <AllDealsContent initialDeals={initialDeals} initialPagination={initialPagination} initialCategory={initialCategory} />
         </Suspense>
     );
 } 

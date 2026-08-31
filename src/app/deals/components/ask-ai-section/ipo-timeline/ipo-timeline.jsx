@@ -137,7 +137,9 @@ const Ipotimeline = ({ handleAskAI, handleQuesAns, isPrivateDeal, qaCount }) => 
   return (
     <section className="ask-ai-section">
       {/* Ask AI Button conditionally rendered based on chat_bot_supported */}
-      {dealDetails?.data?.chat_bot_supported && (
+
+
+      {/* {dealDetails?.data?.chat_bot_supported && (
       <button
         className="ask-ai-button"
         onClick={() => handleAskAI(true)}
@@ -149,7 +151,7 @@ const Ipotimeline = ({ handleAskAI, handleQuesAns, isPrivateDeal, qaCount }) => 
         </svg>
         Ask AI About This Deal
       </button>
-      )}
+      )} */}
 
       <div className="ask-ai-section2">
         <button className="image-stack" onClick={() => handleQuesAns && handleQuesAns(true)}>

@@ -279,7 +279,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
           )
       )}
       {/* Optional Ask AI button only when chatbot is supported */}
-      {dealDetails?.chat_bot_supported && <button
+      {/* {dealDetails?.chat_bot_supported && <button
         className={styles.askAiButton}
         onClick={() => {
           if (!authToken) {
@@ -299,7 +299,7 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
           <path d="M17.5013 15.9382L17.8065 16.785C18.1455 17.7247 18.8857 18.465 19.8255 18.804L20.6722 19.1092C20.7487 19.137 20.7487 19.245 20.6722 19.2727L19.8255 19.578C18.8857 19.917 18.1455 20.6572 17.8065 21.597L17.5013 22.4437C17.4735 22.5202 17.3655 22.5202 17.3378 22.4437L17.0325 21.597C16.6935 20.6572 15.9532 19.917 15.0135 19.578L14.1667 19.2727C14.0903 19.245 14.0903 19.137 14.1667 19.1092L15.0135 18.804C15.9532 18.465 16.6935 17.7247 17.0325 16.785L17.3378 15.9382C17.3655 15.8617 17.4743 15.8617 17.5013 15.9382Z" fill="#C9A74E" />
         </svg>
         Ask AI About This Deal
-      </button>}
+      </button>} */}
 
       {/* {!isMobile && <div className={styles.viewDetailsBtn}>
           <div className={styles.leftDiv}>

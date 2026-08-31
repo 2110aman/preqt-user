@@ -105,7 +105,7 @@ const Valuation = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsProp 
 
       <div className="ask-ai-mob-div">
         {/* Ask AI Button conditionally rendered based on chat_bot_supported */}
-        {dealDetails?.data?.chat_bot_supported && (
+        {/* {dealDetails?.data?.chat_bot_supported && (
           <button
             className="ask-ai-button"
             onClick={() => {
@@ -123,7 +123,7 @@ const Valuation = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsProp 
             </svg>
             Ask AI About This Deal
           </button>
-        )}
+        )} */}
       </div>
 
       {showChatBot && (

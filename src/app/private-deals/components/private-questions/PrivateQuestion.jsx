@@ -536,7 +536,7 @@ const PrivateQuestion = ({ onBack, handleAskAI, qaCount, replies }) => {
         </div>
 
         {/* Ask AI Button conditionally rendered based on chat_bot_supported */}
-        {dealDetails?.data?.chat_bot_supported && (
+        {/* {dealDetails?.data?.chat_bot_supported && (
         <button
           className={styles.AskAiButton}
           onClick={() => handleAskAI && handleAskAI(true)}
@@ -555,7 +555,7 @@ const PrivateQuestion = ({ onBack, handleAskAI, qaCount, replies }) => {
           </svg>
           Ask AI About This Deal
         </button>
-        )}
+        )} */}
       </div>
 
       {/* Popups */}
