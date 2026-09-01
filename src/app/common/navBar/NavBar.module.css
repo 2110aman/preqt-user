@@ -484,7 +484,7 @@
 
   .menuContainer_main {
     /* border: 1px solid red; */
-    margin: 30px 8px;
+    margin: 30px 8px 10px 8px;
     width: 100%;
     /* max-width: 299px; */
 
@@ -814,4 +814,11 @@
     font-weight: 400;
     color: white !important;
   }
+}
+
+.sideMenuAuthBtn {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  margin-left: 8px;
 }

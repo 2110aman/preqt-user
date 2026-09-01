@@ -431,10 +431,18 @@ export default function NavBar({ onSigninClick, hasToken }) {
 
           {/* logout */}
           {accessToken ?
-
-            <AuthAnimatedBtn children="Log Out" onClick={() => { setMenuOpen(false); setShowLogout(true) }} theme="dark" />
-            : <div className={`${styles.containerBtn}`}>
-              <AuthAnimatedBtn children="Sign In" onClick={onSigninClick} theme="dark" />
+            <div className={styles.sideMenuAuthBtn}>
+              <AuthAnimatedBtn children="Log Out" onClick={() => { setMenuOpen(false); setShowLogout(true) }} theme="dark" />
+            </div>
+            : <div className={`${styles.containerBtn} ${styles.sideMenuAuthBtn}`}>
+              <AuthAnimatedBtn 
+                children="Sign In" 
+                onClick={() => {
+                  setMenuOpen(false);
+                  if (onSigninClick) onSigninClick();
+                }} 
+                theme="dark" 
+              />
             </div>}
         </div>
         <div className={styles.sidebarSvg}>

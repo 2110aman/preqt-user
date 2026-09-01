@@ -188,7 +188,8 @@
     }
 
     .showOnMobile {
-        display: block;
+        display: flex;
+        justify-content: flex-start;
     }
 
     .nav {
