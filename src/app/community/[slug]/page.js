@@ -14,7 +14,7 @@ const FALLBACK_DESCRIPTION =
 const IMAGE_URL = (
   process.env.NEXT_PUBLIC_IMAGE_URL ||
   process.env.NEXT_PUBLIC_USER_BASE ||
-  "https://api.preqt.com"
+  "https://api.preqt.club"
 ).replace(/\/+$/, "");
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||

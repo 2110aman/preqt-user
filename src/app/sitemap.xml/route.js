@@ -9,7 +9,7 @@ const BASE_URL = (
 
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_USER_BASE ||
-  'https://api.preqt.com/'
+  'https://api.preqt.club/'
 ).replace(/\/+$/, "");
 
 // Endpoints

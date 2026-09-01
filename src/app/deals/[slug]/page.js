@@ -106,7 +106,7 @@ const getInitialDeals = cache(async (categoryType = "") => {
       dealTypeQuery = "&deal_type=[unlisted,public]";
     }
 
-    const limit = t === "unlisted" ? 40 : (t === "all" ? 40 : 20);
+    const limit = t === "unlisted" ? 40 : (t === "all" ? 50 : 20);
     const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=${limit}&page=1${dealTypeQuery}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -123,7 +123,7 @@ const getInitialDeals = cache(async (categoryType = "") => {
 
 const getDealData = cache(async (slug, token) => {
   try {
-    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "https://apistaging.preqt.club").replace(/\/$/, "");
+    const baseUrl = (process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/").replace(/\/$/, "");
     if (!baseUrl || !slug) return null;
     const res = await fetch(
       `${baseUrl}/admin/api/deals/public/detailsbyslug/${encodeURIComponent(slug)}`,
@@ -398,6 +398,8 @@ export default async function DealPage({ params }) {
       </div>
     );
   }
+
+  
 
   // 2. Otherwise render individual Deal Detail Page
   const cookieStore = await cookies();
