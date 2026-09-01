@@ -91,11 +91,23 @@ export const DEAL_CATEGORIES = {
   },
 };
 
-const getInitialDeals = cache(async () => {
+const getInitialDeals = cache(async (categoryType = "") => {
   try {
     const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
     const baseUrl = rawBaseUrl.replace(/\/$/, "");
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=20&page=1`, {
+    
+    let dealTypeQuery = "";
+    const t = (categoryType || "").toLowerCase();
+    if (t === "unlisted") {
+      dealTypeQuery = "&deal_type=unlisted";
+    } else if (t === "upcoming" || t === "public" || t === "ipo") {
+      dealTypeQuery = "&deal_type=public";
+    } else {
+      dealTypeQuery = "&deal_type=[unlisted,public]";
+    }
+
+    const limit = t === "unlisted" ? 40 : (t === "all" ? 40 : 20);
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=${limit}&page=1${dealTypeQuery}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },
@@ -357,7 +369,7 @@ export default async function DealPage({ params }) {
   // 1. Check if slug is a Deal Category (e.g. /deals/upcoming-ipo, /deals/unlisted-shares, /deals/ipo)
   const categoryConfig = DEAL_CATEGORIES[slug?.toLowerCase()];
   if (categoryConfig) {
-    const initialDealsData = await getInitialDeals();
+    const initialDealsData = await getInitialDeals(categoryConfig.type);
     const deals = initialDealsData?.data || [];
     const pagination = initialDealsData?.pagination || {};
 

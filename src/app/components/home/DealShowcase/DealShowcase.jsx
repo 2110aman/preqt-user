@@ -8,106 +8,82 @@ import DealCard from '@/app/deals/components/DealCard';
 import Link from 'next/link';
 
 export default function DealShowcase() {
-    const [allDeals, setAllDeals] = useState([]);
     const [featuredDeals, setFeaturedDeals] = useState([]);
     const [ipoDeals, setIpoDeals] = useState([]);
     const [unlistedDeals, setUnlistedDeals] = useState([]);
+
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
+
+    const [featuredPage, setFeaturedPage] = useState(1);
+    const [hasMoreFeatured, setHasMoreFeatured] = useState(true);
+    const [loadingMoreFeatured, setLoadingMoreFeatured] = useState(false);
+
+    const [publicPage, setPublicPage] = useState(1);
+    const [hasMorePublic, setHasMorePublic] = useState(true);
+    const [loadingMorePublic, setLoadingMorePublic] = useState(false);
+
+    const [unlistedPage, setUnlistedPage] = useState(1);
+    const [hasMoreUnlisted, setHasMoreUnlisted] = useState(true);
+    const [loadingMoreUnlisted, setLoadingMoreUnlisted] = useState(false);
 
     // Q&A state & cache
     const [qaCounts, setQaCounts] = useState({});
     const [replies, setReplies] = useState({});
     const fetchedQaIds = useRef(new Set());
-    const isFetchingRef = useRef(false);
+    const isFetchingFeaturedRef = useRef(false);
+    const isFetchingPublicRef = useRef(false);
+    const isFetchingUnlistedRef = useRef(false);
 
-    // Filter deals into categories
-    const processDeals = (dealsList) => {
-        const filteredFeatured = dealsList.filter(deal => 
-            (deal.deal_type?.toLowerCase() === 'public' || 
-             deal.deal_type?.toLowerCase() === 'unlisted') && 
-            deal.deal_sub_type?.toLowerCase() === 'featured'
-        );
-
-        const filteredIpos = dealsList.filter(deal => 
-            deal.deal_type?.toLowerCase() === 'public' && 
-            (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
-        );
-
-        const filteredUnlisted = dealsList.filter(deal => 
-            deal.deal_type?.toLowerCase() === 'unlisted' && 
-            (!deal.deal_sub_type || deal.deal_sub_type === null || deal.deal_sub_type === undefined || String(deal.deal_sub_type).trim().toLowerCase() === 'null')
-        );
-
-        setFeaturedDeals(filteredFeatured);
-        setIpoDeals(filteredIpos);
-        setUnlistedDeals(filteredUnlisted);
-    };
-
-    // Fetch Q&A replies count for newly received deals
-    const fetchRepliesForDeals = (dealsList = []) => {
-        dealsList.forEach((deal) => {
-            const dealId = deal?.id;
-            if (!dealId || fetchedQaIds.current.has(dealId)) return;
-            fetchedQaIds.current.add(dealId);
-
-            const isPrivateDeal = deal.deal_type === "private" || deal.deal_type === "ccps" || deal.deal_type === "unlisted";
-            const token = isPrivateDeal ? Cookies.get("accessToken") : null;
-
-            fetch(`${process.env.NEXT_PUBLIC_USER_BASE}admin/api/dashboard/replies-count/${dealId}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(token && { Authorization: `Bearer ${token}` }),
-                },
-            })
-                .then((res) => (res.ok ? res.json() : null))
-                .then((data) => {
-                    if (data) {
-                        setQaCounts((prev) => ({
-                            ...prev,
-                            [dealId]: data?.data?.count || 0,
-                        }));
-                        setReplies((prev) => ({
-                            ...prev,
-                            [dealId]: data,
-                        }));
-                    }
-                })
-                .catch((err) => {
-                    console.error("Error fetching QA count for deal:", dealId, err);
-                });
-        });
-    };
-
-    // Initial Fetch (Page 1 with limit=20)
+    // Initial Fetch (Featured, Public with limit=20, Unlisted with limit=40)
     useEffect(() => {
         const fetchInitialDeals = async () => {
             try {
                 const token = Cookies.get('accessToken');
-                const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=1`,
-                    {
+                const headers = {
+                    "Content-Type": "application/json",
+                    ...(token && { "Authorization": `Bearer ${token}` }),
+                };
+
+                const [featuredRes, publicRes, unlistedRes] = await Promise.allSettled([
+                    fetch(`${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?deal_type=[unlisted,public]&deal_sub_type=featured&limit=20&page=1`, {
                         method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            ...(token && { "Authorization": `Bearer ${token}` }),
-                        },
-                    }
-                );
+                        headers,
+                    }),
+                    fetch(`${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=1&deal_type=public`, {
+                        method: "GET",
+                        headers,
+                    }),
+                    fetch(`${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=40&page=1&deal_type=unlisted`, {
+                        method: "GET",
+                        headers,
+                    }),
+                ]);
 
-                if (res.ok) {
-                    const responseData = await res.json();
-                    const deals = responseData.data || [];
-                    const pagination = responseData.pagination || {};
-
-                    setAllDeals(deals);
-                    processDeals(deals);
-
+                if (featuredRes.status === 'fulfilled' && featuredRes.value.ok) {
+                    const resJson = await featuredRes.value.json();
+                    const deals = resJson.data || [];
+                    const pagination = resJson.pagination || {};
+                    setFeaturedDeals(deals);
                     const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
-                    setHasMore(totalRecords > 0 ? totalRecords > deals.length : deals.length >= 20);
+                    setHasMoreFeatured(totalRecords > 0 ? totalRecords > deals.length : deals.length >= 20);
+                }
+
+                if (publicRes.status === 'fulfilled' && publicRes.value.ok) {
+                    const resJson = await publicRes.value.json();
+                    const deals = resJson.data || [];
+                    const pagination = resJson.pagination || {};
+                    setIpoDeals(deals);
+                    const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
+                    setHasMorePublic(totalRecords > 0 ? totalRecords > deals.length : deals.length >= 20);
+                }
+
+                if (unlistedRes.status === 'fulfilled' && unlistedRes.value.ok) {
+                    const resJson = await unlistedRes.value.json();
+                    const deals = resJson.data || [];
+                    const pagination = resJson.pagination || {};
+                    setUnlistedDeals(deals);
+                    const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
+                    setHasMoreUnlisted(totalRecords > 0 ? totalRecords > deals.length : deals.length >= 40);
                 }
             } catch (error) {
                 console.error("Error fetching deals for landing showcase:", error);
@@ -119,17 +95,17 @@ export default function DealShowcase() {
         fetchInitialDeals();
     }, []);
 
-    // Load next page on scroll/swipe
-    const fetchMoreDeals = useCallback(async () => {
-        if (!hasMore || loadingMore || isFetchingRef.current) return;
-        isFetchingRef.current = true;
-        setLoadingMore(true);
+    // Load next page of Featured Deals
+    const fetchMoreFeaturedDeals = useCallback(async () => {
+        if (!hasMoreFeatured || loadingMoreFeatured || isFetchingFeaturedRef.current) return;
+        isFetchingFeaturedRef.current = true;
+        setLoadingMoreFeatured(true);
 
-        const nextPage = page + 1;
+        const nextPage = featuredPage + 1;
         try {
             const token = Cookies.get('accessToken');
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=${nextPage}`,
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?deal_type=[unlisted,public]&deal_sub_type=featured&limit=20&page=${nextPage}`,
                 {
                     method: "GET",
                     headers: {
@@ -145,30 +121,126 @@ export default function DealShowcase() {
                 const pagination = responseData.pagination || {};
 
                 if (newDeals.length > 0) {
-                    setAllDeals((prev) => {
+                    setFeaturedDeals((prev) => {
                         const existingIds = new Set(prev.map((d) => d.id));
                         const uniqueNew = newDeals.filter((d) => !existingIds.has(d.id));
-                        const combined = [...prev, ...uniqueNew];
-                        processDeals(combined);
-                        return combined;
+                        return [...prev, ...uniqueNew];
                     });
 
-                    setPage(nextPage);
+                    setFeaturedPage(nextPage);
 
                     const loadedCount = nextPage * 20;
                     const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
-                    setHasMore(totalRecords > 0 ? totalRecords > loadedCount : newDeals.length >= 20);
+                    setHasMoreFeatured(totalRecords > 0 ? totalRecords > loadedCount : newDeals.length >= 20);
                 } else {
-                    setHasMore(false);
+                    setHasMoreFeatured(false);
                 }
             }
         } catch (error) {
-            console.error("Error loading more showcase deals:", error);
+            console.error("Error loading more featured showcase deals:", error);
         } finally {
-            isFetchingRef.current = false;
-            setLoadingMore(false);
+            isFetchingFeaturedRef.current = false;
+            setLoadingMoreFeatured(false);
         }
-    }, [hasMore, loadingMore, page]);
+    }, [hasMoreFeatured, loadingMoreFeatured, featuredPage]);
+
+    // Load next page of Public Deals
+    const fetchMorePublicDeals = useCallback(async () => {
+        if (!hasMorePublic || loadingMorePublic || isFetchingPublicRef.current) return;
+        isFetchingPublicRef.current = true;
+        setLoadingMorePublic(true);
+
+        const nextPage = publicPage + 1;
+        try {
+            const token = Cookies.get('accessToken');
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=${nextPage}&deal_type=public`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` }),
+                    },
+                }
+            );
+
+            if (res.ok) {
+                const responseData = await res.json();
+                const newDeals = responseData.data || [];
+                const pagination = responseData.pagination || {};
+
+                if (newDeals.length > 0) {
+                    setIpoDeals((prev) => {
+                        const existingIds = new Set(prev.map((d) => d.id));
+                        const uniqueNew = newDeals.filter((d) => !existingIds.has(d.id));
+                        return [...prev, ...uniqueNew];
+                    });
+
+                    setPublicPage(nextPage);
+
+                    const loadedCount = nextPage * 20;
+                    const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
+                    setHasMorePublic(totalRecords > 0 ? totalRecords > loadedCount : newDeals.length >= 20);
+                } else {
+                    setHasMorePublic(false);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading more public showcase deals:", error);
+        } finally {
+            isFetchingPublicRef.current = false;
+            setLoadingMorePublic(false);
+        }
+    }, [hasMorePublic, loadingMorePublic, publicPage]);
+
+    // Load next page of Unlisted Deals
+    const fetchMoreUnlistedDeals = useCallback(async () => {
+        if (!hasMoreUnlisted || loadingMoreUnlisted || isFetchingUnlistedRef.current) return;
+        isFetchingUnlistedRef.current = true;
+        setLoadingMoreUnlisted(true);
+
+        const nextPage = unlistedPage + 1;
+        try {
+            const token = Cookies.get('accessToken');
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=40&page=${nextPage}&deal_type=unlisted`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` }),
+                    },
+                }
+            );
+
+            if (res.ok) {
+                const responseData = await res.json();
+                const newDeals = responseData.data || [];
+                const pagination = responseData.pagination || {};
+
+                if (newDeals.length > 0) {
+                    setUnlistedDeals((prev) => {
+                        const existingIds = new Set(prev.map((d) => d.id));
+                        const uniqueNew = newDeals.filter((d) => !existingIds.has(d.id));
+                        return [...prev, ...uniqueNew];
+                    });
+
+                    setUnlistedPage(nextPage);
+
+                    const loadedCount = nextPage * 40;
+                    const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
+                    setHasMoreUnlisted(totalRecords > 0 ? totalRecords > loadedCount : newDeals.length >= 40);
+                } else {
+                    setHasMoreUnlisted(false);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading more unlisted showcase deals:", error);
+        } finally {
+            isFetchingUnlistedRef.current = false;
+            setLoadingMoreUnlisted(false);
+        }
+    }, [hasMoreUnlisted, loadingMoreUnlisted, unlistedPage]);
 
     return (
         <div className={styles.showcaseContainer}>
@@ -179,7 +251,7 @@ export default function DealShowcase() {
                 variantOverride="featured_deal"
                 qaCounts={qaCounts}
                 replies={replies}
-                onReachEnd={fetchMoreDeals}
+                onReachEnd={fetchMoreFeaturedDeals}
                 loading={loading}
             />
 
@@ -191,7 +263,7 @@ export default function DealShowcase() {
                 disclaimer="Grey Market Premium (GMPs) are shared for knowledge purpose only. PrEqt doesn’t promote or execute the trades."
                 qaCounts={qaCounts}
                 replies={replies}
-                onReachEnd={fetchMoreDeals}
+                onReachEnd={fetchMorePublicDeals}
                 loading={loading}
             />
 
@@ -203,7 +275,7 @@ export default function DealShowcase() {
                 disclaimer="Disclaimer: Unlisted shares are unregulated & illiquid. This is NOT investment advice. Please do your own due diligence before investing."
                 qaCounts={qaCounts}
                 replies={replies}
-                onReachEnd={fetchMoreDeals}
+                onReachEnd={fetchMoreUnlistedDeals}
                 loading={loading}
             />
         </div>

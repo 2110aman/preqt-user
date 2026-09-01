@@ -132,13 +132,13 @@ export async function GET() {
 
   const extractItemDate = (item) => {
     const dateVal =
+      item.updatedAt ||
       item.updated_at ||
       item.deal_setpData?.updated_at ||
       item.deal_overview?.updated_at ||
-      item.updatedAt ||
       item.updated_on ||
-      item.created_at ||
       item.createdAt ||
+      item.created_at ||
       item.created_on ||
       item.deal_setpData?.created_at ||
       item.deal_overview?.created_at ||

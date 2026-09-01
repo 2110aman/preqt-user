@@ -493,23 +493,36 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
 
 
+    const isFirstRender = useRef(true);
+
     useEffect(() => {
         if (initialDeals && initialDeals.length > 0) {
             const loadedCount = initialDeals.length;
             const total = Number(initialPagination?.totalRecords || initialPagination?.total || 0);
-            setHasMore(total > 0 ? total > loadedCount : loadedCount >= 20);
+            setHasMore(total > 0 ? total > loadedCount : loadedCount >= 40);
             setLoading(false);
         }
     }, [initialDeals, initialPagination]);
 
-    const fetchDeals = async (page) => {
+    const fetchDeals = async (page, dealType = selectedDealType) => {
         try {
-            if (page === 1 && (!initialDeals || initialDeals.length === 0)) {
+            if (page === 1) {
                 setLoading(true);
             }
             const token = Cookies.get('accessToken');
+
+            let dealTypeQuery = "";
+            const t = (dealType || "").toLowerCase();
+            if (t === "unlisted") {
+                dealTypeQuery = "&deal_type=unlisted";
+            } else if (t === "upcoming" || t === "public" || t === "ipo") {
+                dealTypeQuery = "&deal_type=public";
+            } else if (t === "all" || !t) {
+                dealTypeQuery = "&deal_type=[unlisted,public]";
+            }
+
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=20&page=${page}`,
+                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=40&page=${page}${dealTypeQuery}`,
                 {
                     method: "GET",
                     headers: {
@@ -533,9 +546,9 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 setAllDeals((prev) => [...prev, ...deals]);
             }
 
-            const loadedCount = (page - 1) * 20 + deals.length;
+            const loadedCount = (page - 1) * 40 + deals.length;
             const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
-            setHasMore(totalRecords > 0 ? totalRecords > loadedCount : deals.length >= 20);
+            setHasMore(totalRecords > 0 ? totalRecords > loadedCount : deals.length >= 40);
         } catch (err) {
             console.error("Fetch error in AllDeals:", err);
             setError(err.message || "Failed to fetch deals");
@@ -546,10 +559,23 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     };
 
     useEffect(() => {
-        if (currPage === 1 && initialDeals && initialDeals.length > 0) {
-            return; // Already pre-fetched via SSR
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            if (initialDeals && initialDeals.length > 0) {
+                return; // Already pre-fetched via SSR
+            }
+            fetchDeals(1, selectedDealType);
+            return;
         }
-        fetchDeals(currPage);
+
+        setCurrPage(1);
+        fetchDeals(1, selectedDealType);
+    }, [selectedDealType]);
+
+    useEffect(() => {
+        if (currPage > 1) {
+            fetchDeals(currPage, selectedDealType);
+        }
     }, [currPage]);
 
 
