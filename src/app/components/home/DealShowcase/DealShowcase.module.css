@@ -445,3 +445,35 @@
     height: 12px;
 }
 
+.cardSkeleton {
+    flex-shrink: 0;
+    width: 340px;
+    height: 423px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .cardSkeleton {
+        width: 310px;
+    }
+}
+
+@media (max-width: 375px) {
+    .cardSkeleton {
+        width: 280px;
+    }
+}
+
+@keyframes skeletonShimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+

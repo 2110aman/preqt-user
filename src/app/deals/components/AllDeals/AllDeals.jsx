@@ -599,16 +599,6 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     }, [hasMore, loading, loadMore, allDeals]);
 
 
-
-
-    if (loading) {
-        return <Loader />;
-    }
-    // if (!allDeals || allDeals.length == 0) {
-    //     return <div>No deals currently available.</div>;
-    // }
-
-
     return (
         <>
             <div className={styles.AllDealsMainContainer}>
@@ -777,7 +767,16 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                         <>
                             <div className={`${styles.carouselWrapper} carouselWrapper`}>
                                 <div className={`row g-0 ${styles.dealsRow} ${viewType === 'list' ? stylesdeals.listView : ""}`}>
-                                    {dealsToRender && dealsToRender.length > 0 ? (
+                                    {loading ? (
+                                        [...Array(8)].map((_, i) => (
+                                            <div
+                                                key={`skeleton-${i}`}
+                                                className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}
+                                            >
+                                                <div className={`${stylesdeals.skeletonCard} ${viewType === 'list' ? stylesdeals.skeletonCardList : ""}`} />
+                                            </div>
+                                        ))
+                                    ) : dealsToRender && dealsToRender.length > 0 ? (
                                         <>
                                             {dealsToRender.map((deal, index) => {
                                                 const isTriggerItem = index === Math.max(0, dealsToRender.length - 5);

@@ -364,6 +364,7 @@ function DealSection({ title, subtitle, deals, children, redirectUrl, titleColor
                         <div className={styles.cardSkeleton} />
                         <div className={styles.cardSkeleton} />
                         <div className={styles.cardSkeleton} />
+                        <div className={styles.cardSkeleton} />
                     </div>
                 </div>
             ) : hasDeals ? (
