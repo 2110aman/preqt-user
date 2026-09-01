@@ -15,7 +15,8 @@ export default function DealCard({
     qaCount,
     replies,
     isListView,
-    ignoreFeatured = false
+    ignoreFeatured = false,
+    disableLink = false
 }) {
    
     const deal = React.useMemo(() => {
@@ -236,6 +237,12 @@ export default function DealCard({
             )}
         </div>
     );
+
+    const isMockDeal = disableLink || !deal?.slug || (typeof deal?.id === 'string' && (deal.id.startsWith('teaser-') || deal.id.startsWith('dummy-')));
+
+    if (isMockDeal) {
+        return content;
+    }
 
     return (
         <Link href={`/deals/${deal.slug}`} className={styles.cardLink}>

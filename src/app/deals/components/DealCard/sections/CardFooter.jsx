@@ -11,7 +11,7 @@ const globalQaCache = new Map();
 const globalInFlightPromises = new Map();
 
 export async function fetchDealQaData(dealId, isPrivateDeal) {
-    if (!dealId) return null;
+    if (!dealId || typeof dealId !== 'string' || dealId.startsWith("teaser-") || dealId.startsWith("dummy-")) return null;
     if (globalQaCache.has(dealId)) {
         return globalQaCache.get(dealId);
     }
@@ -105,7 +105,7 @@ export default function CardFooter({ deal, qaCount: propQaCount, replies: propRe
             return;
         }
 
-        if (!dealId) return;
+        if (!dealId || (typeof dealId === 'string' && (dealId.startsWith('teaser-') || dealId.startsWith('dummy-')))) return;
 
         if (globalQaCache.has(dealId)) {
             setLazyData(globalQaCache.get(dealId));

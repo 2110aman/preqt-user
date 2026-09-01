@@ -460,6 +460,9 @@
     .cardSkeleton {
         width: 310px;
     }
+    .disclaimerText{
+        padding-bottom: 16px;
+    }
 }
 
 @media (max-width: 375px) {

@@ -176,12 +176,19 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
         return (
             <div className={`${styles.teaserContainer} ${styles.gridCardTeaser} ${className}`}>
                 {/* Background Layer - CricStudio Private Card */}
-                <div className={styles.gridSingleCardBackdrop}>
-                    <DealCard deal={privateDealMock1} isAuthenticated={true} isListView={false} />
+                <div className={styles.gridSingleCardBackdrop} aria-hidden="true">
+                    <DealCard 
+                        deal={privateDealMock1} 
+                        isAuthenticated={true} 
+                        isListView={false} 
+                        disableLink={true}
+                        qaCount={privateDealMock1.qa_count || 0}
+                        replies={{}}
+                    />
                 </div>
 
                 {/* Frosted Glass Overlay */}
-                <div className={styles.gridFrostedOverlay}></div>
+                <div className={styles.gridFrostedOverlay} aria-hidden="true"></div>
 
                 {/* Foreground Content */}
                 <div className={styles.gridForeground}>
@@ -249,10 +256,17 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
             )}
 
             {/* Background Layer with Blurred & Faded Cards */}
-            <div className={`${styles.bgContainer}`} >
+            <div className={`${styles.bgContainer}`} aria-hidden="true">
                 {isListView ? (
-                    <div className={styles.singleCardBackdrop}>
-                        <DealCard deal={techMahindraTeaserMock} isAuthenticated={true} isListView={true} />
+                    <div className={styles.singleCardBackdrop} aria-hidden="true">
+                        <DealCard 
+                            deal={techMahindraTeaserMock} 
+                            isAuthenticated={true} 
+                            isListView={true} 
+                            disableLink={true}
+                            qaCount={techMahindraTeaserMock.qa_count || 0}
+                            replies={{}}
+                        />
                     </div>
                 ) : (
                     <>
@@ -292,10 +306,24 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
 
                             <div className={styles.bgCardsRow}>
                                 <div className={styles.bgCardWrapper}>
-                                    <DealCard deal={privateDealMock1} isAuthenticated={true} isListView={isListView} />
+                                    <DealCard 
+                                        deal={privateDealMock1} 
+                                        isAuthenticated={true} 
+                                        isListView={isListView} 
+                                        disableLink={true}
+                                        qaCount={privateDealMock1.qa_count || 0}
+                                        replies={{}}
+                                    />
                                 </div>
                                 <div className={`${styles.bgCardWrapper} ${styles.hideOnMobile}`}>
-                                    <DealCard deal={privateDealMock2} isAuthenticated={true} isListView={isListView} />
+                                    <DealCard 
+                                        deal={privateDealMock2} 
+                                        isAuthenticated={true} 
+                                        isListView={isListView} 
+                                        disableLink={true}
+                                        qaCount={privateDealMock2.qa_count || 0}
+                                        replies={{}}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -316,7 +344,14 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
 
                             <div className={styles.bgCardsRow}>
                                 <div className={styles.bgCardWrapper}>
-                                    <DealCard deal={startupDealMock} isAuthenticated={true} isListView={isListView} />
+                                    <DealCard 
+                                        deal={startupDealMock} 
+                                        isAuthenticated={true} 
+                                        isListView={isListView} 
+                                        disableLink={true}
+                                        qaCount={startupDealMock.qa_count || 0}
+                                        replies={{}}
+                                    />
                                 </div>
                             </div>
                         </div>
