@@ -172,7 +172,7 @@ export default function CardFooter({ deal, qaCount: propQaCount, replies: propRe
                             </span>
                         </span>
                         <div className={styles.mobileFooterTags}>
-                            <CardTags deal={deal} isListView={true} />
+                            <CardTags deal={deal} isListView={isListView} />
                         </div>
                     </>
                 )}

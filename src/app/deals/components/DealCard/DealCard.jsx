@@ -184,7 +184,7 @@ export default function DealCard({
                 )}
 
                 {layout.sections.includes('header_featured') && (
-                    <Sections.CardHeaderFeatured deal={deal} onTagClick={onTagClick} />
+                    <Sections.CardHeaderFeatured deal={deal} onTagClick={onTagClick} isListView={isListView} />
                 )}
 
                 {layout.sections.includes('companyInfo') && (
@@ -222,7 +222,7 @@ export default function DealCard({
             )}
 
             {layout.sections.includes('tags') && (
-                <Sections.CardTags deal={deal} onTagClick={onTagClick} />
+                <Sections.CardTags deal={deal} onTagClick={onTagClick} isListView={isListView} />
             )}
 
             {layout.sections.includes('actionButton') && (
@@ -234,6 +234,7 @@ export default function DealCard({
                     deal={deal}
                     qaCount={qaCount}
                     replies={replies}
+                    isListView={isListView}
                 />
             )}
         </div>

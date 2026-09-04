@@ -12,6 +12,8 @@ export default function CardCompanyInfo({ deal, isListView, hideAvatar }) {
             ? `${process.env.NEXT_PUBLIC_USER_BASE}admin/${path.replace("public/", "")}`
             : fallback;
 
+    const charLimit = isListView ? 25 : 16;
+
     return (
         <div className={styles.companyInfo}>
             {!hideAvatar && (
@@ -33,7 +35,10 @@ export default function CardCompanyInfo({ deal, isListView, hideAvatar }) {
                             {deal?.tags && deal.tags.length > 0 && (
                                 <span className={styles.mobileTagsInline}>
                                     {deal.tags
-                                        .map(t => typeof t === 'string' ? t.trim() : (t && typeof t === 'object' ? (t.name || t.tag || t.label || t.title || '') : ''))
+                                        .map(t => {
+                                            const tagText = typeof t === 'string' ? t.trim() : (t && typeof t === 'object' ? (t.name || t.tag || t.label || t.title || '') : '');
+                                            return tagText.length > charLimit ? `${tagText.slice(0, charLimit)}...` : tagText;
+                                        })
                                         .filter(Boolean)
                                         .join(' • ')}
                                 </span>

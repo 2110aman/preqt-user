@@ -328,7 +328,6 @@
     font-size: 14px;
     color: #1F2937;
     width: 140px;
-    transition: width 0.2s ease;
 }
 
 .companySearchInput::placeholder {
