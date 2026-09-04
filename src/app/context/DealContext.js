@@ -18,8 +18,10 @@ export const DealsProvider = ({ children }) => {
       setError(null);
 
       try {
+        const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+        const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=40&page=${currPage}&deal_type=[unlisted,public]`,
+          `${baseUrl}admin/api/deals/all-deals/?page=1&limit=500&deal_type=[unlisted,public]`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -32,7 +34,6 @@ export const DealsProvider = ({ children }) => {
         }
 
         const responseData = await res.json();
-
         const deals = responseData.data || [];
         const pagination = responseData.pagination || {};
 
@@ -41,10 +42,7 @@ export const DealsProvider = ({ children }) => {
 
         setAllDeals(deals);
         setTotalDeals(safeTotal);
-
-        setHasMore(
-          safeTotal > (currPage - 1) * 20 + deals.length
-        );
+        setHasMore(false);
       } catch (err) {
         console.error("Fetch error:", err);
         setError(err.message);
@@ -55,7 +53,7 @@ export const DealsProvider = ({ children }) => {
     }
 
     fetchDeals();
-  }, [currPage]);
+  }, []);
 
   return (
     <DealsContext.Provider

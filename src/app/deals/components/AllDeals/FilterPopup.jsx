@@ -299,8 +299,8 @@ const FilterPopup = ({
                         />
                     </div>
                     <div className={styles.checkboxContainerThreeCols}>
-                        {(availableSectors.length > 0 ? availableSectors : ["Healthcare", "Fintech", "Others", "Electrical Engineering", "SaaS", "EV / Infrastructure", "Consumer", "Manufacturing", "Energy"])
-                            .filter(s => s.toLowerCase().includes(searchSector.toLowerCase()))
+                        {availableSectors
+                            .filter(s => s && String(s).toLowerCase().includes(searchSector.toLowerCase()))
                             .map(lbl => (
                                 <Checkbox
                                     key={lbl}

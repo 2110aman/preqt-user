@@ -329,7 +329,7 @@
 @media (max-width: 786px) {
     .teaserContainer {
         padding: 48px 20px;
-        border-radius: 0px 0px 0px 0px;
+        border-radius: 0px;
     }
 
     .headerTitle {
@@ -406,8 +406,12 @@
 /* ==========================================
    Horizontal Banner Layout (isAllDeals={true})
    ========================================== */
+.allDealsContainer {
+    border-radius: 20px !important;
+}
+
 .allDealsTeaser {
-    height: 250px;
+    max-height: 198px;
     width: 100% !important;
     max-width: 97.5% !important;
     margin-left: auto !important;
@@ -482,7 +486,7 @@
     align-items: flex-start !important;
     justify-content: center !important;
     gap: 0px !important;
-    max-width: 600px !important;
+    max-width: 441px !important;
     z-index: 10 !important;
 }
 
@@ -536,7 +540,7 @@
 @media (max-width: 786px) {
     .allDealsTeaser {
         height: auto !important;
-        min-height: 300px !important;
+        min-height: 360px !important;
         flex-direction: column !important;
         padding: 32px 16px !important;
         text-align: center !important;

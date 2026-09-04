@@ -3,12 +3,20 @@ import { NextResponse } from "next/server";
 export function middleware(request) {
   const { pathname, origin } = request.nextUrl;
 
-  // 1. Detect if this is a staging environment using the host header or env variables
-  const host = request.headers.get("host") || "";
+  // 1. Detect if this is a staging/preview environment using the host header or env variables
+  const host = (request.headers.get("host") || "").toLowerCase();
+  const isProdHost = host === "preqt.club" || host === "www.preqt.club";
   const isStaging = 
+    (host && !isProdHost && !host.startsWith("localhost:")) ||
     host.includes("staging") || 
     host.includes("vercel.app") || 
+    host.includes("webninjaz.com") ||
+    process.env.VERCEL_ENV === "preview" ||
+    process.env.VERCEL_ENV === "development" ||
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" ||
     process.env.NEXT_PUBLIC_SITE_URL?.includes("apistaging") ||
+    process.env.NEXT_PUBLIC_SITE_URL?.includes("staging") ||
+    process.env.NEXT_PUBLIC_SITE_URL?.includes("vercel.app") ||
     process.env.NEXT_PUBLIC_USER_BASE?.includes("apistaging") ||
     process.env.NEXT_PUBLIC_USER_BASE?.includes("staging");
 
@@ -75,7 +83,7 @@ export function middleware(request) {
     if (!isAuthenticated && isAccessingSecurePath) {
       const response = NextResponse.redirect(new URL("/", origin));
       if (isStaging) {
-        response.headers.set("X-Robots-Tag", "noindex, nofollow");
+        response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
       }
       return response;
     }
@@ -84,7 +92,7 @@ export function middleware(request) {
   // 3. Set X-Robots-Tag header on staging requests
   const response = NextResponse.next();
   if (isStaging) {
-    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive, nosnippet");
   }
   return response;
 }

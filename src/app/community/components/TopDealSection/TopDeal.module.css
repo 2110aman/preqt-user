@@ -944,3 +944,71 @@ margin-top: 20px;
     color: #FFF;
     margin: 0;
 }
+
+/* Explore Tags Section */
+.exploreTagsCard {
+    background: linear-gradient(180deg, #F5F1E4 0%, #FFFFFF 100%);
+    border-radius: 20px;
+    padding: 22px 20px 24px 20px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.exploreTagsTitle {
+    color: #1F2937;
+    font-family: inherit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 28px;
+    letter-spacing: 0;
+    margin: 0;
+}
+
+.exploreTagsList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 6px;
+    align-items: center;
+}
+
+.exploreTagPill {
+    display: inline-flex;
+    align-items: center;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 9999px;
+    padding: 9px 16px 6px;
+    cursor: pointer;
+    outline: none;
+    text-decoration: none;
+    user-select: none;
+}
+
+.exploreTagPill:hover {
+    background-color: #FAF8F2;
+    border-color: #C4972E;
+}
+
+.exploreTagPill:active {
+    transform: translateY(0px);
+}
+
+.exploreTagHash {
+    color: #B59131;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.exploreTagText {
+    color: #000000;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+}
+

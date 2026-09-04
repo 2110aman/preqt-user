@@ -76,6 +76,10 @@ export function getMetricDetail(deal, metric) {
         }
     }
 
+    if (val === undefined || val === null || val === "" || val === "null" || val === "undefined") {
+        val = metric?.fallback || "TBD";
+    }
+
     return { value: val, label, icon, toolTip };
 }
 
@@ -140,7 +144,7 @@ export const METRICS_CONFIG = {
             { label: "REVENUE (FY'25)", key: "revenue_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "P/E MULTIPLE", key: "pe_multiple", format: "multiplier" },
-            { label: "EXPECTED LISTING", key: "listing_timeline", format: "date_short" },
+            { label: "EXPECTED LISTING", key: "listing_timeline", format: "date_short", fallback: "TBD" },
             { label: "CAGR 3Y", key: "cagr_growth_3y_percent", format: "percent" }
         ]
     },
@@ -150,7 +154,7 @@ export const METRICS_CONFIG = {
             { label: "Revenue (FY'25)", key: "revenue_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "PAT (FY'25)", key: "pat_fy25_in_cr", format: "currency", suffix: "Cr" },
             { label: "P/E Multiple", key: "pe_multiple", format: "multiplier" },
-            { label: "Expected Listing", key: "listing_timeline", format: "date_short" },
+            { label: "Expected Listing", key: "listing_timeline", format: "date_short", fallback: "TBD" },
             { label: "CAGR 3Y", key: "cagr_growth_3y_percent", format: "percent" }
         ]
     }

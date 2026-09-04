@@ -89,8 +89,11 @@ const Customnavbar = ({ isPrivateDeal, isccps, dealDetails: dealDetailsProp }) =
       hasShareholding = hasPromoters || hasAdditionals;
     }
 
+    const existingInvestors = fundraise.existing_investor || fundraise.existing_investors;
+    const hasExistingInvestors = existingInvestors && existingInvestors.status !== false && existingInvestors.status !== "false";
+
     if (isPrivateDeal) {
-      return hasShareholding;
+      return hasShareholding || hasExistingInvestors;
     }
 
     // 2. IPO Key Highlights check
@@ -130,7 +133,7 @@ const Customnavbar = ({ isPrivateDeal, isccps, dealDetails: dealDetailsProp }) =
       )
     );
 
-    return hasShareholding || hasHighlights || hasObjective || hasNotes;
+    return hasShareholding || hasHighlights || hasObjective || hasNotes || hasExistingInvestors;
   }, [dealDetails, isPrivateDeal]);
 
   const availableTabs = useMemo(() => {

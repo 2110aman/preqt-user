@@ -1,4 +1,5 @@
 import { headers } from 'next/headers';
+import { checkIsStaging } from './utils/seoUtils';
 
 export const dynamic = 'force-dynamic';
 
@@ -6,19 +7,24 @@ export default async function robots() {
   const headersList = await headers();
   const host = headersList.get('host') || '';
 
-  const isStaging =
-    host.includes("staging") ||
-    host.includes(".vercel.app") ||
-    process.env.NEXT_PUBLIC_SITE_URL?.includes("apistaging") ||
-    process.env.NEXT_PUBLIC_USER_BASE?.includes("apistaging") ||
-    process.env.NEXT_PUBLIC_USER_BASE?.includes("staging");
+  const isStaging = checkIsStaging(host);
 
   if (isStaging) {
     return {
-      rules: {
-        userAgent: '*',
-        disallow: '/',
-      },
+      rules: [
+        {
+          userAgent: '*',
+          disallow: '/',
+        },
+        {
+          userAgent: 'Googlebot',
+          disallow: '/',
+        },
+        {
+          userAgent: 'Bingbot',
+          disallow: '/',
+        },
+      ],
     };
   }
 

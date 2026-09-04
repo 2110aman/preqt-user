@@ -2,7 +2,7 @@ import React from 'react';
 import Badge from '../ui/Badge';
 import styles from '../DealCard.module.css';
 
-export default function CardHeaderFeatured({ deal }) {
+export default function CardHeaderFeatured({ deal, onTagClick }) {
     const statusRaw = (deal?.hidden_status || '').toLowerCase();
     let statusKey = 'upcoming';
     if (statusRaw === 'live') statusKey = 'live';
@@ -12,6 +12,14 @@ export default function CardHeaderFeatured({ deal }) {
         live: 'LIVE',
         upcoming: 'UPCOMING',
         closed: 'CLOSED'
+    };
+
+    const handleBadgeClick = (tag) => (e) => {
+        if (onTagClick && tag) {
+            e.preventDefault();
+            e.stopPropagation();
+            onTagClick(tag);
+        }
     };
 
     // Assuming tags are passed as an array of strings in deal.tags
@@ -30,16 +38,24 @@ export default function CardHeaderFeatured({ deal }) {
                     </Badge>
                 )}
                 {(deal.hight_conviction === true || deal.hight_conviction === "true") && (
-                    <Badge color="highConviction" variant="pill" className={styles.featureBadge}>
-                        HIGH CONVICTION
-                    </Badge>
+                    <div onClick={handleBadgeClick('High Conviction')} style={onTagClick ? { cursor: 'pointer' } : undefined}>
+                        <Badge color="highConviction" variant="pill" className={styles.featureBadge}>
+                            HIGH CONVICTION
+                        </Badge>
+                    </div>
                 )}
                 {tags.map((tag, idx) => {
-                    const isHighConviction = tag === 'HIGH CONVICTION';
+                    const tagText = typeof tag === 'string'
+                        ? tag.trim()
+                        : (tag && typeof tag === 'object' ? (tag.name || tag.tag || tag.label || tag.title || '') : '');
+                    if (!tagText) return null;
+                    const isHighConviction = tagText === 'HIGH CONVICTION';
                     return (
-                        <Badge key={idx} color={isHighConviction ? 'highConviction' : 'sme'} variant="solid" className={styles.featureBadge}>
-                            {tag}
-                        </Badge>
+                        <div key={idx} onClick={handleBadgeClick(tagText)} style={onTagClick ? { cursor: 'pointer' } : undefined}>
+                            <Badge color={isHighConviction ? 'highConviction' : 'sme'} variant="solid" className={styles.featureBadge}>
+                                {tagText}
+                            </Badge>
+                        </div>
                     );
                 })}
             </div>

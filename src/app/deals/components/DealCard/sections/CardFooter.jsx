@@ -11,12 +11,14 @@ const globalQaCache = new Map();
 const globalInFlightPromises = new Map();
 
 export async function fetchDealQaData(dealId, isPrivateDeal) {
-    if (!dealId || typeof dealId !== 'string' || dealId.startsWith("teaser-") || dealId.startsWith("dummy-")) return null;
-    if (globalQaCache.has(dealId)) {
-        return globalQaCache.get(dealId);
+    if (!dealId) return null;
+    const idStr = String(dealId).trim();
+    if (idStr.startsWith("teaser-") || idStr.startsWith("dummy-")) return null;
+    if (globalQaCache.has(idStr)) {
+        return globalQaCache.get(idStr);
     }
-    if (globalInFlightPromises.has(dealId)) {
-        return globalInFlightPromises.get(dealId);
+    if (globalInFlightPromises.has(idStr)) {
+        return globalInFlightPromises.get(idStr);
     }
 
     const promise = (async () => {
@@ -25,7 +27,7 @@ export async function fetchDealQaData(dealId, isPrivateDeal) {
             const baseUrl = rawBase.replace(/\/$/, "");
             const token = isPrivateDeal ? Cookies.get("accessToken") : null;
 
-            const res = await fetch(`${baseUrl}/admin/api/dashboard/replies-count/${dealId}`, {
+            const res = await fetch(`${baseUrl}/admin/api/dashboard/replies-count/${idStr}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -36,22 +38,22 @@ export async function fetchDealQaData(dealId, isPrivateDeal) {
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             const result = {
-                count: data?.data?.count || 0,
+                count: Number(data?.data?.count || data?.count || 0),
                 replies: data,
             };
-            globalQaCache.set(dealId, result);
+            globalQaCache.set(idStr, result);
             return result;
         } catch (err) {
-            console.error("Error fetching lazy QA for deal:", dealId, err);
+            console.error("Error fetching lazy QA for deal:", idStr, err);
             const fallback = { count: 0, replies: null };
-            globalQaCache.set(dealId, fallback);
+            globalQaCache.set(idStr, fallback);
             return fallback;
         } finally {
-            globalInFlightPromises.delete(dealId);
+            globalInFlightPromises.delete(idStr);
         }
     })();
 
-    globalInFlightPromises.set(dealId, promise);
+    globalInFlightPromises.set(idStr, promise);
     return promise;
 }
 
@@ -105,10 +107,12 @@ export default function CardFooter({ deal, qaCount: propQaCount, replies: propRe
             return;
         }
 
-        if (!dealId || (typeof dealId === 'string' && (dealId.startsWith('teaser-') || dealId.startsWith('dummy-')))) return;
+        if (!dealId) return;
+        const idStr = String(dealId).trim();
+        if (idStr.startsWith('teaser-') || idStr.startsWith('dummy-')) return;
 
-        if (globalQaCache.has(dealId)) {
-            setLazyData(globalQaCache.get(dealId));
+        if (globalQaCache.has(idStr)) {
+            setLazyData(globalQaCache.get(idStr));
             return;
         }
 

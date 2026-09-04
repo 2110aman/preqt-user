@@ -3,7 +3,7 @@ import Badge from '../ui/Badge';
 import RatingBadge from '../ui/RatingBadge';
 import styles from '../DealCard.module.css';
 
-export default function CardHeader({ deal, layout, isListView }) {
+export default function CardHeader({ deal, layout, isListView, onTagClick }) {
     const statusRaw = (deal?.hidden_status || '').toLowerCase();
     let statusKey = 'upcoming';
     if (statusRaw === 'live') statusKey = 'live';
@@ -22,6 +22,23 @@ export default function CardHeader({ deal, layout, isListView }) {
     const rating = deal?.ipo_review_rating?.status && deal?.ipo_review_rating?.weighted_composite_score;
     const shouldRenderStatus = deal?.deal_type?.toLowerCase() === 'public';
 
+    const handleBadgeClick = (tag) => (e) => {
+        if (onTagClick && tag) {
+            e.preventDefault();
+            e.stopPropagation();
+            onTagClick(tag);
+        }
+    };
+
+    const firstTag = deal?.tags?.[0];
+    const firstTagText = typeof firstTag === 'string'
+        ? firstTag.trim()
+        : (firstTag && typeof firstTag === 'object' ? (firstTag.name || firstTag.tag || firstTag.label || firstTag.title || '') : '');
+
+    const stageText = typeof deal?.stage === 'string'
+        ? deal.stage.trim()
+        : (deal?.stage && typeof deal.stage === 'object' ? (deal.stage.name || deal.stage.label || '') : '');
+
     return (
         <div className={styles.headerRow}>
             <div className={styles.leftBadges}>
@@ -32,24 +49,28 @@ export default function CardHeader({ deal, layout, isListView }) {
                     </Badge>
                 )}
 
-
-
-                {deal?.deal_type?.toLowerCase() === 'unlisted' && deal?.tags?.[0] && (
-                    <Badge color="sme" variant="pill">
-                        {deal.tags[0]}
-                    </Badge>
+                {deal?.deal_type?.toLowerCase() === 'unlisted' && firstTagText && (
+                    <div onClick={handleBadgeClick(firstTagText)} style={onTagClick ? { cursor: 'pointer' } : undefined}>
+                        <Badge color="sme" variant="pill">
+                            {firstTagText}
+                        </Badge>
+                    </div>
                 )}
 
-                {deal.deal_type?.toLowerCase() === 'public' && deal.tags?.[0] && (
-                    <Badge color="sme" variant="pill">
-                        {deal.tags[0]}
-                    </Badge>
+                {deal?.deal_type?.toLowerCase() === 'public' && firstTagText && (
+                    <div onClick={handleBadgeClick(firstTagText)} style={onTagClick ? { cursor: 'pointer' } : undefined}>
+                        <Badge color="sme" variant="pill">
+                            {firstTagText}
+                        </Badge>
+                    </div>
                 )}
 
-                {isPrivateDeal && (
-                    <Badge color="preIpoSme" variant="pill">
-                        {deal.stage}
-                    </Badge>
+                {isPrivateDeal && stageText && (
+                    <div onClick={handleBadgeClick(stageText)} style={onTagClick ? { cursor: 'pointer' } : undefined}>
+                        <Badge color="preIpoSme" variant="pill">
+                            {stageText}
+                        </Badge>
+                    </div>
                 )}
             </div>
 

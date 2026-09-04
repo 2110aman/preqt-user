@@ -92,25 +92,34 @@ const startupDealMock = {
 };
 
 const techMahindraTeaserMock = {
-    id: "dummy-2",
+    id: "teaser-list-1",
     deal_type: "Private",
-    hidden_status: "upcoming",
-    tags: ["EXCLUSIVE", "TECH", "SERIES C"],
-    ipo_review_rating: { status: true, weighted_composite_score: 4.2 },
-    company_name: "Tech Mahindra",
-    short_description: "Global digital transformation and consulting services provider.",
-    round_size_in_cr: 500.0,
+    hidden_status: "live",
+    exclusive_deal: true,
+    company_name: "Ola Electric Mobility Ltd.",
+    tag_line: "India's leading EV two-wheeler manufacturer with deep vertical integration",
+    round_size_in_cr: 750.0,
     stage: "Series C",
-    valuation_in_cr: 25000.0,
-    rev_arr_in_cr: 4500.0,
-    gross_margin_percent: 38.5,
-    growth_yoy: 1.2,
-    min_ticket_in_inr: 100000.0,
-    target_funding_in_cr: 500.0,
-    raised_amount: 150.0,
+    valuation_in_cr: 750.0,
+    rev_arr_in_cr: 135.0,
+    gross_margin_percent: 48.0,
+    growth_yoy: 1.5,
+    min_ticket_in_inr: 50000.0,
+    revenue_fy25_in_cr: 135.0,
+    pat_fy25_in_cr: 12.5,
+    pe_multiple: 12.0,
+    listing_timeline: "2027-09-01",
+    cagr_growth_3y_percent: 48.0,
+    raised_amount: 450.0,
+    target_funding_in_cr: 750.0,
+    tags: ["PROFITABLE", "DIVIDEND PAYING", "MATURE"],
+    qa_count: 12,
+    qa_freshness: "Last 3 Days",
+    dummy_initials: ["O", "L", "A"],
     is_featured: true,
     company_stage: "Series C",
-    sector_industry: "IT Services"
+    sector_industry: "EV Mobility",
+    slug: "ola-electric-mobility-ltd"
 };
 
 export default function UnlockTeaser({ className = "", isAllDeals = false, isListView = false, isGridCard = false, isTopDeal = false }) {
@@ -241,7 +250,7 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
     }
 
     return (
-        <div className={`${styles.teaserContainer} ${isListView ? styles.allDealsTeaser : ''} ${className}`}>
+        <div className={`${styles.teaserContainer} ${isAllDeals ? styles.allDealsContainer : ''} ${isListView ? styles.allDealsTeaser : ''} ${className}`}>
             {/* If on hero section, show the header clearly on top of the teaser container */}
             {!isAllDeals && (
                 <div className={styles.heroHeader}>
@@ -385,8 +394,8 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
                     <p className={styles.actionDesc}>
                         Download the mobile app to unlock verified private market opportunities, startup deals, and exclusive IPO access.
                     </p>
-
-                    {/* App Badges */}
+                </div>
+                {/* App Badges */}
                     <div className={styles.badgeContainer}>
                         <Image
                             src="/downloadapplePreqt.png"
@@ -407,7 +416,6 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
                             draggable={false}
                         />
                     </div>
-                </div>
             </div>
         </div>
     );

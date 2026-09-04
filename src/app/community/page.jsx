@@ -1,4 +1,5 @@
 import PostDealcontainer from "./components/PostDealContainer/PostDealcontainer";
+import { getRobotsDirectives } from "../utils/seoUtils";
 
 export const revalidate = 300;
 const PAGE_SIZE = 50;
@@ -158,6 +159,7 @@ export async function generateMetadata() {
     },
     authors: [{ name: PUBLISHER_NAME }],
     publisher: PUBLISHER_NAME,
+    robots: getRobotsDirectives(),
     alternates: {
       canonical: `${SITE_URL}/community`,
     },

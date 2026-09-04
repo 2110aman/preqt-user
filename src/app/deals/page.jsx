@@ -1,11 +1,12 @@
 import { cache } from "react";
+import { getRobotsDirectives } from "../utils/seoUtils";
 import AllDeals from "./components/AllDeals/AllDeals";
 
 const getInitialDeals = cache(async () => {
   try {
     const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
     const baseUrl = rawBaseUrl.replace(/\/$/, "");
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=40&page=1&deal_type=[unlisted,public]`, {
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=1&limit=500&deal_type=[unlisted,public]`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },
@@ -63,17 +64,7 @@ export async function generateMetadata() {
       description,
       images: [`${siteUrl}/logo.png`],
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
+    robots: getRobotsDirectives(),
   };
 }
 

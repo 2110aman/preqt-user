@@ -1,11 +1,11 @@
 "use client"
 import Styles from './postSection.module.css'
 import Image from 'next/image'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
 import { showErrorToast, showSuccessToast } from '../../../components/ToastProvider'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import ImageSlide from '../ImageSlide'
 import ShareModal from '../CommentSection/ShareModal'
 import Loader from '../../../components/Loader'
@@ -30,6 +30,7 @@ const PostSection = ({
   const hasInitialPayload = Array.isArray(initialPosts);
   const pageSize = limit ? 7 : 10;
 
+  const searchParams = useSearchParams();
   const [selectedOption, setSelectedOption] = useState(null)
   const [hasVoted, setHasVoted] = useState(false)
   const [isVoting, setIsVoting] = useState(false)
@@ -59,6 +60,32 @@ const PostSection = ({
   const [signinEmail, setSigninEmail] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [noPosts, setNoPosts] = useState(() => hasInitialPayload ? initialNoPosts : false);
+
+  // Explore tags filtering state
+  const [selectedTags, setSelectedTags] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawTags = urlParams.get('tags');
+      const rawTag = urlParams.get('tag');
+      if (rawTags) {
+        return rawTags.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      if (rawTag) {
+        return [rawTag.trim()];
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [];
+  });
+
+  const [tagSearchQuery, setTagSearchQuery] = useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [availableTags, setAvailableTags] = useState([
+    "avengers", "power", "mind", "time", "kk", "dff", "mk", "ck", "rk", "ksdj", "lskd", "ksjd", "skjd"
+  ]);
+  const searchDropdownRef = useRef(null);
 
   const loadMoreRef = useRef(null);
   const router = useRouter();
@@ -223,7 +250,7 @@ const PostSection = ({
     }
   }
 
-  const getAllPosts = async (pageParam = 1, append = false, type = 'post') => {
+  const getAllPosts = async (pageParam = 1, append = false, type = 'post', tagsParam = selectedTags) => {
     try {
       if (append) {
         setIsFetchingMore(true);
@@ -240,6 +267,10 @@ const PostSection = ({
       // Ensure we always pass the post type to the API
       if (type) {
         api += `&type=${encodeURIComponent(type)}`;
+      }
+      // Filter posts by tags if provided
+      if (Array.isArray(tagsParam) && tagsParam.length > 0) {
+        api += `&tags=${encodeURIComponent(tagsParam.join(','))}`;
       }
       const token = Cookies.get('accessToken');
       const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -629,12 +660,12 @@ const PostSection = ({
       if (first.isIntersecting && hasMore && !isFetchingMore) {
         const next = page + 1;
         setPage(next);
-        getAllPosts(next, true);
+        getAllPosts(next, true, 'post', selectedTags);
       }
     }, { rootMargin: '200px' });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [page, hasMore, isFetchingMore, posts])
+  }, [page, hasMore, isFetchingMore, posts, selectedTags]);
 
   // Update current time every second for poll countdown
   useEffect(() => {
@@ -644,34 +675,140 @@ const PostSection = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [])
+  }, []);
 
-  // if (noPosts) {
+  // Re-fetch posts from API when selectedTags change
+  const isFirstMount = useRef(true);
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      if (selectedTags && selectedTags.length > 0) {
+        setPage(1);
+        setHasMore(true);
+        getAllPosts(1, false, 'post', selectedTags);
+      }
+      return;
+    }
+    setPage(1);
+    setHasMore(true);
+    getAllPosts(1, false, 'post', selectedTags);
+  }, [selectedTags]);
 
-  //   // onLoadingChange(false);
-  //   return (
-  //     <> <CommingSoon/></>
-  //   )
+  // Sync with searchParams
+  useEffect(() => {
+    const rawTags = searchParams?.get('tags');
+    const rawTag = searchParams?.get('tag');
+    let tagsFromUrl = [];
+    if (rawTags) {
+      tagsFromUrl = rawTags.split(',').map(s => s.trim()).filter(Boolean);
+    } else if (rawTag) {
+      tagsFromUrl = [rawTag.trim()];
+    }
+    setSelectedTags(tagsFromUrl);
+  }, [searchParams]);
 
-  // }
+  // Listen to custom event from sidebar TopDeal
+  useEffect(() => {
+    const handleTagEvent = (e) => {
+      const tag = e.detail?.tag;
+      const tags = e.detail?.tags;
+      if (tags && Array.isArray(tags)) {
+        setSelectedTags(tags);
+      } else if (tag) {
+        setSelectedTags(prev => prev.includes(tag) ? prev : [...prev, tag]);
+      }
+    };
+    window.addEventListener('communityTagChanged', handleTagEvent);
+    return () => window.removeEventListener('communityTagChanged', handleTagEvent);
+  }, []);
 
+  // Fetch community tags for the dropdown
+  useEffect(() => {
+    const fetchCommunityTags = async () => {
+      try {
+        const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+        const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
+        const res = await fetch(`${baseUrl}admin/api/community/community-tags`);
+        if (res.ok) {
+          const result = await res.json();
+          const tagsList = result?.data?.data || result?.data || [];
+          if (Array.isArray(tagsList) && tagsList.length > 0) {
+            setAvailableTags(tagsList);
+          }
+        }
+      } catch (e) {
+        // Fallback already in place
+      }
+    };
+    fetchCommunityTags();
+  }, []);
+
+  // Click outside search dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchDropdownRef.current && !searchDropdownRef.current.contains(e.target)) {
+        setShowSearchDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const updateUrlTags = (tags) => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (tags.length === 0) {
+      url.searchParams.delete('tag');
+      url.searchParams.delete('tags');
+    } else {
+      url.searchParams.delete('tag');
+      url.searchParams.set('tags', tags.join(','));
+    }
+    window.history.pushState({}, '', url.toString());
+  };
+
+  const handleAddTag = (tag) => {
+    if (!tag) return;
+    const trimmed = tag.trim();
+    if (!selectedTags.some(t => t.toLowerCase() === trimmed.toLowerCase())) {
+      const nextTags = [...selectedTags, trimmed];
+      setSelectedTags(nextTags);
+      updateUrlTags(nextTags);
+    }
+    setTagSearchQuery('');
+    setShowSearchDropdown(false);
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    const nextTags = selectedTags.filter(t => t.toLowerCase() !== tagToRemove.toLowerCase());
+    setSelectedTags(nextTags);
+    updateUrlTags(nextTags);
+  };
+
+  const handleClearAllTags = () => {
+    setSelectedTags([]);
+    updateUrlTags([]);
+  };
+
+  const suggestedTags = useMemo(() => {
+    const q = tagSearchQuery.trim().toLowerCase();
+    return availableTags.filter(t => {
+      if (selectedTags.some(st => st.toLowerCase() === t.toLowerCase())) return false;
+      if (!q) return true;
+      return t.toLowerCase().includes(q);
+    });
+  }, [availableTags, tagSearchQuery, selectedTags]);
+
+  const displayedPosts = posts;
 
   return (
     <>
-      {/* <div className={Styles.searchContainer}>
-    <img src="/assets/pictures/search.svg" alt="search icon" title="search icon" />
-      <input type="text" placeholder='Search' className={Styles.searchInput} />
-    </div> */}
-
       <div className={`${Styles.postsMainContainer} ${resetSpace && Styles.resetWidth} ${isMarketSentiment ? Styles.marketSentimentMode : ""}`}>
 
         {isLoading ? (
-          // <div className={Styles.IndividualPostContainer}>
           <Loader />
-          // </div>
-        ) : (
-
-          posts.map((post) => (
+        ) : displayedPosts && displayedPosts.length > 0 ? (
+          displayedPosts.map((post) => (
             <div className={`${Styles.postwrapperBorder} ${post.isInlinePoll ? Styles.mobileOnlyPoll : ""}`} key={post.id}>
               {post.type === 'poll' ? (
                 <div className={`${Styles.IndividualPostContainer} ${resetSpace && Styles.resetSpace}`} onClick={() => viewPostDetails(post.slug)}>
@@ -915,7 +1052,15 @@ const PostSection = ({
                               const tagName = typeof tag === 'string' ? tag : (tag?.name || tag?.title || tag?.tag_name || '');
                               if (!tagName) return null;
                               return (
-                                <span key={index} className={Styles.tag}>
+                                <span
+                                  key={index}
+                                  className={Styles.tag}
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddTag(tagName);
+                                  }}
+                                >
                                   {tagName}
                                 </span>
                               );
@@ -1016,6 +1161,18 @@ const PostSection = ({
 
 
           ))
+        ) : (
+          <div className={Styles.noFilteredPosts}>
+            <p style={{ margin: 0 }}>No community posts found matching the selected tag(s).</p>
+            <button
+              type="button"
+              className={Styles.clearAllTagsBtn}
+              onClick={handleClearAllTags}
+              style={{ marginTop: '12px', display: 'inline-block' }}
+            >
+              Clear Tags
+            </button>
+          </div>
         )}
 
 

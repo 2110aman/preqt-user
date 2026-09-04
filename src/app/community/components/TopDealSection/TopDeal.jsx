@@ -28,8 +28,16 @@ const truncateDescription = (text) => {
   return `${truncated}....`;
 };
 
-const DEFAULT_PUBLIC_DEALS = [
- 
+const DEFAULT_PUBLIC_DEALS = [];
+
+const EXPLORE_TAGS = [
+  "SME",
+  "IPO",
+  "High Conviction",
+  "Manufacturing",
+  "Healthcare",
+  "SaaS",
+  "EV"
 ];
 
 const TopDeal = () => {
@@ -619,6 +627,43 @@ const TopDeal = () => {
 
 
       </div>
+
+      {!isCommunityDetailPage && (
+        <div className={Styles.exploreTagsCard}>
+          <h3 className={Styles.exploreTagsTitle}>Explore Tags</h3>
+          <div className={Styles.exploreTagsList}>
+            {EXPLORE_TAGS.map((tag, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={Styles.exploreTagPill}
+                onClick={() => {
+                  if (isCommunityDetailPage) {
+                    router.push(`/community?tags=${encodeURIComponent(tag)}`);
+                  } else {
+                    const url = new URL(window.location.href);
+                    const existingTags = url.searchParams.get('tags')
+                      ? url.searchParams.get('tags').split(',').map(s => s.trim()).filter(Boolean)
+                      : (url.searchParams.get('tag') ? [url.searchParams.get('tag').trim()] : []);
+                    
+                    if (!existingTags.some(t => t.toLowerCase() === tag.toLowerCase())) {
+                      existingTags.push(tag);
+                    }
+                    url.searchParams.delete('tag');
+                    url.searchParams.set('tags', existingTags.join(','));
+                    window.history.pushState({}, '', url.toString());
+                    window.dispatchEvent(new CustomEvent('communityTagChanged', { detail: { tags: existingTags, tag } }));
+                  }
+                }}
+              >
+                <span className={Styles.exploreTagHash}>#</span>
+                <span className={Styles.exploreTagText}>{tag}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!isCommunityDetailPage && (
         <div className={Styles.postwrapperBorder} key={post.id}>
 

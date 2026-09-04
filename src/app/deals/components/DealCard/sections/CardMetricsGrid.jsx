@@ -14,7 +14,18 @@ export default function CardMetricsGrid({ deal, config }) {
     if (!config) return null;
 
     const formatValue = (value, metric) => {
-        if (value === null || value === undefined || value === "" || value === "TBD") return "TBD";
+        if (
+            value === null ||
+            value === undefined ||
+            value === "" ||
+            value === "TBD" ||
+            value === "null" ||
+            value === "undefined" ||
+            value === "N/A" ||
+            value === "-"
+        ) {
+            return "TBD";
+        }
 
         switch (metric.format) {
             case 'currency':
@@ -25,13 +36,27 @@ export default function CardMetricsGrid({ deal, config }) {
                 return `${formatNumberWithCommas(value)}%`;
             case 'date':
                 return formatFullDate(value);
-            case 'date_short':
-                if (!value) return "TBD";
-                const d = new Date(value);
-                if (isNaN(d.getTime())) return value;
+            case 'date_short': {
+                const str = String(value).trim();
+                if (
+                    !str ||
+                    str === "TBD" ||
+                    str.toLowerCase() === "null" ||
+                    str.toLowerCase() === "undefined" ||
+                    str.toLowerCase() === "n/a" ||
+                    str.toLowerCase() === "none" ||
+                    str === "-"
+                ) {
+                    return "TBD";
+                }
+                const d = new Date(str);
+                if (isNaN(d.getTime())) {
+                    return str;
+                }
                 const month = d.toLocaleString('en-US', { month: 'short' });
                 const year = d.getFullYear().toString().slice(-2);
                 return `${month} '${year}`;
+            }
             default:
                 return value;
         }

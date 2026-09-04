@@ -16,7 +16,8 @@ export default function DealCard({
     replies,
     isListView,
     ignoreFeatured = false,
-    disableLink = false
+    disableLink = false,
+    onTagClick
 }) {
    
     const deal = React.useMemo(() => {
@@ -107,9 +108,9 @@ export default function DealCard({
         <div className={`${styles.cardContainer} ${styles.listView} ${styles[theme.theme]} ${theme.gradient ? styles[theme.gradient] : ''} ${layout.hasOFSGradient ? styles.ofsCard : ''} ${styles[variantKey] || ''}`}>
             {/* Mobile/Tablet Header: Spans full width above both sections */}
             <div className={`${styles.headerRowWrapper} ${styles.mobileHeaderWrapper}`}>
-                <Sections.CardHeader deal={deal} layout={layout} isListView={true} />
+                <Sections.CardHeader deal={deal} layout={layout} isListView={true} onTagClick={onTagClick} />
                 <div className={styles.mobileTopRightRow}>
-                    <Sections.CardTags deal={deal} isListView={true} />
+                    <Sections.CardTags deal={deal} isListView={true} onTagClick={onTagClick} />
                     {deal?.ipo_review_rating?.status && (
                         <RatingBadge
                             rating={deal.ipo_review_rating.weighted_composite_score}
@@ -129,7 +130,7 @@ export default function DealCard({
             {/* 1. Left Section: Badges, Company Info, Footer */}
             <div className={styles.leftSection}>
                 <div className={`${styles.headerRowWrapper} ${styles.desktopHeaderWrapper}`}>
-                    <Sections.CardHeader deal={deal} layout={layout} isListView={true} />
+                    <Sections.CardHeader deal={deal} layout={layout} isListView={true} onTagClick={onTagClick} />
                 </div>
                 <Sections.CardCompanyInfo deal={deal} isListView={true} />
                 <CardFooter deal={deal} qaCount={qaCount} replies={replies} isListView={true} />
@@ -148,7 +149,7 @@ export default function DealCard({
             {/* 3. Metrics & Tags Section */}
             <div className={styles.mainSection}>
                 <div className={styles.topRightRow}>
-                    <Sections.CardTags deal={deal} isListView={true} />
+                    <Sections.CardTags deal={deal} isListView={true} onTagClick={onTagClick} />
                     {deal?.ipo_review_rating?.status && (
                         <RatingBadge
                             rating={deal.ipo_review_rating.weighted_composite_score}
@@ -179,11 +180,11 @@ export default function DealCard({
 
             <div className={`${styles.headerGroup} ${!hasRatingBadge ? styles.noRating : ''}`}>
                 {layout.sections.includes('header') && (
-                    <Sections.CardHeader deal={deal} layout={layout} isListView={false} />
+                    <Sections.CardHeader deal={deal} layout={layout} isListView={false} onTagClick={onTagClick} />
                 )}
 
                 {layout.sections.includes('header_featured') && (
-                    <Sections.CardHeaderFeatured deal={deal} />
+                    <Sections.CardHeaderFeatured deal={deal} onTagClick={onTagClick} />
                 )}
 
                 {layout.sections.includes('companyInfo') && (
@@ -221,7 +222,7 @@ export default function DealCard({
             )}
 
             {layout.sections.includes('tags') && (
-                <Sections.CardTags deal={deal} />
+                <Sections.CardTags deal={deal} onTagClick={onTagClick} />
             )}
 
             {layout.sections.includes('actionButton') && (

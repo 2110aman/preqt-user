@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 
 import React from "react";
 import Image from "next/image";
-import { ArrowUpRight, ChevronDown, Lock, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, Lock, Search, SlidersHorizontal, X } from "lucide-react";
 import SignupFormPopup from "@/app/signup-form/SignupFormPopup";
 import SignupTypePopup from "@/app/signup/SignupTypePopup";
 import OtpPopup from "@/app/otp/OtpPopup";
@@ -20,6 +20,42 @@ import LoadMoreLoader from "@/app/components/LoadMore/LoadMoreLoader";
 import FilterPopup from "./FilterPopup";
 import DealCard from "../DealCard";
 import UnlockTeaser from "@/app/components/home/DealShowcase/UnlockTeaser";
+
+/**
+ * Safely parses a close date string (YYYY-MM-DD or ISO timestamp)
+ * and returns boundaries for the start and end of that day in local time.
+ */
+function parseCloseDate(dateStr) {
+    if (!dateStr) return null;
+    const str = String(dateStr).trim();
+    // Handle standard YYYY-MM-DD format
+    const match = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match && !str.includes('T') && !str.includes('Z')) {
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        return {
+            startOfDay: new Date(year, month, day, 0, 0, 0, 0).getTime(),
+            endOfDay: new Date(year, month, day, 23, 59, 59, 999).getTime(),
+            year,
+            month,
+            day
+        };
+    }
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return null;
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const day = d.getDate();
+    return {
+        startOfDay: new Date(year, month, day, 0, 0, 0, 0).getTime(),
+        endOfDay: new Date(year, month, day, 23, 59, 59, 999).getTime(),
+        exactTime: d.getTime(),
+        year,
+        month,
+        day
+    };
+}
 
 function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCategory = null }) {
     const [localCategory, setLocalCategory] = useState(initialCategory || null);
@@ -37,6 +73,39 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
     const [viewType, setViewType] = useState('list'); // 'grid' or 'list'
     const [showBtn, setShowBtn] = useState(-1);
+
+    const [companySearch, setCompanySearch] = useState("");
+    const [sortBy, setSortBy] = useState("latest");
+    const [showSortDropdown, setShowSortDropdown] = useState(false);
+    const [tagSearch, setTagSearch] = useState("");
+    const [showTagDropdown, setShowTagDropdown] = useState(false);
+    const [selectedTags, setSelectedTags] = useState([]);
+    const [fetchedTags, setFetchedTags] = useState([]);
+    const [fetchedSectors, setFetchedSectors] = useState([]);
+
+    const sortDropdownRef = useRef(null);
+    const mobileSortDropdownRef = useRef(null);
+    const tagDropdownRef = useRef(null);
+
+    const sortOptions = useMemo(() => {
+        const isUnlisted = (selectedDealType || "").toLowerCase() === "unlisted";
+        const allOptions = [
+            { label: "Latest", value: "latest" },
+            { label: "Closing Soon", value: "closing_soon" },
+            { label: "Most Viewed", value: "most_viewed" },
+            { label: "High Conviction", value: "high_conviction" }
+        ];
+        if (isUnlisted) {
+            return allOptions.filter(opt => opt.value !== "closing_soon");
+        }
+        return allOptions;
+    }, [selectedDealType]);
+
+    useEffect(() => {
+        if ((selectedDealType || "").toLowerCase() === "unlisted" && sortBy === "closing_soon") {
+            setSortBy("latest");
+        }
+    }, [selectedDealType, sortBy]);
 
     const [showSignin, setShowSignin] = useState(false);
     const [showSignupType, setShowSignupType] = useState(false);
@@ -60,6 +129,14 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setShowDealTypeDropdown(false);
+            }
+            const clickedSort = (sortDropdownRef.current && sortDropdownRef.current.contains(event.target)) ||
+                                (mobileSortDropdownRef.current && mobileSortDropdownRef.current.contains(event.target));
+            if (!clickedSort) {
+                setShowSortDropdown(false);
+            }
+            if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target)) {
+                setShowTagDropdown(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -177,15 +254,208 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     }, [allDeals]);
 
     const availableSectors = useMemo(() => {
-        if (!allDeals) return [];
-        const sectors = allDeals.map(deal => deal.sector_industry).filter(Boolean);
-        return [...new Set(sectors)].sort();
-    }, [allDeals]);
+        if (!fetchedSectors || !Array.isArray(fetchedSectors)) return [];
+        const sectorSet = new Set();
+        fetchedSectors.forEach(s => {
+            const name = typeof s === 'string'
+                ? s.trim()
+                : (s && typeof s === 'object' ? (s.name || s.sector || s.sector_name || s.title || s.label || s.value || '') : '');
+            if (name) sectorSet.add(name);
+        });
+        return Array.from(sectorSet).sort((a, b) => a.localeCompare(b));
+    }, [fetchedSectors]);
+
+    useEffect(() => {
+        const fetchCompanySectors = async () => {
+            try {
+                const token = Cookies.get('accessToken');
+                const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+                const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
+                const res = await fetch(`${baseUrl}admin/api/deals/company-sectors`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` }),
+                    },
+                });
+                if (res.ok) {
+                    const result = await res.json();
+                    let sectorArray = [];
+                    if (result?.data?.data && Array.isArray(result.data.data)) {
+                        sectorArray = result.data.data;
+                    } else if (result?.data && Array.isArray(result.data)) {
+                        sectorArray = result.data;
+                    } else if (Array.isArray(result)) {
+                        sectorArray = result;
+                    }
+                    const parsedSectors = sectorArray
+                        .map(s => {
+                            if (typeof s === 'string') return s.trim();
+                            if (s && typeof s === 'object') {
+                                return (s.name || s.sector || s.sector_name || s.title || s.label || s.value || '').trim();
+                            }
+                            return '';
+                        })
+                        .filter(Boolean);
+
+                    setFetchedSectors([...new Set(parsedSectors)]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch company sectors:", err);
+            }
+        };
+
+        fetchCompanySectors();
+    }, []);
+
+    useEffect(() => {
+        const fetchDealTags = async () => {
+            try {
+                const token = Cookies.get('accessToken');
+                const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+                const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
+                const res = await fetch(`${baseUrl}admin/api/deals/get-all-deal-tags`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` }),
+                    },
+                });
+                if (res.ok) {
+                    const result = await res.json();
+                    let tagArray = [];
+                    if (result?.data?.data && Array.isArray(result.data.data)) {
+                        tagArray = result.data.data;
+                    } else if (result?.data && Array.isArray(result.data)) {
+                        tagArray = result.data;
+                    }
+                    if (tagArray.length > 0) {
+                        setFetchedTags(tagArray);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch deal tags:", err);
+            }
+        };
+
+        fetchDealTags();
+    }, []);
+
+    const allAvailableTags = useMemo(() => {
+        const tagSet = new Set();
+        if (fetchedTags && Array.isArray(fetchedTags)) {
+            fetchedTags.forEach(t => t && tagSet.add(String(t).trim()));
+        }
+        if (allDeals && Array.isArray(allDeals)) {
+            allDeals.forEach(deal => {
+                if (Array.isArray(deal.tags)) {
+                    deal.tags.forEach(t => {
+                        const tagText = typeof t === 'string' ? t.trim() : (t && typeof t === 'object' ? (t.name || t.tag || t.label || t.title || '') : '');
+                        if (tagText && tagText !== '[object Object]') tagSet.add(tagText);
+                    });
+                }
+                if (Array.isArray(deal.key_highlights)) {
+                    deal.key_highlights.forEach(h => {
+                        const hText = typeof h === 'string' ? h.trim() : (h && typeof h === 'object' ? (h.name || h.tag || h.label || h.title || '') : '');
+                        if (hText && hText !== '[object Object]') tagSet.add(hText);
+                    });
+                }
+                if (Array.isArray(deal.companies_sectors)) {
+                    deal.companies_sectors.forEach(s => {
+                        const secText = typeof s === 'string' ? s.trim() : (s?.name || s?.sector || '');
+                        if (secText) tagSet.add(secText);
+                    });
+                }
+                if (deal.sector_industry) {
+                    tagSet.add(String(deal.sector_industry).trim());
+                }
+                if (deal.company_stage) {
+                    tagSet.add(String(deal.company_stage).trim());
+                }
+                if (deal.stage) {
+                    tagSet.add(String(deal.stage).trim());
+                }
+            });
+        }
+        if (tagSet.size === 0) {
+            ["SME", "IPO", "High Conviction", "Manufacturing", "Pre-IPO", "Unlisted", "Tech", "Saas", "Fintech", "AI"].forEach(t => tagSet.add(t));
+        }
+        return Array.from(tagSet);
+    }, [allDeals, fetchedTags]);
+
+    const suggestedTags = useMemo(() => {
+        const query = tagSearch.trim().toLowerCase();
+        return allAvailableTags.filter(tag => {
+            if (selectedTags.some(st => st.toLowerCase() === tag.toLowerCase())) return false;
+            if (!query) return true;
+            return tag.toLowerCase().includes(query);
+        });
+    }, [allAvailableTags, tagSearch, selectedTags]);
+
+    const handleAddTag = (tag) => {
+        if (!tag) return;
+        const trimmed = String(tag).trim();
+        if (!selectedTags.some(t => t.toLowerCase() === trimmed.toLowerCase())) {
+            setSelectedTags(prev => [...prev, trimmed]);
+        }
+        setTagSearch("");
+        setShowTagDropdown(false);
+    };
+
+    useEffect(() => {
+        const tagParam = searchParams?.get("tag");
+        if (tagParam) {
+            handleAddTag(tagParam);
+        }
+    }, [searchParams]);
+
+    const handleRemoveTag = (tagToRemove) => {
+        setSelectedTags(prev => prev.filter(t => t.toLowerCase() !== tagToRemove.toLowerCase()));
+    };
+
+    const handleClearAllTags = () => {
+        setSelectedTags([]);
+        setTagSearch("");
+    };
+
+    const matchTag = (deal, tag) => {
+        if (!deal || !tag) return false;
+        const t = tag.trim().toLowerCase();
+        if (Array.isArray(deal.tags) && deal.tags.some(item => {
+            const str = typeof item === 'string' ? item : (item && typeof item === 'object' ? (item.name || item.tag || item.label || item.title || '') : '');
+            return str && (str.toLowerCase() === t || str.toLowerCase().includes(t) || t.includes(str.toLowerCase()));
+        })) return true;
+        if (Array.isArray(deal.key_highlights) && deal.key_highlights.some(item => {
+            const str = typeof item === 'string' ? item : (item && typeof item === 'object' ? (item.name || item.tag || item.label || item.title || '') : '');
+            return str && (str.toLowerCase() === t || str.toLowerCase().includes(t) || t.includes(str.toLowerCase()));
+        })) return true;
+        if (t === "sme" && (deal.is_sme || (deal.deal_type || '').toLowerCase() === 'public' || (deal.tags && deal.tags.some(x => {
+            const str = typeof x === 'string' ? x : (x && typeof x === 'object' ? (x.name || x.tag || x.label || x.title || '') : '');
+            return str && str.toLowerCase().includes('sme');
+        })))) return true;
+        if (t === "ipo" && ((deal.deal_type || '').toLowerCase() === 'public' || (deal.deal_type || '').toLowerCase() === 'upcoming')) return true;
+        if (t === "high conviction" && (deal.hight_conviction === true || deal.hight_conviction === "true" || deal.high_conviction === true || deal.high_conviction === "true")) return true;
+        if (Array.isArray(deal.companies_sectors) && deal.companies_sectors.some(s => {
+            const secText = typeof s === 'string' ? s.toLowerCase() : (s?.name || s?.sector || '').toLowerCase();
+            return secText && (secText === t || secText.includes(t) || t.includes(secText));
+        })) return true;
+        if (deal.sector_industry && (deal.sector_industry.toLowerCase().includes(t) || t.includes(deal.sector_industry.toLowerCase()))) return true;
+        if (deal.company_stage && (deal.company_stage.toLowerCase().includes(t) || t.includes(deal.company_stage.toLowerCase()))) return true;
+        if (deal.stage && (deal.stage.toLowerCase().includes(t) || t.includes(deal.stage.toLowerCase()))) return true;
+        if (deal.company_name && (deal.company_name.toLowerCase().includes(t) || t.includes(deal.company_name.toLowerCase()))) return true;
+        return false;
+    };
 
     const filteredDeals = useMemo(() => {
-        // Restrict rendered opportunities to strictly public and unlisted types (case-insensitive)
+        // Restrict rendered opportunities to selected types (case-insensitive)
         let deals = allDeals.filter(deal => {
             const type = (deal.deal_type || '').toLowerCase();
+            if (selectedDealType === "Private") {
+                return type === 'private' || type === 'ofs' || type === 'ccps';
+            }
+            if (selectedDealType === "Startup") {
+                return type === 'startup';
+            }
             return type === 'public' || type === 'unlisted';
         });
 
@@ -213,9 +483,39 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             }
             // Sector / Industry
             if (appliedFilters.sectors && appliedFilters.sectors.length > 0) {
-                deals = deals.filter(deal =>
-                    appliedFilters.sectors.includes(deal.sector_industry)
-                );
+                deals = deals.filter(deal => {
+                    const filterSectorsLower = appliedFilters.sectors.map(s => String(s).trim().toLowerCase());
+
+                    // 1. Check deal.companies_sectors (array of strings or objects)
+                    if (Array.isArray(deal.companies_sectors) && deal.companies_sectors.length > 0) {
+                        const match = deal.companies_sectors.some(cs => {
+                            const name = typeof cs === 'string' ? cs.trim() : (cs?.name || cs?.sector || cs?.title || cs?.label || '');
+                            return filterSectorsLower.includes(name.toLowerCase());
+                        });
+                        if (match) return true;
+                    } else if (typeof deal.companies_sectors === 'string' && deal.companies_sectors.trim()) {
+                        if (filterSectorsLower.includes(deal.companies_sectors.trim().toLowerCase())) {
+                            return true;
+                        }
+                    }
+
+                    // 2. Check deal.company_sectors (array of strings or objects)
+                    if (Array.isArray(deal.company_sectors) && deal.company_sectors.length > 0) {
+                        const match = deal.company_sectors.some(cs => {
+                            const name = typeof cs === 'string' ? cs.trim() : (cs?.name || cs?.sector || cs?.title || cs?.label || '');
+                            return filterSectorsLower.includes(name.toLowerCase());
+                        });
+                        if (match) return true;
+                    }
+
+                    // 3. Fallback to legacy sector_industry / company_sector / sector
+                    const legacySector = (deal.sector_industry || deal.company_sector || deal.sector || '').trim().toLowerCase();
+                    if (legacySector && filterSectorsLower.includes(legacySector)) {
+                        return true;
+                    }
+
+                    return false;
+                });
             }
             // Deal Rating (Score)
             if (appliedFilters.dealRatings && appliedFilters.dealRatings.length > 0) {
@@ -300,15 +600,140 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             }
         }
 
-        // Sort: public deals first
-        return deals.sort((a, b) => {
-            const aType = (a.deal_type || '').toLowerCase();
-            const bType = (b.deal_type || '').toLowerCase();
-            if (aType === 'public' && bType !== 'public') return -1;
-            if (aType !== 'public' && bType === 'public') return 1;
-            return 0;
-        });
-    }, [allDeals, selectedDealType, appliedFilters]);
+        // 3. Search Company Query
+        if (companySearch && companySearch.trim()) {
+            const query = companySearch.trim().toLowerCase();
+            deals = deals.filter(deal => {
+                const name = (deal.company_name || '').toLowerCase();
+                const brand = (deal.brand_name || '').toLowerCase();
+                const intro = (deal.company_intro || '').toLowerCase();
+                const tagline = (deal.tag_line || '').toLowerCase();
+                const symbol = (deal.symbol || '').toLowerCase();
+                return name.includes(query) || brand.includes(query) || intro.includes(query) || tagline.includes(query) || symbol.includes(query);
+            });
+        }
+
+        // 4. Selected Tags Filter
+        if (selectedTags.length > 0) {
+            deals = deals.filter(deal => selectedTags.every(tag => matchTag(deal, tag)));
+        }
+
+        // 5. Sorting
+        // =====================================================================
+        // Sorting Strategies:
+        // - "closing_soon":
+        //     1. Only includes public deals that are not explicitly marked closed.
+        //     2. Preserves deals closing today (keeps them active until 23:59:59).
+        //     3. Deals closing TODAY appear at the very top of the list.
+        //     4. Future closing deals appear in ascending order (nearest date first).
+        //     5. Secondary sort: newest createdAt descending.
+        // - "most_viewed":
+        //     Sorts deals by user visit count descending.
+        // - "high_conviction":
+        //     Filters exclusively for high-conviction deals, sorted by latest createdAt.
+        // - "latest" (Default):
+        //     Sorts deals by creation date descending (newest deals first).
+        // =====================================================================
+        if (sortBy === 'closing_soon') {
+            const now = new Date();
+            const todayYear = now.getFullYear();
+            const todayMonth = now.getMonth();
+            const todayDate = now.getDate();
+            const startOfToday = new Date(todayYear, todayMonth, todayDate, 0, 0, 0, 0).getTime();
+
+            // Helper to determine if a parsed close date matches today's calendar date
+            const isToday = (parsed) => {
+                if (!parsed) return false;
+                return parsed.year === todayYear && parsed.month === todayMonth && parsed.day === todayDate;
+            };
+
+            // Step 1: Filter out non-public deals, closed deals, and deals that closed strictly before today
+            deals = deals.filter(deal => {
+                const isPublic = (deal.deal_type || '').toLowerCase() === 'public';
+                if (!isPublic) return false;
+
+                // Exclude explicitly closed deals
+                const statusRaw = (deal.hidden_status || deal.status || '').toLowerCase().trim();
+                if (statusRaw === 'closed' || statusRaw === 'round closed') return false;
+
+                // Exclude deals whose closing date ended strictly before today
+                const closeDateStr = deal.timeline_ipo_close_date || deal.bidding_end_date || deal.close_date;
+                if (closeDateStr) {
+                    const parsed = parseCloseDate(closeDateStr);
+                    if (parsed && parsed.endOfDay < startOfToday) {
+                        return false; // Close date expired before today
+                    }
+                }
+
+                return true;
+            });
+
+            // Step 2: Sort deals with today's closing deals prioritized at the top
+            deals = [...deals].sort((a, b) => {
+                const aDateStr = a.timeline_ipo_close_date || a.bidding_end_date || a.close_date;
+                const bDateStr = b.timeline_ipo_close_date || b.bidding_end_date || b.close_date;
+
+                const aParsed = parseCloseDate(aDateStr);
+                const bParsed = parseCloseDate(bDateStr);
+
+                const aIsToday = isToday(aParsed);
+                const bIsToday = isToday(bParsed);
+
+                // Priority 1: Deals closing TODAY come at the very top
+                if (aIsToday && !bIsToday) return -1;
+                if (!aIsToday && bIsToday) return 1;
+
+                // Priority 2: Sort upcoming deals in ascending order (nearest closing date first)
+                const aTime = aParsed ? aParsed.startOfDay : null;
+                const bTime = bParsed ? bParsed.startOfDay : null;
+
+                const aHasDate = aTime !== null;
+                const bHasDate = bTime !== null;
+
+                if (aHasDate && bHasDate) {
+                    if (aTime !== bTime) return aTime - bTime;
+                } else if (aHasDate) {
+                    return -1;
+                } else if (bHasDate) {
+                    return 1;
+                }
+
+                // Priority 3: Secondary sort by creation date (newest first)
+                const aCreated = new Date(a.createdAt || a.created_at || 0).getTime();
+                const bCreated = new Date(b.createdAt || b.created_at || 0).getTime();
+                return bCreated - aCreated;
+            });
+        } else if (sortBy === 'most_viewed') {
+            // Sort by views / user visits in descending order
+            deals = [...deals].sort((a, b) => {
+                const aViews = parseFloat(a.user_visited_count ?? a.views ?? a.visit_count ?? 0) || 0;
+                const bViews = parseFloat(b.user_visited_count ?? b.views ?? b.visit_count ?? 0) || 0;
+                return bViews - aViews;
+            });
+        } else if (sortBy === 'high_conviction') {
+            // Filter exclusively for deals marked as High Conviction, then sort by newest first
+            deals = deals.filter(deal =>
+                deal.hight_conviction === true ||
+                deal.hight_conviction === "true" ||
+                deal.high_conviction === true ||
+                deal.high_conviction === "true"
+            );
+            deals = [...deals].sort((a, b) => {
+                const aTime = new Date(a.createdAt || a.created_at || 0).getTime();
+                const bTime = new Date(b.createdAt || b.created_at || 0).getTime();
+                return bTime - aTime;
+            });
+        } else {
+            // Default: "latest" (sort by createdAt descending, newest deals first)
+            deals = [...deals].sort((a, b) => {
+                const aTime = new Date(a.createdAt || a.created_at || 0).getTime();
+                const bTime = new Date(b.createdAt || b.created_at || 0).getTime();
+                return bTime - aTime;
+            });
+        }
+
+        return deals;
+    }, [allDeals, selectedDealType, appliedFilters, companySearch, selectedTags, sortBy]);
 
     const dealsToRender = useMemo(() => {
         return filteredDeals;
@@ -486,43 +911,61 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
 
 
-    const [currPage, setCurrPage] = useState(1);
-    const [hasMore, setHasMore] = useState(false);
-    const [loadMore, setLoadMore] = useState(false);
-    const hasMoreRef = useRef(null);
-
-
-
     const isFirstRender = useRef(true);
 
     useEffect(() => {
         if (initialDeals && initialDeals.length > 0) {
-            const loadedCount = initialDeals.length;
-            const total = Number(initialPagination?.totalRecords || initialPagination?.total || 0);
-            setHasMore(total > 0 ? total > loadedCount : loadedCount >= 40);
+            setAllDeals(initialDeals);
             setLoading(false);
         }
-    }, [initialDeals, initialPagination]);
+    }, [initialDeals]);
 
-    const fetchDeals = async (page, dealType = selectedDealType) => {
+    const fetchDeals = async (
+        dealType = selectedDealType,
+        search = companySearch,
+        tags = selectedTags,
+        sectors = appliedFilters?.sectors
+    ) => {
         try {
-            if (page === 1) {
-                setLoading(true);
-            }
+            setLoading(true);
+            setError(null);
             const token = Cookies.get('accessToken');
 
             let dealTypeQuery = "";
             const t = (dealType || "").toLowerCase();
             if (t === "unlisted") {
-                dealTypeQuery = "&deal_type=unlisted";
+                dealTypeQuery = "deal_type=unlisted";
             } else if (t === "upcoming" || t === "public" || t === "ipo") {
-                dealTypeQuery = "&deal_type=public";
+                dealTypeQuery = "deal_type=public";
+            } else if (t === "private") {
+                dealTypeQuery = "deal_type=[private,ofs,ccps]";
+            } else if (t === "startup") {
+                dealTypeQuery = "deal_type=[startup]";
             } else if (t === "all" || !t) {
-                dealTypeQuery = "&deal_type=[unlisted,public]";
+                dealTypeQuery = "deal_type=[unlisted,public]";
             }
 
+            let queryString = `?page=1&limit=500&${dealTypeQuery}`;
+
+            if (search && search.trim()) {
+                queryString += `&search=${encodeURIComponent(search.trim())}`;
+            }
+
+            const cleanTags = Array.isArray(tags) ? tags.map(item => String(item).trim()).filter(Boolean) : [];
+            if (cleanTags.length > 0) {
+                queryString += `&tags=${encodeURIComponent(cleanTags.join(','))}`;
+            }
+
+            const cleanSectors = Array.isArray(sectors) ? sectors.map(item => String(item).trim()).filter(Boolean) : [];
+            if (cleanSectors.length > 0) {
+                queryString += `&companies_sectors=${encodeURIComponent(cleanSectors.join(','))}`;
+            }
+
+            const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+            const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
+
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_USER_BASE}admin/api/deals/all-deals/?limit=40&page=${page}${dealTypeQuery}`,
+                `${baseUrl}admin/api/deals/all-deals/${queryString}`,
                 {
                     method: "GET",
                     headers: {
@@ -538,65 +981,38 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
             const responseData = await res.json();
             const deals = responseData.data || [];
-            const pagination = responseData.pagination || {};
-
-            if (page === 1) {
-                setAllDeals(deals);
-            } else {
-                setAllDeals((prev) => [...prev, ...deals]);
-            }
-
-            const loadedCount = (page - 1) * 40 + deals.length;
-            const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
-            setHasMore(totalRecords > 0 ? totalRecords > loadedCount : deals.length >= 40);
+            setAllDeals(deals);
         } catch (err) {
             console.error("Fetch error in AllDeals:", err);
             setError(err.message || "Failed to fetch deals");
         } finally {
             setLoading(false);
-            setLoadMore(false);
         }
     };
 
     useEffect(() => {
+        if (isFirstRender.current) return;
+        const timer = setTimeout(() => {
+            fetchDeals(selectedDealType, companySearch, selectedTags, appliedFilters?.sectors);
+        }, 350);
+
+        return () => clearTimeout(timer);
+    }, [companySearch]);
+
+    useEffect(() => {
         if (isFirstRender.current) {
             isFirstRender.current = false;
-            if (initialDeals && initialDeals.length > 0) {
+            const hasTags = selectedTags && selectedTags.length > 0;
+            const hasSectors = appliedFilters?.sectors && appliedFilters.sectors.length > 0;
+            if (initialDeals && initialDeals.length > 0 && !companySearch && !hasTags && !hasSectors) {
                 return; // Already pre-fetched via SSR
             }
-            fetchDeals(1, selectedDealType);
+            fetchDeals(selectedDealType, companySearch, selectedTags, appliedFilters?.sectors);
             return;
         }
 
-        setCurrPage(1);
-        fetchDeals(1, selectedDealType);
-    }, [selectedDealType]);
-
-    useEffect(() => {
-        if (currPage > 1) {
-            fetchDeals(currPage, selectedDealType);
-        }
-    }, [currPage]);
-
-
-    useEffect(() => {
-        if (!hasMore || loading || loadMore) return; // stop if no more pages or currently fetching
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && !loading && !loadMore) {
-                    setLoadMore(true);
-                    setCurrPage((prev) => prev + 1);
-                }
-            },
-            { threshold: 0.1 } // triggers pre-fetch when user reaches the 5th deal from the bottom
-        );
-
-        if (hasMoreRef.current) observer.observe(hasMoreRef.current);
-
-        return () => {
-            if (hasMoreRef.current) observer.unobserve(hasMoreRef.current);
-        };
-    }, [hasMore, loading, loadMore, allDeals]);
+        fetchDeals(selectedDealType, companySearch, selectedTags, appliedFilters?.sectors);
+    }, [selectedDealType, selectedTags, appliedFilters?.sectors]);
 
 
     return (
@@ -607,7 +1023,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                         <div className={stylesdeals.pageHeader}>
                             <div className={stylesdeals.backButtonHeader} onClick={() => router.push('/')}>
                                 <span className={stylesdeals.backArrow}>
-                                    <svg width="20" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="15 18 9 12 15 6"></polyline>
                                     </svg>
                                 </span>
@@ -618,11 +1034,13 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                         </div>
 
                         <div className={stylesdeals.filterBarRow}>
-                            <div className={stylesdeals.desktopFilterContainer}>
-                                <button className={stylesdeals.desktopFilterBtn} onClick={() => setShowFilterPopup(!showFilterPopup)}>
+                            {/* Row 1: Filter button + View Toggle + Deal Type Dropdown (Mobile) / Full Desktop Row */}
+                            <div className={stylesdeals.filterRowTop}>
+                                <button className={stylesdeals.desktopFilterBtn} onClick={() => setShowFilterPopup(!showFilterPopup)} title="Filters">
                                     <SlidersHorizontal size={18} />
                                 </button>
-                                {/* Static Pill Tabs for Deal Types */}
+
+                                {/* Static Pill Tabs for Deal Types (Desktop only) */}
                                 <div className={stylesdeals.dealTypeTabs}>
                                     {dealTypeTabs.map(tab => (
                                         <div
@@ -634,78 +1052,126 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                         </div>
                                     ))}
                                 </div>
-                            </div>
 
-                            <div className={stylesdeals.headerActions} ref={dropdownRef}>
-                                {/* View Toggle */}
-                                <div className={stylesdeals.viewToggle}>
-                                    <div className={`${stylesdeals.toggleSlider} ${viewType === 'list' ? stylesdeals.slideRight : ''}`} />
-                                    <div
-                                        className={`${stylesdeals.toggleIcon} ${viewType === 'grid' ? stylesdeals.active : ""}`}
-                                        onClick={() => setViewType('grid')}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke={viewType === 'grid' ? '#96785f' : '#aba99b'}
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="lucide lucide-layout-grid-icon lucide-layout-grid"
+                                {/* Search Company Input (Desktop only) */}
+                                <div className={`${stylesdeals.companySearchContainer} ${stylesdeals.desktopOnly}`}>
+                                    <Search size={16} className={stylesdeals.companySearchIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search company"
+                                        value={companySearch}
+                                        onChange={(e) => setCompanySearch(e.target.value)}
+                                        className={stylesdeals.companySearchInput}
+                                    />
+                                    {companySearch && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setCompanySearch("")}
+                                            className={stylesdeals.companySearchClear}
                                         >
-                                            <rect width="7" height="7" x="3" y="3" rx="1" />
-                                            <rect width="7" height="7" x="14" y="3" rx="1" />
-                                            <rect width="7" height="7" x="14" y="14" rx="1" />
-                                            <rect width="7" height="7" x="3" y="14" rx="1" />
-                                        </svg>
-                                    </div>
-                                    <div
-                                        className={`${stylesdeals.toggleIcon} ${viewType === 'list' ? stylesdeals.active : ""}`}
-                                        onClick={() => setViewType('list')}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke={viewType === 'list' ? '#96785f' : '#aba99b'}
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="lucide lucide-list-icon lucide-list"
-                                        >
-                                            <path d="M3 5h.01" />
-                                            <path d="M3 12h.01" />
-                                            <path d="M3 19h.01" />
-                                            <path d="M8 5h13" />
-                                            <path d="M8 12h13" />
-                                            <path d="M8 19h13" />
-                                        </svg>
-                                    </div>
+                                            <X size={14} />
+                                        </button>
+                                    )}
                                 </div>
 
-                                <div className={stylesdeals.mobileRightActions}>
-                                    {/* Filters Button */}
-                                    <button className={stylesdeals.filterBtn} onClick={() => setShowFilterPopup(!showFilterPopup)}>
-                                        <img src="/filterIcon.svg" alt="filter" />
-                                        <span>Filters</span>
-                                    </button>
+                                <div className={stylesdeals.headerActions} ref={dropdownRef}>
+                                    {/* Sort by Dropdown (Desktop only) */}
+                                    <div className={`${stylesdeals.sortDropdownContainer} ${stylesdeals.desktopOnly}`} ref={sortDropdownRef}>
+                                        <button
+                                            type="button"
+                                            className={stylesdeals.sortDropdownBtn}
+                                            onClick={() => setShowSortDropdown(!showSortDropdown)}
+                                        >
+                                            <span className={stylesdeals.sortLabelText}>
+                                                Sort by: {sortOptions.find(o => o.value === sortBy)?.label || "Latest"}
+                                            </span>
+                                            <ChevronDown size={14} strokeWidth={2.8} className={`${stylesdeals.sortChevron} ${showSortDropdown ? stylesdeals.sortChevronActive : ""}`} />
+                                        </button>
 
-                                    {/* Mobile Deal Type Dropdown */}
-                                    <div className={stylesdeals.dealTypeDropdownContainer}>
+                                        {showSortDropdown && (
+                                            <div className={stylesdeals.sortDropdownMenu}>
+                                                {sortOptions.map(option => {
+                                                    const isSelected = sortBy === option.value;
+                                                    return (
+                                                        <div
+                                                            key={option.value}
+                                                            className={`${stylesdeals.sortDropdownItem} ${isSelected ? stylesdeals.sortDropdownItemActive : ""}`}
+                                                            onClick={() => {
+                                                                setSortBy(option.value);
+                                                                setShowSortDropdown(false);
+                                                            }}
+                                                        >
+                                                            <span>{option.label}</span>
+                                                            {isSelected && (
+                                                                <Check size={16} className={stylesdeals.sortCheckIcon} strokeWidth={2.5} />
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* View Toggle */}
+                                    <div className={stylesdeals.viewToggle}>
+                                        <div className={`${stylesdeals.toggleSlider} ${viewType === 'list' ? stylesdeals.slideRight : ''}`} />
+                                        <div
+                                            className={`${stylesdeals.toggleIcon} ${viewType === 'grid' ? stylesdeals.active : ""}`}
+                                            onClick={() => setViewType('grid')}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke={viewType === 'grid' ? '#96785f' : '#aba99b'}
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <rect width="7" height="7" x="3" y="3" rx="1" />
+                                                <rect width="7" height="7" x="14" y="3" rx="1" />
+                                                <rect width="7" height="7" x="14" y="14" rx="1" />
+                                                <rect width="7" height="7" x="3" y="14" rx="1" />
+                                            </svg>
+                                        </div>
+                                        <div
+                                            className={`${stylesdeals.toggleIcon} ${viewType === 'list' ? stylesdeals.active : ""}`}
+                                            onClick={() => setViewType('list')}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="20"
+                                                height="20"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke={viewType === 'list' ? '#96785f' : '#aba99b'}
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M3 5h.01" />
+                                                <path d="M3 12h.01" />
+                                                <path d="M3 19h.01" />
+                                                <path d="M8 5h13" />
+                                                <path d="M8 12h13" />
+                                                <path d="M8 19h13" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    {/* Mobile Deal Type Dropdown (visible <= 768px) */}
+                                    <div className={`${stylesdeals.dealTypeDropdownContainer} ${stylesdeals.mobileOnly}`}>
                                         <button
                                             className={`${stylesdeals.dealTypeDropdownBtn} ${showDealTypeDropdown ? stylesdeals.activeBtn : ""}`}
                                             onClick={() => setShowDealTypeDropdown(!showDealTypeDropdown)}
                                         >
                                             <span>
-                                                {selectedDealType === "All" ? "Deal Type" :
-                                                    dealTypeTabs.find(t => t.value === selectedDealType)?.label || "Deal Type"}
+                                                {selectedDealType === "All" ? "All Deals" :
+                                                    dealTypeTabs.find(t => t.value === selectedDealType)?.label || "All Deals"}
                                             </span>
-                                            <ChevronDown size={16} className={`${stylesdeals.chevronIcon} ${showDealTypeDropdown ? stylesdeals.chevronIconActive : ""}`} />
+                                            <ChevronDown size={14} className={`${stylesdeals.chevronIcon} ${showDealTypeDropdown ? stylesdeals.chevronIconActive : ""}`} />
                                         </button>
 
                                         <div className={`${stylesdeals.dealTypeDropdownMenu} ${showDealTypeDropdown ? stylesdeals.dropdownOpen : ""}`}>
@@ -725,7 +1191,135 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Row 2 on mobile (Search company + Sort by) */}
+                            <div className={stylesdeals.mobileSearchAndSortRow}>
+                                <div className={stylesdeals.companySearchContainer}>
+                                    <Search size={16} className={stylesdeals.companySearchIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search company"
+                                        value={companySearch}
+                                        onChange={(e) => setCompanySearch(e.target.value)}
+                                        className={stylesdeals.companySearchInput}
+                                    />
+                                    {companySearch && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setCompanySearch("")}
+                                            className={stylesdeals.companySearchClear}
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className={stylesdeals.sortDropdownContainer} ref={mobileSortDropdownRef}>
+                                    <button
+                                        type="button"
+                                        className={stylesdeals.sortDropdownBtn}
+                                        onClick={() => setShowSortDropdown(!showSortDropdown)}
+                                    >
+                                        <span className={stylesdeals.sortLabelText}>
+                                            Sort by: {sortOptions.find(o => o.value === sortBy)?.label || "Latest"}
+                                        </span>
+                                        <ChevronDown size={14} strokeWidth={2.8} className={`${stylesdeals.sortChevron} ${showSortDropdown ? stylesdeals.sortChevronActive : ""}`} />
+                                    </button>
+
+                                    {showSortDropdown && (
+                                        <div className={stylesdeals.sortDropdownMenu}>
+                                            {sortOptions.map(option => {
+                                                const isSelected = sortBy === option.value;
+                                                return (
+                                                    <div
+                                                        key={option.value}
+                                                        className={`${stylesdeals.sortDropdownItem} ${isSelected ? stylesdeals.sortDropdownItemActive : ""}`}
+                                                        onClick={() => {
+                                                            setSortBy(option.value);
+                                                            setShowSortDropdown(false);
+                                                        }}
+                                                    >
+                                                        <span>{option.label}</span>
+                                                        {isSelected && (
+                                                            <Check size={16} className={stylesdeals.sortCheckIcon} strokeWidth={2.5} />
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Search & Add Tags Bar Row (Row 3 & Row 4 on mobile) - Only visible when tag(s) selected */}
+                        {selectedTags.length > 0 && (
+                            <div className={stylesdeals.tagsFilterRow}>
+                                <div className={stylesdeals.tagSearchContainer} ref={tagDropdownRef}>
+                                    <Search size={15} className={stylesdeals.tagSearchIcon} />
+                                    <input
+                                        type="text"
+                                        placeholder="Search and add tags..."
+                                        value={tagSearch}
+                                        onChange={(e) => {
+                                            setTagSearch(e.target.value);
+                                            setShowTagDropdown(true);
+                                        }}
+                                        onFocus={() => setShowTagDropdown(true)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" && tagSearch.trim()) {
+                                                e.preventDefault();
+                                                handleAddTag(tagSearch.trim());
+                                            }
+                                        }}
+                                        className={stylesdeals.tagSearchInput}
+                                    />
+                                    {showTagDropdown && suggestedTags.length > 0 && (
+                                        <div className={stylesdeals.tagDropdownMenu}>
+                                            {suggestedTags.slice(0, 10).map(tag => (
+                                                <div
+                                                    key={tag}
+                                                    className={stylesdeals.tagDropdownItem}
+                                                    onClick={() => handleAddTag(tag)}
+                                                >
+                                                    <span>{tag}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Selected Active Tag Pills & Clear All (Row 4 on mobile) */}
+                                <div className={stylesdeals.selectedTagsRowWrapper}>
+                                    <div className={stylesdeals.selectedTagsContainer}>
+                                        {selectedTags.map(tag => (
+                                            <div key={tag} className={stylesdeals.selectedTagPill}>
+                                                <span>{tag}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveTag(tag)}
+                                                    className={stylesdeals.removeTagBtn}
+                                                    aria-label={`Remove tag ${tag}`}
+                                                >
+                                                    <X size={11} strokeWidth={2.5} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Clear All button */}
+                                    {selectedTags.length > 0 && (
+                                        <button
+                                            type="button"
+                                            className={stylesdeals.clearAllTagsBtn}
+                                            onClick={handleClearAllTags}
+                                        >
+                                            Clear All
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {appliedFilters && (
@@ -766,7 +1360,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                     ) : (
                         <>
                             <div className={`${styles.carouselWrapper} carouselWrapper`}>
-                                <div className={`row g-0 ${styles.dealsRow} ${viewType === 'list' ? stylesdeals.listView : ""}`}>
+                                <div className={`row g-0 ${styles.dealsRow} ${stylesdeals.dealsRow} ${viewType === 'list' ? stylesdeals.listView : ""}`}>
                                     {loading ? (
                                         [...Array(8)].map((_, i) => (
                                             <div
@@ -778,26 +1372,21 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                         ))
                                     ) : dealsToRender && dealsToRender.length > 0 ? (
                                         <>
-                                            {dealsToRender.map((deal, index) => {
-                                                const isTriggerItem = index === Math.max(0, dealsToRender.length - 5);
-                                                return (
-                                                    <div
-                                                        key={deal.id}
-                                                        ref={isTriggerItem ? hasMoreRef : null}
-                                                        className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}
-                                                    >
-                                                        <DealCard
-                                                            deal={deal}
-                                                            isAuthenticated={!!authToken}
-                                                            onLoginClick={handleSigninOpen}
-                                                            qaCount={qaCounts[deal.id]}
-                                                            replies={replies[deal.id]}
-                                                            isListView={viewType === 'list'}
-                                                            ignoreFeatured={true}
-                                                        />
-                                                    </div>
-                                                );
-                                            })}
+                                            {dealsToRender.map((deal) => (
+                                                <div
+                                                    key={deal.id}
+                                                    className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}
+                                                >
+                                                    <DealCard
+                                                        deal={deal}
+                                                        isAuthenticated={!!authToken}
+                                                        onLoginClick={handleSigninOpen}
+                                                        isListView={viewType === 'list'}
+                                                        ignoreFeatured={true}
+                                                        onTagClick={handleAddTag}
+                                                    />
+                                                </div>
+                                            ))}
                                             {viewType === 'grid' && selectedDealType === "All" && (
                                                 <div className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
                                                     <UnlockTeaser isGridCard={true} isAllDeals={true} />
@@ -816,11 +1405,6 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                     )}
                                 </div>
                             </div>
-                            {
-                                hasMore && loadMore &&
-                                <LoadMoreLoader />
-                            }
-                            {hasMore && dealsToRender.length === 0 && <div ref={hasMoreRef} style={{ height: "1px" }} />}
                         </>
                     )}
                     {((selectedDealType || '').toLowerCase() === "public" || (selectedDealType || '').toLowerCase() === "upcoming") && (

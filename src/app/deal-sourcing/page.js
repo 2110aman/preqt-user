@@ -5,6 +5,7 @@ import DealsDiffPreqt from './DealsDiffPreqt'
 import DealsDiffPreqtVideo from './DealsVideos'
 import BenefitSection from '../new-landing/fillequitymarket.module.css/BenefitSection'
 import DealRaiseCapital from './DealRaiseCapital'
+import { getRobotsDirectives } from '../utils/seoUtils'
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
 const PUBLISHER_NAME = "PrEqt";
@@ -12,6 +13,7 @@ const PAGE_TITLE = "Preqt | Deal Sourcing - Raise Capital Smarter";
 const PAGE_DESCRIPTION = "Start your funding journey with India's most trusted private market platform. Designed to help promoters achieve faster listings, stronger valuations, and market credibility.";
 
 export const metadata = {
+  robots: getRobotsDirectives(),
   title: PAGE_TITLE,
   description: PAGE_DESCRIPTION,
   keywords: [

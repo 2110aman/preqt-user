@@ -3,6 +3,7 @@ import AllDeals from "../components/AllDeals/AllDeals";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { notFound } from "next/navigation";
+import { getRobotsDirectives } from "../../utils/seoUtils";
 
 export const DEAL_CATEGORIES = {
   "upcoming-ipo": {
@@ -99,15 +100,18 @@ const getInitialDeals = cache(async (categoryType = "") => {
     let dealTypeQuery = "";
     const t = (categoryType || "").toLowerCase();
     if (t === "unlisted") {
-      dealTypeQuery = "&deal_type=unlisted";
+      dealTypeQuery = "deal_type=unlisted";
     } else if (t === "upcoming" || t === "public" || t === "ipo") {
-      dealTypeQuery = "&deal_type=public";
+      dealTypeQuery = "deal_type=public";
+    } else if (t === "private") {
+      dealTypeQuery = "deal_type=[private,ofs,ccps]";
+    } else if (t === "startup") {
+      dealTypeQuery = "deal_type=[startup]";
     } else {
-      dealTypeQuery = "&deal_type=[unlisted,public]";
+      dealTypeQuery = "deal_type=[unlisted,public]";
     }
 
-    const limit = t === "unlisted" ? 40 : (t === "all" ? 50 : 20);
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?limit=${limit}&page=1${dealTypeQuery}`, {
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=1&limit=500&${dealTypeQuery}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },
@@ -183,17 +187,7 @@ export async function generateMetadata({ params }) {
         description: categoryConfig.description,
         images: [`${siteUrl}/logo.png`],
       },
-      robots: {
-        index: true,
-        follow: true,
-        googleBot: {
-          index: true,
-          follow: true,
-          "max-video-preview": -1,
-          "max-image-preview": "large",
-          "max-snippet": -1,
-        },
-      },
+      robots: getRobotsDirectives(),
     };
   }
 
@@ -313,17 +307,7 @@ export async function generateMetadata({ params }) {
       alternates: {
         canonical: `${siteUrl}/deals/${slug}`,
       },
-      robots: {
-        index: true,
-        follow: true,
-        googleBot: {
-          index: true,
-          follow: true,
-          "max-video-preview": -1,
-          "max-image-preview": "large",
-          "max-snippet": -1,
-        },
-      },
+      robots: getRobotsDirectives(),
       openGraph: {
         title,
         description,

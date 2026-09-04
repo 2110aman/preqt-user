@@ -32,7 +32,10 @@ export default function CardCompanyInfo({ deal, isListView, hideAvatar }) {
                         <div className={styles.mobileCompanyBadgeRow}>
                             {deal?.tags && deal.tags.length > 0 && (
                                 <span className={styles.mobileTagsInline}>
-                                    {deal.tags.join(' • ')}
+                                    {deal.tags
+                                        .map(t => typeof t === 'string' ? t.trim() : (t && typeof t === 'object' ? (t.name || t.tag || t.label || t.title || '') : ''))
+                                        .filter(Boolean)
+                                        .join(' • ')}
                                 </span>
                             )}
                         </div>

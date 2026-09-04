@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Fundamentals from "../fundamentals/fundamentals";
+import ExistingInvestors from "./ExistingInvestors";
 import styles from "./Shareholding.module.css";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useDealStore } from "@/store/dealStore";
@@ -66,10 +67,12 @@ export default function Shareholding({ isPrivateDeal, dealDetails: dealDetailsPr
   const hasShareholdingData = promoters.length > 0 || additionalShareholders.length > 0;
 
   if (!hasShareholdingData) {
-    if (!isPrivateDeal) {
-      return <Fundamentals isPrivateDeal={isPrivateDeal} />;
-    }
-    return null;
+    return (
+      <div className={isPrivateDeal ? styles.privateContainer : styles.container}>
+        <ExistingInvestors isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
+        {!isPrivateDeal && <Fundamentals isPrivateDeal={isPrivateDeal} />}
+      </div>
+    );
   }
 
   return (
@@ -221,6 +224,8 @@ export default function Shareholding({ isPrivateDeal, dealDetails: dealDetailsPr
           </div>
         </>
       )}
+
+      <ExistingInvestors isPrivateDeal={isPrivateDeal} dealDetails={dealDetails} />
 
       {!isPrivateDeal && <Fundamentals isPrivateDeal={isPrivateDeal} />}
     </div>

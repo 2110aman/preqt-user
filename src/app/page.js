@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { getRobotsDirectives, checkIsStaging } from "./utils/seoUtils";
 import HomeComponent from "./components/home/home";
 import LandingPage from "./components/LandingPage/LandingPage";
 import HeroBanner from "./new-landing/fillequitymarket.module.css/HeroBanner";
@@ -122,24 +123,14 @@ export async function generateMetadata() {
     alternates: {
       canonical: SITE_URL,
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
-    verification: {
+    robots: getRobotsDirectives(),
+    verification: checkIsStaging() ? undefined : {
       google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
       yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION,
       yahoo: process.env.NEXT_PUBLIC_YAHOO_VERIFICATION,
     },
     other: {
-      "x-robots-tag": "index, follow",
+      "x-robots-tag": checkIsStaging() ? "noindex, nofollow, noarchive, nosnippet" : "index, follow",
     },
   };
 }

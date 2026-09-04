@@ -18,6 +18,7 @@ import ReCaptchaProviderWrapper from "./components/ReCaptchaProviderWrapper";
 import { UserProvider } from "./context/UserContext";
 import { DealsProvider } from "./context/DealContext";
 import { MeetingProvider } from "./context/MeetingContext";
+import { getRobotsDirectives } from "./utils/seoUtils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,8 +49,10 @@ const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").
 const SITE_IMAGE = `${SITE_URL}/favicon.png`;
 
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "PrEqt",
   description: "PrEqt - Private Equity Platform",
+  robots: getRobotsDirectives(),
   icons: {
     icon: "/favicon.ico",
   },

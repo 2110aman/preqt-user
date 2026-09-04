@@ -76,13 +76,6 @@ const Namedetailsection = ({ slug, initialDealData }) => {
     setShowSignin(false);
     setOtpPayload({ ...payload, flow: "signin" });
   };
-
-
-  // Synchronously seed Zustand store if server data is present
-  if (initialDealData?.data && useDealStore.getState().dealDetails?.data?.deal_id !== initialDealData?.data?.deal_id) {
-    useDealStore.setState({ dealDetails: initialDealData });
-  }
-
   // const activeDealFromStore = deal ?? selectedDeal;
   const { setDealDataDetails } = useDealStore();
   const { updateDealType } = useDealType();
