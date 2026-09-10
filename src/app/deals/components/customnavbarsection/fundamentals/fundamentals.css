@@ -86,14 +86,16 @@
   color: #6b7280;
 }
 
-.Fundamentals-body-section1-item h6 {
+.Fundamentals-body-section1-item h6,
+.Fundamentals-body-section1-item .item-value {
   font-weight: 700;
   font-size: 14px;
   line-height: 16px;
   color: #1f2937;
 }
 
-.Fundamentals-body-section1-item h5 {
+.Fundamentals-body-section1-item h5,
+.Fundamentals-body-section1-item .item-desc {
   font-weight: 300;
   font-size: 14px;
   line-height: 16px;
@@ -202,7 +204,8 @@ background: linear-gradient(180deg, #F3F4F6 0%, #FFF 100%);
 padding: 24px;
 }
 
-.ipoObjectiveSection h2{
+.ipoObjectiveSection h2,
+.ipoObjectiveSection h4 {
 color: var(--Gray-800, #1F2937);
 font-size: 16px;
 font-style: normal;

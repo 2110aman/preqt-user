@@ -34,6 +34,7 @@ import { Flashlight } from "lucide-react";
 import SigninPopup from "@/app/sign-in/SigninPopup";
 import OtpPopup from "@/app/otp/OtpPopup";
 import { useSearchParams } from "next/navigation";
+import { getDealCategoryInfo } from "@/app/utils/seoUtils";
 
 
 const Namedetailsection = ({ slug, initialDealData }) => {
@@ -498,6 +499,8 @@ const Namedetailsection = ({ slug, initialDealData }) => {
   }, [searchParams, isDarkTheme]);
 
   const dealData = dealDetails?.data?.deal_setpData;
+  const rawDealType = dealDetails?.data?.deal_type || initialDealData?.data?.deal_type || currentDealType || "";
+  const dealCategory = getDealCategoryInfo(rawDealType, dealDetails?.data || initialDealData?.data);
 
   const isShowInterest = dealDetails?.data?.is_user_showed_interest;
 
@@ -628,6 +631,28 @@ const Namedetailsection = ({ slug, initialDealData }) => {
             <Link href="/deals"> Deals </Link>
           </span>
 
+          {dealCategory && dealCategory.path !== "/deals" && (
+            <>
+              <svg
+                width="8"
+                height="10"
+                viewBox="0 0 8 14"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M1.14206 13.6663C0.898251 13.6663 0.654443 13.573 0.468734 13.3873C0.0963594 13.0149 0.0963594 12.413 0.468734 12.0407L5.50958 6.99976L0.468734 1.95893C0.0963594 1.58656 0.0963594 0.984664 0.468734 0.612289C0.841109 0.239914 1.443 0.239914 1.81538 0.612289L7.52958 6.32651C7.90192 6.69884 7.90192 7.30076 7.52958 7.67309L1.81538 13.3873C1.62967 13.573 1.38586 13.6663 1.14206 13.6663Z"
+                  fill={isDarkTheme ? 'white' : " #6b7280"}
+                />
+              </svg>
+
+              <span className="dea">
+                <Link href={dealCategory.path}> {dealCategory.label} </Link>
+              </span>
+            </>
+          )}
 
           <svg
             width="8"
@@ -759,11 +784,15 @@ const Namedetailsection = ({ slug, initialDealData }) => {
                 <div>
                   <img
                     src={imgSrc}
-                    alt={dealData?.company_name || "Company Logo"}
+                    alt={`${dealData?.company_name || dealDetails?.data?.company_name || "Company"} Logo - PrEqt`}
+                    width={50}
+                    height={50}
+                    loading="eager"
+                    fetchPriority="high"
                     onError={handleImageError}
                     style={{ borderRadius: '50%', objectFit: "contain", width: '50px', height: '50px', background: '#fff' }}
                   />
-                  <h1>{dealData?.company_name}</h1>
+                  <h1>{dealData?.company_name || dealDetails?.data?.company_name || dealDetails?.data?.deal_overview?.company_name || "Deal Details"}</h1>
                 </div>
                 {authToken &&
                   <div className='svg-icons-button'>
@@ -1074,9 +1103,9 @@ const PreqtSummarySection = ({ isPrivateLike, summaryData, labelName }) => {
 
   return (
     <div style={{ width: "100%" }}>
-      <h3 style={{ color: theme.titleColor, marginBottom: "12px", marginTop: "10px" ,fontSize: "16px", fontWeight: "500", fontFamily: "Helvetica Neue" }}>
+      <h2 style={{ color: theme.titleColor, marginBottom: "12px", marginTop: "10px" ,fontSize: "16px", fontWeight: "500", fontFamily: "Helvetica Neue" }}>
           {labelName || "Preqt Summary"}
-        </h3>
+        </h2>
       <div
         style={{
           borderLeft: "4px solid #B59131",

@@ -101,6 +101,7 @@ export default function Documentation({ isPrivateDeal, dealDetails: dealDetailsP
       {/* ✅ Show Pitch Deck separately */}
       <Pitchdeck isPrivateDeal={isPrivateLike} pdfUrl={pitchDeckFileUrl} />
 
+      <h3 className="sr-only">Documents & Filings</h3>
       <div className={isPrivateLike ? styles.privateContainer : styles.container}>
         {filteredDocuments.length > 0 ? (
           filteredDocuments.map((doc, idx) => (

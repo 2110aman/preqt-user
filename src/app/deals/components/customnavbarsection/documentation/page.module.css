@@ -53,7 +53,8 @@
   margin-bottom: 12px;
 }
 
-.pitchDeck h4 {
+.pitchDeck h4,
+.pitchDeck h3 {
   font-family: Helvetica;
   font-size: 20px;
   /* fixed typo (20.bod-section h4px → 20px) */

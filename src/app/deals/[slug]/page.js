@@ -3,7 +3,7 @@ import AllDeals from "../components/AllDeals/AllDeals";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { notFound } from "next/navigation";
-import { getRobotsDirectives } from "../../utils/seoUtils";
+import { getRobotsDirectives, getDealCategoryInfo } from "../../utils/seoUtils";
 
 export const DEAL_CATEGORIES = {
   "upcoming-ipo": {
@@ -92,7 +92,7 @@ export const DEAL_CATEGORIES = {
   },
 };
 
-const getInitialDeals = cache(async (categoryType = "") => {
+const getInitialDeals = cache(async (categoryType = "", page = 1) => {
   try {
     const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
     const baseUrl = rawBaseUrl.replace(/\/$/, "");
@@ -111,7 +111,7 @@ const getInitialDeals = cache(async (categoryType = "") => {
       dealTypeQuery = "deal_type=[unlisted,public]";
     }
 
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=1&limit=500&${dealTypeQuery}`, {
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=${page}&limit=15&${dealTypeQuery}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },
@@ -152,23 +152,28 @@ const getDealData = cache(async (slug, token) => {
   return null;
 });
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const pageParam = parseInt(resolvedSearchParams?.page, 10);
+  const pageNum = !isNaN(pageParam) && pageParam > 1 ? pageParam : null;
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
 
   // 1. Check if slug matches a Deal Category
   const categoryConfig = DEAL_CATEGORIES[slug?.toLowerCase()];
   if (categoryConfig) {
+    const title = pageNum ? `${categoryConfig.title} - Page ${pageNum}` : categoryConfig.title;
+    const canonical = pageNum ? `${siteUrl}${categoryConfig.canonicalPath}?page=${pageNum}` : `${siteUrl}${categoryConfig.canonicalPath}`;
     return {
-      title: categoryConfig.title,
+      title,
       description: categoryConfig.description,
       alternates: {
-        canonical: `${siteUrl}${categoryConfig.canonicalPath}`,
+        canonical,
       },
       openGraph: {
-        title: categoryConfig.title,
+        title,
         description: categoryConfig.description,
-        url: `${siteUrl}${categoryConfig.canonicalPath}`,
+        url: canonical,
         siteName: "PrEqt",
         locale: "en_IN",
         type: "website",
@@ -250,16 +255,52 @@ export async function generateMetadata({ params }) {
       ? rawTagline.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim()
       : "";
 
-    const title = dealName
-      ? `${dealName} Unlisted Share Price | PrEqt`
-      : "Deal Details | PrEqt";
+    const rawMetaTitle =
+      dealData?.meta_title ||
+      dealData?.deal_setpData?.meta_title ||
+      deal?.data?.meta_title ||
+      "";
+    const apiMetaTitle = (
+      typeof rawMetaTitle === "string" ? rawMetaTitle : rawMetaTitle?.data || ""
+    ).trim();
 
-    const description =
+    const rawMetaDesc =
+      dealData?.meta_description ||
+      dealData?.deal_setpData?.meta_description ||
+      deal?.data?.meta_description ||
+      "";
+    const apiMetaDescription = (
+      typeof rawMetaDesc === "string" ? rawMetaDesc : rawMetaDesc?.data || ""
+    ).trim();
+
+    const getFallbackTitle = (name, type) => {
+      if (!name) return "Deal Details | PrEqt";
+      const t = (type || "").toLowerCase();
+      if (t === "public" || t === "ipo" || t === "upcoming") {
+        return `${name} IPO Share Price, Valuation & Review | PrEqt`;
+      }
+      if (t === "unlisted") {
+        return `${name} Unlisted Share Price, Financials & Valuation | PrEqt`;
+      }
+      if (t === "private" || t === "ofs" || t === "ccps") {
+        return `${name} Pre-IPO Share Price & Private Deal | PrEqt`;
+      }
+      if (t === "startup") {
+        return `${name} Startup Investment & Deal Details | PrEqt`;
+      }
+      return `${name} Share Price, Financials & Deal Details | PrEqt`;
+    };
+
+    const title = apiMetaTitle || getFallbackTitle(dealName, rawDealType);
+
+    const fallbackDescription =
       cleanSummary ||
       cleanTagline ||
       (dealName
-        ? `Discover ${dealName} unlisted share price, valuation, key financials, and investment analysis on PrEqt.`
+        ? `Discover ${dealName} share price, valuation, key financials, and investment analysis on PrEqt. Explore verified opportunities.`
         : "Explore detailed deal information on PrEqt.");
+
+    const description = apiMetaDescription || fallbackDescription;
 
     const rawTags = Array.isArray(dealData?.deal_setpData?.tags?.data)
       ? dealData.deal_setpData.tags.data
@@ -299,41 +340,55 @@ export async function generateMetadata({ params }) {
         : "Deals, Investments, Opportunities";
 
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+    const normalizedSlug = encodeURIComponent((slug || "").toLowerCase().trim());
+    const canonicalUrl = `${siteUrl}/deals/${normalizedSlug}`;
+
+    const companyLogoPath =
+      dealData?.deal_setpData?.company_logo?.[0]?.path ||
+      dealData?.company_logo?.[0]?.path;
+
+    const primaryOgImage = companyLogoPath
+      ? `${process.env.NEXT_PUBLIC_USER_BASE}admin/${companyLogoPath.replace("public/", "")}`
+      : `${siteUrl}/logo.png`;
+
+    const introImages =
+      dealData?.deal_overview?.company_intro_images?.data?.map((img) => ({
+        url: `${process.env.NEXT_PUBLIC_USER_BASE}admin/${img?.path?.replace("public/", "")}`,
+        alt: title,
+      })) || [];
+
+    const ogImages = [
+      {
+        url: primaryOgImage,
+        width: 1200,
+        height: 630,
+        alt: `${dealName} - primary preview`,
+      },
+      ...introImages,
+    ];
 
     return {
       title,
       description,
       keywords,
       alternates: {
-        canonical: `${siteUrl}/deals/${slug}`,
+        canonical: canonicalUrl,
       },
       robots: getRobotsDirectives(),
       openGraph: {
         title,
         description,
-        url: `${siteUrl}/deals/${slug}`,
+        url: canonicalUrl,
         siteName: "PrEqt",
         locale: "en_IN",
         type: "website",
-        images: [
-          {
-            url: `${siteUrl}/favicon.png`,
-            width: 1200,
-            height: 630,
-            alt: `${dealName} - primary preview`,
-          },
-          ...(
-            dealData?.deal_overview?.company_intro_images?.data?.map((img) => ({
-              url: `${process.env.NEXT_PUBLIC_USER_BASE}admin/${img?.path?.replace("public/", "")}`,
-              alt: title,
-            })) || []
-          ),
-        ],
+        images: ogImages,
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
+        images: [primaryOgImage],
       },
     };
   } catch (error) {
@@ -346,14 +401,17 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default async function DealPage({ params }) {
+export default async function DealPage({ params, searchParams }) {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const pageParam = parseInt(resolvedSearchParams?.page, 10);
+  const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
 
   // 1. Check if slug is a Deal Category (e.g. /deals/upcoming-ipo, /deals/unlisted-shares, /deals/ipo)
   const categoryConfig = DEAL_CATEGORIES[slug?.toLowerCase()];
   if (categoryConfig) {
-    const initialDealsData = await getInitialDeals(categoryConfig.type);
+    const initialDealsData = await getInitialDeals(categoryConfig.type, page);
     const deals = initialDealsData?.data || [];
     const pagination = initialDealsData?.pagination || {};
 
@@ -401,29 +459,50 @@ export default async function DealPage({ params }) {
     dealData?.deal_overview?.company_name ||
     "Deal Details";
 
+  const rawDealType = dealData?.deal_type || dealData?.deal_setpData?.deal_type || "";
+  const dealCategory = getDealCategoryInfo(rawDealType, dealData);
+
+  const breadcrumbItems = [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": siteUrl,
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Deals",
+      "item": `${siteUrl}/deals`,
+    },
+  ];
+
+  if (dealCategory && dealCategory.path !== "/deals") {
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      "position": 3,
+      "name": dealCategory.label,
+      "item": `${siteUrl}${dealCategory.path}`,
+    });
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      "position": 4,
+      "name": dealName,
+      "item": `${siteUrl}/deals/${slug}`,
+    });
+  } else {
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      "position": 3,
+      "name": dealName,
+      "item": `${siteUrl}/deals/${slug}`,
+    });
+  }
+
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": siteUrl,
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Deals",
-        "item": `${siteUrl}/deals`,
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": dealName,
-        "item": `${siteUrl}/deals/${slug}`,
-      },
-    ],
+    "itemListElement": breadcrumbItems,
   };
 
   const priceVal =
@@ -436,20 +515,57 @@ export default async function DealPage({ params }) {
     dealData?.updatedAt ||
     dealData?.createdAt;
 
+  const rawMetaDesc =
+    dealData?.meta_description ||
+    dealData?.deal_setpData?.meta_description ||
+    dealData?.data?.meta_description ||
+    "";
+  const apiMetaDescription = (
+    typeof rawMetaDesc === "string" ? rawMetaDesc : rawMetaDesc?.data || ""
+  ).trim();
+
+  const reviewData = dealData?.ipo_review_rating?.data || dealData?.ipo_review_rating;
+  const hasValidReview =
+    (reviewData?.status === true || reviewData?.status === "true") &&
+    reviewData?.weighted_composite_score;
+  const scoreValue = hasValidReview ? parseFloat(reviewData.weighted_composite_score) : null;
+
+  const normalizedSlug = encodeURIComponent((slug || "").toLowerCase().trim());
+
+  const companyLogoPath =
+    dealData?.deal_setpData?.company_logo?.[0]?.path ||
+    dealData?.company_logo?.[0]?.path;
+  const companyLogoUrl = companyLogoPath
+    ? `${process.env.NEXT_PUBLIC_USER_BASE}admin/${companyLogoPath.replace("public/", "")}`
+    : `${siteUrl}/logo.png`;
+
   const financialProductSchema = {
     "@context": "https://schema.org",
     "@type": "FinancialProduct",
     "name": dealName,
     "description":
+      apiMetaDescription ||
       dealData?.deal_setpData?.tag_line?.data ||
       dealData?.tag_line ||
       `Explore ${dealName} investment opportunity on PrEqt.`,
-    "url": `${siteUrl}/deals/${slug}`,
+    "url": `${siteUrl}/deals/${normalizedSlug}`,
+    "image": companyLogoUrl,
     "provider": {
       "@type": "Organization",
       "name": "PrEqt",
       "url": siteUrl,
     },
+    ...(scoreValue && !isNaN(scoreValue)
+      ? {
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": scoreValue.toFixed(1),
+            "bestRating": "5",
+            "worstRating": "1",
+            "ratingCount": 1,
+          },
+        }
+      : {}),
     ...(priceVal
       ? {
           "offers": {
@@ -464,6 +580,19 @@ export default async function DealPage({ params }) {
       : {}),
   };
 
+  const corporationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Corporation",
+    "name": dealName,
+    "url": `${siteUrl}/deals/${normalizedSlug}`,
+    "description":
+      apiMetaDescription ||
+      dealData?.deal_setpData?.tag_line?.data ||
+      dealData?.tag_line ||
+      `Explore ${dealName} company details and investment opportunities on PrEqt.`,
+    "logo": companyLogoUrl,
+  };
+
   return (
     <div>
       <script
@@ -473,6 +602,10 @@ export default async function DealPage({ params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(financialProductSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(corporationSchema) }}
       />
       <Namedetailsection slug={slug} initialDealData={initialDealData} />
     </div>

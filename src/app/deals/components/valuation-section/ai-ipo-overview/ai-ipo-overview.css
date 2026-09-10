@@ -243,6 +243,8 @@
 
 .label-with-tooltip {
   display: flex;
+  font-size: 14px;
+  color: #64748b;
   align-items: center;
 
 }

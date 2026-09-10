@@ -901,11 +901,13 @@
   padding: 0 !important;
 }
 
-.observations-html-content h1 {
+.observations-html-content h1,
+.observations-html-content h5 {
   font-size: 18px;
 }
 
-.observations-html-content h2 {
+.observations-html-content h2,
+.observations-html-content h6 {
   font-size: 14px;
 }
 

@@ -715,7 +715,7 @@
 
 .noDealsFound {
     width: 100%;
-    padding: 80px 20px;
+    padding: 140px 20px;
     text-align: center;
     color: #64748B;
     font-size: 18px;
@@ -726,6 +726,15 @@
     margin-top: 0px !important;
     margin-bottom: 0px !important;
     border-radius: 20px !important;
+}
+
+.teaserTbody,
+.teaserTr,
+.teaserTd {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .disclaimerText {
@@ -1365,5 +1374,167 @@
     .listView .dealCardCol,
     .listViewCol {
         padding: 0 0 16px 0 !important;
+    }
+}
+
+.desktopTableWrapper {
+    display: block;
+    width: 100%;
+}
+
+.mobileListWrapper {
+    display: none;
+    width: 100%;
+}
+
+@media (max-width: 1023px) {
+    .desktopTableWrapper {
+        display: none !important;
+    }
+
+    .mobileListWrapper {
+        display: block !important;
+    }
+}
+
+.tableScrollWrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding: 4px 0 16px 0;
+}
+
+.dealsTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+    margin: 0;
+    padding: 0;
+    table-layout: auto;
+}
+
+/* Pagination Styles */
+.paginationContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0px auto 0px auto;
+    width: 100%;
+    user-select: none;
+}
+
+.paginationBtn {
+    min-width: 42px;
+    height: 42px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.paginationBtn:hover:not(.paginationActive) {
+    background: #F3F4F6;
+    color: #111827;
+}
+
+.paginationActive {
+    background: #1E1E1E !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+.paginationArrow {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    color: #4B5563;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.paginationArrow:hover:not(:disabled) {
+    background: #F3F4F6;
+    color: #111827;
+}
+
+.paginationArrowDisabled,
+.paginationArrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.paginationDots {
+    min-width: 32px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #6B7280;
+    letter-spacing: 1px;
+}
+
+/* Dark theme support for pagination */
+.privateDealTheme .paginationBtn {
+    color: #9CA3AF;
+}
+
+.privateDealTheme .paginationBtn:hover:not(.paginationActive) {
+    background: #262626;
+    color: #FFFFFF;
+}
+
+.privateDealTheme .paginationActive {
+    background: #FFFFFF !important;
+    color: #111827 !important;
+}
+
+.privateDealTheme .paginationArrow {
+    color: #9CA3AF;
+}
+
+.privateDealTheme .paginationArrow:hover:not(:disabled) {
+    background: #262626;
+    color: #FFFFFF;
+}
+
+.privateDealTheme .paginationDots {
+    color: #6B7280;
+}
+
+@media (max-width: 640px) {
+    .paginationContainer {
+        gap: 4px;
+        margin: 30px auto 16px auto;
+    }
+
+    .paginationBtn,
+    .paginationArrow {
+        min-width: 36px;
+        height: 36px;
+        font-size: 14px;
+        border-radius: 8px;
+    }
+
+    .paginationDots {
+        min-width: 24px;
+        height: 36px;
+        font-size: 14px;
     }
 }

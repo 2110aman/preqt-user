@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 
 import React from "react";
 import Image from "next/image";
-import { ArrowUpRight, Check, ChevronDown, Lock, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, ChevronLeft, ChevronRight, Lock, Search, SlidersHorizontal, X } from "lucide-react";
 import SignupFormPopup from "@/app/signup-form/SignupFormPopup";
 import SignupTypePopup from "@/app/signup/SignupTypePopup";
 import OtpPopup from "@/app/otp/OtpPopup";
@@ -57,15 +57,29 @@ function parseCloseDate(dateStr) {
     };
 }
 
-function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCategory = null }) {
+function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCategory = null, initialSort = "latest" }) {
     const [localCategory, setLocalCategory] = useState(initialCategory || null);
     const [loading, setLoading] = useState(!initialDeals || initialDeals.length === 0);
     const [allDeals, setAllDeals] = useState(initialDeals);
+    const [pagination, setPagination] = useState(initialPagination);
+    const [totalRecords, setTotalRecords] = useState(Number(initialPagination?.totalRecords || initialPagination?.total || 0));
     const [error, setError] = useState([]);
     const { setSelectedDeal, appliedFilters, setAppliedFilters, selectedDealType: storeDealType, setSelectedDealType } = useDealStore();
     
     // Guarantee synchronous initial category on first render without flash of "All"
     const selectedDealType = localCategory !== null ? localCategory : (initialCategory || storeDealType || "All");
+
+    const ITEMS_PER_PAGE = 15;
+    const initialPage = useMemo(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const p = parseInt(params.get("page"), 10);
+            return !isNaN(p) && p > 0 ? p : 1;
+        }
+        return 1;
+    }, []);
+    const [currentPage, setCurrentPage] = useState(initialPage);
+    const dealsSectionRef = useRef(null);
 
     const authToken = Cookies.get('accessToken'); // or from cookies
     const router = useRouter();
@@ -75,7 +89,26 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     const [showBtn, setShowBtn] = useState(-1);
 
     const [companySearch, setCompanySearch] = useState("");
-    const [sortBy, setSortBy] = useState("latest");
+    const [sortBy, setSortBy] = useState(() => {
+        return searchParams?.get("sort_by") || searchParams?.get("sortBy") || initialSort || "latest";
+    });
+
+    const updatePageInUrl = (page, sort = sortBy) => {
+        if (typeof window === "undefined") return;
+        const url = new URL(window.location.href);
+        if (page > 1) {
+            url.searchParams.set("page", page);
+        } else {
+            url.searchParams.delete("page");
+        }
+        if (sort && sort !== "latest") {
+            url.searchParams.set("sort_by", sort);
+        } else {
+            url.searchParams.delete("sort_by");
+            url.searchParams.delete("sortBy");
+        }
+        window.history.pushState(null, "", url.toString());
+    };
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [tagSearch, setTagSearch] = useState("");
     const [showTagDropdown, setShowTagDropdown] = useState(false);
@@ -183,11 +216,13 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     const handleTabSelect = (tab) => {
         setLocalCategory(tab.value);
         setSelectedDealType(tab.value);
+        setCurrentPage(1);
         if (typeof window !== "undefined") {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("page");
             const newPath = tab.slug ? `/deals/${tab.slug}` : "/deals";
-            if (window.location.pathname !== newPath) {
-                window.history.pushState(null, "", newPath);
-            }
+            url.pathname = newPath;
+            window.history.pushState(null, "", url.toString());
         }
     };
 
@@ -204,9 +239,10 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     }, [searchParams, setSelectedDealType]);
 
     const availableStages = useMemo(() => {
-        if (!allDeals) return [];
+        const defaultStages = ["IPO – SME", "IPO – Mainboard", "Pre-IPO – SME", "Pre-IPO – Mainboard", "Early Stage", "Growth Stage", "Late Stage"];
+        if (!allDeals) return defaultStages;
         const allStages = allDeals.map(deal => deal.company_stage).filter(Boolean);
-        return [...new Set(allStages)].sort();
+        return [...new Set([...defaultStages, ...allStages])].sort();
     }, [allDeals]);
 
     const getVal = (val) => (typeof val === 'object' && val !== null && 'data' in val) ? val.data : val;
@@ -216,8 +252,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         const revenues = allDeals.map(d => parseFloat(getVal(d.revenue_fy25_in_cr))).filter(n => !isNaN(n));
         if (revenues.length === 0) return { min: 0, max: 100 };
         return {
-            min: Math.floor(Math.min(...revenues)),
-            max: Math.ceil(Math.max(...revenues))
+            min: Math.min(0, Math.floor(Math.min(...revenues))),
+            max: Math.max(100, Math.ceil(Math.max(...revenues)))
         };
     }, [allDeals]);
 
@@ -226,8 +262,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         const valuations = allDeals.map(d => parseFloat(getVal(d.valuation_in_cr) || getVal(d.target_valuation_in_cr))).filter(n => !isNaN(n));
         if (valuations.length === 0) return { min: 0, max: 10000 };
         return {
-            min: Math.floor(Math.min(...valuations)),
-            max: Math.ceil(Math.max(...valuations))
+            min: Math.min(0, Math.floor(Math.min(...valuations))),
+            max: Math.max(10000, Math.ceil(Math.max(...valuations)))
         };
     }, [allDeals]);
 
@@ -447,15 +483,15 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     };
 
     const filteredDeals = useMemo(() => {
+        // For Private and Startup deals, we do NOT show deal cards - only the UnlockTeaser banner is displayed
+        const isPrivateOrStartup = (selectedDealType || '').toLowerCase() === "private" || (selectedDealType || '').toLowerCase() === "startup";
+        if (isPrivateOrStartup) {
+            return [];
+        }
+
         // Restrict rendered opportunities to selected types (case-insensitive)
         let deals = allDeals.filter(deal => {
             const type = (deal.deal_type || '').toLowerCase();
-            if (selectedDealType === "Private") {
-                return type === 'private' || type === 'ofs' || type === 'ccps';
-            }
-            if (selectedDealType === "Startup") {
-                return type === 'startup';
-            }
             return type === 'public' || type === 'unlisted';
         });
 
@@ -473,132 +509,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             deals = deals.filter(deal => (deal.deal_type || '').toLowerCase() === selectedDealType.toLowerCase());
         }
 
-        // 2. Applied Filters (Modal)
-        if (appliedFilters) {
-            // Deal Stage (Company Stage)
-            if (appliedFilters.dealStages && appliedFilters.dealStages.length > 0) {
-                deals = deals.filter(deal =>
-                    appliedFilters.dealStages.includes(deal.company_stage)
-                );
-            }
-            // Sector / Industry
-            if (appliedFilters.sectors && appliedFilters.sectors.length > 0) {
-                deals = deals.filter(deal => {
-                    const filterSectorsLower = appliedFilters.sectors.map(s => String(s).trim().toLowerCase());
-
-                    // 1. Check deal.companies_sectors (array of strings or objects)
-                    if (Array.isArray(deal.companies_sectors) && deal.companies_sectors.length > 0) {
-                        const match = deal.companies_sectors.some(cs => {
-                            const name = typeof cs === 'string' ? cs.trim() : (cs?.name || cs?.sector || cs?.title || cs?.label || '');
-                            return filterSectorsLower.includes(name.toLowerCase());
-                        });
-                        if (match) return true;
-                    } else if (typeof deal.companies_sectors === 'string' && deal.companies_sectors.trim()) {
-                        if (filterSectorsLower.includes(deal.companies_sectors.trim().toLowerCase())) {
-                            return true;
-                        }
-                    }
-
-                    // 2. Check deal.company_sectors (array of strings or objects)
-                    if (Array.isArray(deal.company_sectors) && deal.company_sectors.length > 0) {
-                        const match = deal.company_sectors.some(cs => {
-                            const name = typeof cs === 'string' ? cs.trim() : (cs?.name || cs?.sector || cs?.title || cs?.label || '');
-                            return filterSectorsLower.includes(name.toLowerCase());
-                        });
-                        if (match) return true;
-                    }
-
-                    // 3. Fallback to legacy sector_industry / company_sector / sector
-                    const legacySector = (deal.sector_industry || deal.company_sector || deal.sector || '').trim().toLowerCase();
-                    if (legacySector && filterSectorsLower.includes(legacySector)) {
-                        return true;
-                    }
-
-                    return false;
-                });
-            }
-            // Deal Rating (Score)
-            if (appliedFilters.dealRatings && appliedFilters.dealRatings.length > 0) {
-                deals = deals.filter(deal => {
-                    // This filter works ONLY on public deals
-                    const type = (deal.deal_type || "").toLowerCase();
-                    if (type !== "public") return false;
-
-                    const score = parseFloat(deal.ipo_review_rating?.weighted_composite_score);
-                    if (isNaN(score)) return false;
-
-                    return appliedFilters.dealRatings.some(ratingLabel => {
-                        if (ratingLabel === "4.5 & above") return score >= 4.5;
-                        if (ratingLabel === "4.0 – 4.5") return score >= 4.0 && score < 4.5;
-                        if (ratingLabel === "Below 4.0") return score < 4.0;
-                        return false;
-                    });
-                });
-            }
-            // Ticket Size / Allocation (Revenue)
-            if (appliedFilters.ticketSize) {
-                const [min, max] = appliedFilters.ticketSize;
-                deals = deals.filter(deal => {
-                    const rev = parseFloat(getVal(deal.revenue_fy25_in_cr) || 0);
-                    return rev >= min && rev <= max;
-                });
-            }
-            // Funding Status
-            if (appliedFilters.fundingStatus && appliedFilters.fundingStatus.length > 0) {
-                deals = deals.filter(deal => {
-                    const raised = parseFloat(deal.raised_amount || 0);
-                    const target = parseFloat(getVal(deal.target_funding_in_cr) || getVal(deal.issue_size_overall) || 0);
-                    const percent = target > 0 ? (raised / target) * 100 : 0;
-
-                    return appliedFilters.fundingStatus.some(lbl => {
-                        if (lbl === "< 50% Funded") return percent < 50 && percent >=0;
-                        if (lbl === "80%+ Funded") return percent >= 80;
-                        if (lbl === "50% – 80% Funded") return percent >= 50 && percent <= 80;
-                        return false;
-                    });
-                });
-            }
-            // Valuation Range
-            if (appliedFilters.valuationRange) {
-                const [min, max] = appliedFilters.valuationRange;
-                deals = deals.filter(deal => {
-                    const val = parseFloat(getVal(deal.valuation_in_cr) || getVal(deal.target_valuation_in_cr) || 0);
-                    return val >= min && val <= max;
-                });
-            }
-
-            // Activity & Freshness
-            if (appliedFilters.activities && appliedFilters.activities.length > 0) {
-                deals = deals.filter(deal => {
-                    const freshness = deal.activity_freshness;
-                    let data = [];
-                    if (Array.isArray(freshness)) {
-                        data = freshness;
-                    } else if (freshness && Array.isArray(freshness.data)) {
-                        data = freshness.data;
-                    }
-                    return appliedFilters.activities.some(activityVal =>
-                        data.some(item => item.toLowerCase() === activityVal.toLowerCase())
-                    );
-                });
-            }
-
-            // Participation & Validation
-            if (appliedFilters.participation && appliedFilters.participation.length > 0) {
-                deals = deals.filter(deal => {
-                    const validations = deal.participation_validations;
-                    let data = [];
-                    if (Array.isArray(validations)) {
-                        data = validations;
-                    } else if (validations && Array.isArray(validations.data)) {
-                        data = validations.data;
-                    }
-                    return appliedFilters.participation.some(selected =>
-                        data.some(item => item.toLowerCase() === selected.toLowerCase())
-                    );
-                });
-            }
-        }
+        // 2. Applied Filters (Modal) - Handled server-side via admin/api/deals/all-deals query params
 
         // 3. Search Company Query
         if (companySearch && companySearch.trim()) {
@@ -735,9 +646,88 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         return deals;
     }, [allDeals, selectedDealType, appliedFilters, companySearch, selectedTags, sortBy]);
 
+    // Reset page to 1 whenever any filter, search, tags, or sort change
+    useEffect(() => {
+        if (isFirstRender.current) return;
+        setCurrentPage(1);
+        updatePageInUrl(1, sortBy);
+    }, [selectedDealType, appliedFilters, companySearch, selectedTags, sortBy]);
+
+    // Handle browser back/forward buttons
+    useEffect(() => {
+        const handlePopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            const pageParam = parseInt(params.get("page"), 10);
+            const targetPage = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
+            const sortParam = params.get("sort_by") || params.get("sortBy") || "latest";
+            setCurrentPage(targetPage);
+            if (sortParam !== sortBy) {
+                setSortBy(sortParam);
+            }
+            fetchDeals(targetPage, selectedDealType, companySearch, selectedTags, appliedFilters, sortParam);
+        };
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [selectedDealType, companySearch, selectedTags, appliedFilters, sortBy]);
+
+    const totalCount = Number(
+        pagination?.totalRecords ||
+        pagination?.total ||
+        pagination?.total_records ||
+        pagination?.count ||
+        totalRecords ||
+        allDeals.length ||
+        0
+    );
+    const totalPages = Math.max(
+        1,
+        Number(pagination?.totalPages || pagination?.total_pages || pagination?.pages) ||
+        Math.ceil(totalCount / ITEMS_PER_PAGE)
+    );
+
     const dealsToRender = useMemo(() => {
-        return filteredDeals;
-    }, [filteredDeals]);
+        if (allDeals.length <= ITEMS_PER_PAGE) {
+            return filteredDeals;
+        }
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredDeals.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    }, [filteredDeals, allDeals.length, currentPage]);
+
+    const showUnlockTeaser = (selectedDealType || '').toLowerCase() === "all";
+
+    const teaserRandomIndex = useMemo(() => {
+        if (!dealsToRender || dealsToRender.length === 0) return -1;
+        if (dealsToRender.length === 1) return 0;
+        const min = 1;
+        const max = Math.max(1, dealsToRender.length - 1);
+        if (max === min) return 1;
+        return Math.floor(Math.random() * (max - min)) + min;
+    }, [dealsToRender?.length, currentPage, selectedDealType]);
+
+    const handlePageChange = (page) => {
+        if (page < 1 || page > totalPages || page === currentPage) return;
+        setCurrentPage(page);
+        updatePageInUrl(page, sortBy);
+        fetchDeals(page, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy);
+        if (dealsSectionRef.current) {
+            dealsSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (typeof window !== "undefined") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    };
+
+    const getPageNumbers = (current, total) => {
+        if (total <= 7) {
+            return Array.from({ length: total }, (_, i) => i + 1);
+        }
+        if (current <= 4) {
+            return [1, 2, 3, 4, 5, '...', total];
+        }
+        if (current >= total - 3) {
+            return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+        }
+        return [1, '...', current - 1, current, current + 1, '...', total];
+    };
 
     const formatDealType = (type) => {
         if (type === "All") return "All Deals";
@@ -918,13 +908,19 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             setAllDeals(initialDeals);
             setLoading(false);
         }
-    }, [initialDeals]);
+        if (initialPagination && (initialPagination.totalRecords || initialPagination.total || initialPagination.total_records || initialPagination.count)) {
+            setPagination(initialPagination);
+            setTotalRecords(Number(initialPagination.totalRecords || initialPagination.total || initialPagination.total_records || initialPagination.count || 0));
+        }
+    }, [initialDeals, initialPagination]);
 
     const fetchDeals = async (
+        page = currentPage,
         dealType = selectedDealType,
         search = companySearch,
         tags = selectedTags,
-        sectors = appliedFilters?.sectors
+        filters = appliedFilters,
+        sort = sortBy
     ) => {
         try {
             setLoading(true);
@@ -945,27 +941,101 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 dealTypeQuery = "deal_type=[unlisted,public]";
             }
 
-            let queryString = `?page=1&limit=500&${dealTypeQuery}`;
+            let queryString = `?page=${page}&limit=15&${dealTypeQuery}`;
+
+            if (sort) {
+                queryString += `&sort_by=${encodeURIComponent(sort)}`;
+            }
 
             if (search && search.trim()) {
                 queryString += `&search=${encodeURIComponent(search.trim())}`;
             }
 
-            const cleanTags = Array.isArray(tags) ? tags.map(item => String(item).trim()).filter(Boolean) : [];
+            // Tags (from tag selector or filter modal)
+            const allTags = [
+                ...(Array.isArray(tags) ? tags : (typeof tags === 'string' && tags.trim() ? [tags] : [])),
+                ...(Array.isArray(filters?.tags) ? filters.tags : (typeof filters?.tags === 'string' && filters.tags.trim() ? [filters.tags] : []))
+            ];
+            const cleanTags = Array.from(new Set(allTags.map(item => String(item).trim()).filter(Boolean)));
             if (cleanTags.length > 0) {
                 queryString += `&tags=${encodeURIComponent(cleanTags.join(','))}`;
             }
 
-            const cleanSectors = Array.isArray(sectors) ? sectors.map(item => String(item).trim()).filter(Boolean) : [];
+            // Sectors
+            const sectors = filters?.sectors;
+            const cleanSectors = Array.isArray(sectors)
+                ? sectors.map(item => String(item).trim()).filter(Boolean)
+                : (typeof sectors === 'string' && sectors.trim() ? [sectors.trim()] : []);
             if (cleanSectors.length > 0) {
-                queryString += `&companies_sectors=${encodeURIComponent(cleanSectors.join(','))}`;
+                queryString += `&sectors=${encodeURIComponent(cleanSectors.join(','))}`;
+            }
+
+            // Deal Stages
+            const dealStages = filters?.dealStages;
+            const cleanDealStages = Array.isArray(dealStages)
+                ? dealStages.map(item => String(item).trim()).filter(Boolean)
+                : (typeof dealStages === 'string' && dealStages.trim() ? [dealStages.trim()] : []);
+            if (cleanDealStages.length > 0) {
+                queryString += `&dealStages=${encodeURIComponent(cleanDealStages.join(','))}`;
+            }
+
+            // Deal Ratings
+            const dealRatings = filters?.dealRatings;
+            const cleanDealRatings = Array.isArray(dealRatings)
+                ? dealRatings.map(item => String(item).trim()).filter(Boolean)
+                : (typeof dealRatings === 'string' && dealRatings.trim() ? [dealRatings.trim()] : []);
+            if (cleanDealRatings.length > 0) {
+                queryString += `&dealRatings=${encodeURIComponent(cleanDealRatings.join(','))}`;
+            }
+
+            // Ticket Size
+            if (filters?.ticketSize !== undefined && filters?.ticketSize !== null) {
+                const ticketVal = Array.isArray(filters.ticketSize) ? filters.ticketSize[1] : filters.ticketSize;
+                if (ticketVal !== undefined && ticketVal !== null && ticketVal !== '') {
+                    queryString += `&ticketSize=${encodeURIComponent(ticketVal)}`;
+                }
+            }
+
+            // Funding Status
+            const fundingStatus = filters?.fundingStatus;
+            const cleanFundingStatus = Array.isArray(fundingStatus)
+                ? fundingStatus.map(item => String(item).trim()).filter(Boolean)
+                : (typeof fundingStatus === 'string' && fundingStatus.trim() ? [fundingStatus.trim()] : []);
+            if (cleanFundingStatus.length > 0) {
+                queryString += `&fundingStatus=${encodeURIComponent(cleanFundingStatus.join(','))}`;
+            }
+
+            // Valuation Range
+            if (filters?.valuationRange !== undefined && filters?.valuationRange !== null) {
+                const valRangeVal = Array.isArray(filters.valuationRange) ? filters.valuationRange[1] : filters.valuationRange;
+                if (valRangeVal !== undefined && valRangeVal !== null && valRangeVal !== '') {
+                    queryString += `&valuationRange=${encodeURIComponent(valRangeVal)}`;
+                }
+            }
+
+            // Activities
+            const activities = filters?.activities;
+            const cleanActivities = Array.isArray(activities)
+                ? activities.map(item => String(item).trim()).filter(Boolean)
+                : (typeof activities === 'string' && activities.trim() ? [activities.trim()] : []);
+            if (cleanActivities.length > 0) {
+                queryString += `&activities=${encodeURIComponent(cleanActivities.join(','))}`;
+            }
+
+            // Participation
+            const participation = filters?.participation;
+            const cleanParticipation = Array.isArray(participation)
+                ? participation.map(item => String(item).trim()).filter(Boolean)
+                : (typeof participation === 'string' && participation.trim() ? [participation.trim()] : []);
+            if (cleanParticipation.length > 0) {
+                queryString += `&participation=${encodeURIComponent(cleanParticipation.join(','))}`;
             }
 
             const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
             const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
 
             const res = await fetch(
-                `${baseUrl}admin/api/deals/all-deals/${queryString}`,
+                `${baseUrl}admin/api/deals/all-deals${queryString}`,
                 {
                     method: "GET",
                     headers: {
@@ -981,7 +1051,11 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
             const responseData = await res.json();
             const deals = responseData.data || [];
+            const pageData = responseData.pagination || {};
             setAllDeals(deals);
+            setPagination(pageData);
+            const total = Number(pageData.totalRecords || pageData.total || pageData.total_records || pageData.count || responseData.total || deals.length || 0);
+            setTotalRecords(total);
         } catch (err) {
             console.error("Fetch error in AllDeals:", err);
             setError(err.message || "Failed to fetch deals");
@@ -993,7 +1067,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     useEffect(() => {
         if (isFirstRender.current) return;
         const timer = setTimeout(() => {
-            fetchDeals(selectedDealType, companySearch, selectedTags, appliedFilters?.sectors);
+            fetchDeals(1, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy);
         }, 350);
 
         return () => clearTimeout(timer);
@@ -1003,22 +1077,23 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         if (isFirstRender.current) {
             isFirstRender.current = false;
             const hasTags = selectedTags && selectedTags.length > 0;
-            const hasSectors = appliedFilters?.sectors && appliedFilters.sectors.length > 0;
-            if (initialDeals && initialDeals.length > 0 && !companySearch && !hasTags && !hasSectors) {
+            const hasFilters = appliedFilters && Object.keys(appliedFilters).length > 0;
+            const isDifferentSort = sortBy !== (initialSort || "latest");
+            if (initialDeals && initialDeals.length > 0 && !companySearch && !hasTags && !hasFilters && !isDifferentSort) {
                 return; // Already pre-fetched via SSR
             }
-            fetchDeals(selectedDealType, companySearch, selectedTags, appliedFilters?.sectors);
+            fetchDeals(initialPage, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy);
             return;
         }
 
-        fetchDeals(selectedDealType, companySearch, selectedTags, appliedFilters?.sectors);
-    }, [selectedDealType, selectedTags, appliedFilters?.sectors]);
+        fetchDeals(1, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy);
+    }, [selectedDealType, selectedTags, appliedFilters, sortBy]);
 
 
     return (
         <>
             <div className={styles.AllDealsMainContainer}>
-                <section className={`${styles.DealsTalkMainContainer} ${stylesdeals.DealsTalkMainContainer} ${appliedFilters ? stylesdeals.filtersActive : ""}`} >
+                <section ref={dealsSectionRef} id="dealsSection" className={`${styles.DealsTalkMainContainer} ${stylesdeals.DealsTalkMainContainer} ${appliedFilters ? stylesdeals.filtersActive : ""}`} >
                     <div className={`${stylesdeals.allDealsHeaderRow} ${appliedFilters ? stylesdeals.filtersActive : ""}`}>
                         <div className={stylesdeals.pageHeader}>
                             <div className={stylesdeals.backButtonHeader} onClick={() => router.push('/')}>
@@ -1353,59 +1428,169 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                         </div>
                     )}
 
-                    {selectedDealType === "Private" || selectedDealType === "Startup" ? (
-                        <div style={{ width: "100%", marginTop: "10px" }}>
-                            <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={viewType === 'list'} />
-                        </div>
-                    ) : (
-                        <>
-                            <div className={`${styles.carouselWrapper} carouselWrapper`}>
-                                <div className={`row g-0 ${styles.dealsRow} ${stylesdeals.dealsRow} ${viewType === 'list' ? stylesdeals.listView : ""}`}>
-                                    {loading ? (
-                                        [...Array(8)].map((_, i) => (
-                                            <div
-                                                key={`skeleton-${i}`}
-                                                className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}
-                                            >
-                                                <div className={`${stylesdeals.skeletonCard} ${viewType === 'list' ? stylesdeals.skeletonCardList : ""}`} />
-                                            </div>
-                                        ))
-                                    ) : dealsToRender && dealsToRender.length > 0 ? (
+                    <div className={`${styles.carouselWrapper} carouselWrapper`}>
+                        <div className={`row g-0 ${styles.dealsRow} ${stylesdeals.dealsRow} ${viewType === 'list' ? stylesdeals.listView : ""}`}>
+                            {loading ? (
+                                [...Array(8)].map((_, i) => (
+                                    <div
+                                        key={`skeleton-${i}`}
+                                        className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}
+                                    >
+                                        <div className={`${stylesdeals.skeletonCard} ${viewType === 'list' ? stylesdeals.skeletonCardList : ""}`} />
+                                    </div>
+                                ))
+                            ) : ((selectedDealType || '').toLowerCase() === "private" || (selectedDealType || '').toLowerCase() === "startup") ? (
+                                <div style={{ width: "100%", marginTop: "10px" }}>
+                                    {viewType === 'list' ? (
                                         <>
-                                            {dealsToRender.map((deal) => (
-                                                <div
-                                                    key={deal.id}
-                                                    className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}
-                                                >
-                                                    <DealCard
-                                                        deal={deal}
-                                                        isAuthenticated={!!authToken}
-                                                        onLoginClick={handleSigninOpen}
-                                                        isListView={viewType === 'list'}
-                                                        ignoreFeatured={true}
-                                                        onTagClick={handleAddTag}
-                                                    />
-                                                </div>
-                                            ))}
-                                            {viewType === 'grid' && selectedDealType === "All" && (
-                                                <div className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
-                                                    <UnlockTeaser isGridCard={true} isAllDeals={true} />
-                                                </div>
-                                            )}
-                                            {viewType === 'list'&& selectedDealType === "All"  && (
-                                                <div className="col-lg-12 col-md-12 col-sm-12 px-0" style={{ width: "100%", marginTop: "0px" }}>
-                                                    <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} />
-                                                </div>
-                                            )}
+                                            <div className={stylesdeals.desktopTableWrapper}>
+                                                <table className={stylesdeals.dealsTable}>
+                                                    <tbody className={stylesdeals.teaserTbody} role="rowgroup">
+                                                        <tr className={stylesdeals.teaserTr}>
+                                                            <td colSpan={9} className={stylesdeals.teaserTd}>
+                                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={true} />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div className={stylesdeals.mobileListWrapper}>
+                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={false} />
+                                            </div>
                                         </>
                                     ) : (
-                                        <div className={stylesdeals.noDealsFound}>
-                                            <p>No deals found matching your filters.</p>
-                                        </div>
+                                        <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={false} />
                                     )}
                                 </div>
-                            </div>
-                        </>
+                            ) : dealsToRender && dealsToRender.length > 0 ? (
+                                <>
+                                    {viewType === 'list' ? (
+                                        <>
+                                            {/* Desktop Table View (>= 1024px) */}
+                                            <div className={stylesdeals.desktopTableWrapper}>
+                                                <div className={stylesdeals.tableScrollWrapper}>
+                                                    <table className={stylesdeals.dealsTable}>
+                                                        {dealsToRender.map((deal, index) => (
+                                                            <React.Fragment key={`table-${deal.id}`}>
+                                                                {showUnlockTeaser && index === teaserRandomIndex && (
+                                                                    <tbody key="unlock-teaser-group" className={stylesdeals.teaserTbody} role="rowgroup">
+                                                                        <tr className={stylesdeals.teaserTr}>
+                                                                            <td colSpan={9} className={stylesdeals.teaserTd}>
+                                                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={true} />
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                )}
+                                                                <DealCard
+                                                                    deal={deal}
+                                                                    isAuthenticated={!!authToken}
+                                                                    onLoginClick={handleSigninOpen}
+                                                                    isListView={true}
+                                                                    isTableView={true}
+                                                                    ignoreFeatured={true}
+                                                                    onTagClick={handleAddTag}
+                                                                />
+                                                            </React.Fragment>
+                                                        ))}
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            {/* Mobile / Tablet Original List View (< 1024px) */}
+                                            <div className={stylesdeals.mobileListWrapper}>
+                                                {dealsToRender.map((deal, index) => (
+                                                    <React.Fragment key={`list-${deal.id}`}>
+                                                        {showUnlockTeaser && index === teaserRandomIndex && (
+                                                            <div className="col-12 px-0" style={{ width: "100%", marginBottom: "16px" }}>
+                                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={false} />
+                                                            </div>
+                                                        )}
+                                                        <div className={`col-12 ${stylesdeals.dealCardCol} ${stylesdeals.listViewCol}`}>
+                                                            <DealCard
+                                                                deal={deal}
+                                                                isAuthenticated={!!authToken}
+                                                                onLoginClick={handleSigninOpen}
+                                                                isListView={true}
+                                                                isTableView={false}
+                                                                ignoreFeatured={true}
+                                                                onTagClick={handleAddTag}
+                                                            />
+                                                        </div>
+                                                    </React.Fragment>
+                                                ))}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {dealsToRender.map((deal, index) => (
+                                                <React.Fragment key={deal.id}>
+                                                    {showUnlockTeaser && index === teaserRandomIndex && (
+                                                        <div key="unlock-teaser-grid" className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
+                                                            <UnlockTeaser isGridCard={true} isAllDeals={true} />
+                                                        </div>
+                                                    )}
+                                                    <div
+                                                        className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}
+                                                    >
+                                                        <DealCard
+                                                            deal={deal}
+                                                            isAuthenticated={!!authToken}
+                                                            onLoginClick={handleSigninOpen}
+                                                            isListView={false}
+                                                            ignoreFeatured={true}
+                                                            onTagClick={handleAddTag}
+                                                        />
+                                                    </div>
+                                                </React.Fragment>
+                                            ))}
+                                        </>
+                                    )}
+                                </>
+                            ) : (
+                                <div className={stylesdeals.noDealsFound}>
+                                    <p>No deals found matching your filters.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {((selectedDealType || '').toLowerCase() !== "private" && (selectedDealType || '').toLowerCase() !== "startup") && totalPages > 1 && (
+                        <div className={stylesdeals.paginationContainer}>
+                            <button
+                                type="button"
+                                className={`${stylesdeals.paginationArrow} ${currentPage <= 1 ? stylesdeals.paginationArrowDisabled : ''}`}
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage <= 1}
+                                aria-label="Previous Page"
+                            >
+                                <ChevronLeft size={18} strokeWidth={2} />
+                            </button>
+                            {getPageNumbers(currentPage, totalPages).map((p, idx) =>
+                                p === '...' ? (
+                                    <span key={`dots-${idx}`} className={stylesdeals.paginationDots}>
+                                        ...
+                                    </span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        key={`page-${p}`}
+                                        className={`${stylesdeals.paginationBtn} ${currentPage === p ? stylesdeals.paginationActive : ''}`}
+                                        onClick={() => handlePageChange(p)}
+                                    >
+                                        {p}
+                                    </button>
+                                )
+                            )}
+                            <button
+                                type="button"
+                                className={`${stylesdeals.paginationArrow} ${currentPage >= totalPages ? stylesdeals.paginationArrowDisabled : ''}`}
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage >= totalPages}
+                                aria-label="Next Page"
+                            >
+                                <ChevronRight size={18} strokeWidth={2} />
+                            </button>
+                        </div>
                     )}
                     {((selectedDealType || '').toLowerCase() === "public" || (selectedDealType || '').toLowerCase() === "upcoming") && (
                         <div className={stylesdeals.disclaimerText}>
@@ -1510,10 +1695,10 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 }
 
 
-export default function AllDeals({ initialDeals = [], initialPagination = {}, initialCategory = null }) {
+export default function AllDeals({ initialDeals = [], initialPagination = {}, initialCategory = null, initialSort = "latest" }) {
     return (
         <Suspense fallback={<Loader />}>
-            <AllDealsContent initialDeals={initialDeals} initialPagination={initialPagination} initialCategory={initialCategory} />
+            <AllDealsContent initialDeals={initialDeals} initialPagination={initialPagination} initialCategory={initialCategory} initialSort={initialSort} />
         </Suspense>
     );
 } 

@@ -134,8 +134,8 @@
 }
 
 .dealsRow {
-    --bs-gutter-x: 32px;
-    --bs-gutter-y: 32px;
+    /* --bs-gutter-x: 32px;
+    --bs-gutter-y: 32px; */
 }
 
 .DealsTalkCardContainer {

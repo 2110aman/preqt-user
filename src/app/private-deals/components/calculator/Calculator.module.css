@@ -105,7 +105,8 @@
   /* margin-bottom: 5px; */
 }
 
-.amount h2 {
+.amount h2,
+.amount .amountValue {
   background: linear-gradient(90deg, #FFF2D0, #8E6B0F);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -489,7 +490,8 @@
     color: #FFFFFF;
   }
 
-  .amount h2 {
+  .amount h2,
+  .amount .amountValue {
     font-size: 30px;
 
   }
@@ -644,7 +646,8 @@
   color: #6B7280 !important;
 }
 
-.lightCard .amount h2 {
+.lightCard .amount h2,
+.lightCard .amount .amountValue {
   background: none !important;
   -webkit-text-fill-color: #B59131 !important;
   color: #B59131 !important;

@@ -20,7 +20,7 @@ const Bod = ({ isPrivateDeal }) => {
 
   return (
     <section className={`bod-section ${isPrivateDeal ? "private-bod-section" : ""}`}>
-      <h4>Board of Directors</h4>
+      <h3>Board of Directors</h3>
 
       {/* src={`${process.env.NEXT_PUBLIC_USER_BASE}admin${deal.company_logo[0]?.path.replace("public", "")}` */}
 
@@ -37,7 +37,7 @@ const Bod = ({ isPrivateDeal }) => {
               <div className="our-directors">
                 <img src={imgSrc} alt={director.name} />
                 <section>
-                  <h6>{director.name}</h6>
+                  <h4 className="director-name">{director.name}</h4>
                   <p>{director.designation}</p>
                 </section>
               </div>
@@ -48,7 +48,7 @@ const Bod = ({ isPrivateDeal }) => {
 
             <Collapse in={openItems.includes(index)}>
               <div className="dropdown-body">
-                <h6 className="bg-head">Background</h6>
+                <span className="bg-head">Background</span>
                 <div 
                   className="bg-content"
                   dangerouslySetInnerHTML={{ __html: director.background || "" }} 

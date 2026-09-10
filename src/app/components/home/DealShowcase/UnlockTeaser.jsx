@@ -115,14 +115,14 @@ const techMahindraTeaserMock = {
     tags: ["PROFITABLE", "DIVIDEND PAYING", "MATURE"],
     qa_count: 12,
     qa_freshness: "Last 3 Days",
-    dummy_initials: ["O", "L", "A"],
+    dummy_initials: ["A", "A", "A", "AE"],
     is_featured: true,
     company_stage: "Series C",
     sector_industry: "EV Mobility",
     slug: "ola-electric-mobility-ltd"
 };
 
-export default function UnlockTeaser({ className = "", isAllDeals = false, isListView = false, isGridCard = false, isTopDeal = false }) {
+export default function UnlockTeaser({ className = "", isAllDeals = false, isListView = false, isGridCard = false, isTopDeal = false, isCompactList = false }) {
     const handleGooglePlayClick = () => {
         window.open("https://play.google.com/store/apps/details?id=com.preqt.app", "_blank");
     };
@@ -241,6 +241,77 @@ export default function UnlockTeaser({ className = "", isAllDeals = false, isLis
                             className={styles.gridStoreBadge}
                             onClick={handleGooglePlayClick}
                             alt="Get it on Google Play"
+                            draggable={false}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isCompactList) {
+        return (
+            <div className={`${styles.compactListTeaser} ${className}`}>
+                {/* Background Layer with Blurred & Faded Cards */}
+                <div className={styles.compactListBgContainer} aria-hidden="true">
+                    <div className={styles.compactListBackdrop}>
+                        <table className={styles.compactListTable}>
+                            <DealCard 
+                                deal={techMahindraTeaserMock} 
+                                isAuthenticated={true} 
+                                isListView={true} 
+                                isTableView={true}
+                                disableLink={true}
+                                qaCount={techMahindraTeaserMock.qa_count || 0}
+                                replies={{}}
+                            />
+                        </table>
+                    </div>
+                </div>
+
+                {/* Frosted Glass Overlay */}
+                <div className={styles.compactListOverlay} aria-hidden="true"></div>
+
+                {/* Foreground Content */}
+                <div className={styles.compactListForeground}>
+                    {/* Glowing Gold Phone Graphic */}
+                    <div className={styles.compactListPhoneWrapper}>
+                        <img
+                            src="/downloadPreqt.png"
+                            className={styles.compactListPhoneGraphic}
+                            alt="PreQT App"
+                            draggable={false}
+                        />
+                    </div>
+
+                    {/* PreQT Logo: White pr. + Gold .eqt. */}
+                    <img
+                        src="/landing-logo.svg"
+                        className={styles.compactListLogo}
+                        alt="pr.eqt."
+                        draggable={false}
+                    />
+
+                    {/* Two-Line Action Text */}
+                    <div className={styles.compactListText}>
+                        <span>Download The Mobile App To Unlock Verified Private Market Opportunities,</span>
+                        <span>Startup Deals, And Exclusive IPO Access.</span>
+                    </div>
+
+                    {/* App Store & Google Play Badges */}
+                    <div className={styles.compactListBadges}>
+                        <img
+                            src="/downloadapplePreqt.png"
+                            alt="Download on the App Store"
+                            className={styles.compactListBadge}
+                            onClick={handleAppStoreClick}
+                            draggable={false}
+                        />
+                        <img
+                            src="/androiddownloadpreqt.png"
+                            alt="Get it on Google Play"
+                            className={styles.compactListBadge}
+                            onClick={handleGooglePlayClick}
                             draggable={false}
                         />
                     </div>

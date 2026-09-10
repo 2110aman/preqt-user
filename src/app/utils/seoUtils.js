@@ -61,3 +61,49 @@ export const getRobotsDirectives = (host = '') => {
     },
   };
 };
+
+/**
+ * Maps raw deal type and deal metadata to category breadcrumb details and listing route.
+ * Deal categories:
+ * - Public / IPO -> Upcoming IPO (/deals/upcoming-ipo) or IPO Deals (/deals/ipo)
+ * - Unlisted -> Unlisted Shares (/deals/unlisted-shares)
+ * - Private / OFS / CCPS -> Private Deals (/deals/private-deals)
+ * - Startup -> Startup Deals (/deals/startup-deals)
+ */
+export const getDealCategoryInfo = (rawDealType, dealData) => {
+  const effectiveType = (
+    rawDealType ||
+    dealData?.deal_type ||
+    dealData?.deal_setpData?.deal_type ||
+    dealData?.data?.deal_type ||
+    ""
+  ).toString().trim().toLowerCase();
+
+  const ipoTimelineData =
+    dealData?.deal_setpData?.ipo_timeline?.data ||
+    dealData?.ipo_timeline?.data ||
+    dealData?.data?.deal_setpData?.ipo_timeline?.data;
+    
+  const ipoOpenDate = ipoTimelineData?.ipo_open_date;
+  const isUpcoming = ipoOpenDate ? new Date(ipoOpenDate) > new Date() : false;
+
+  if (effectiveType === "public" || effectiveType === "ipo") {
+    return isUpcoming
+      ? { label: "Upcoming IPO", path: "/deals/upcoming-ipo" }
+      : { label: "IPO Deals", path: "/deals/ipo" };
+  }
+  if (effectiveType === "upcoming" || effectiveType === "upcoming-ipo") {
+    return { label: "Upcoming IPO", path: "/deals/upcoming-ipo" };
+  }
+  if (effectiveType === "unlisted") {
+    return { label: "Unlisted Shares", path: "/deals/unlisted-shares" };
+  }
+  if (effectiveType === "private" || effectiveType === "ofs" || effectiveType === "ccps") {
+    return { label: "Private Deals", path: "/deals/private-deals" };
+  }
+  if (effectiveType === "startup") {
+    return { label: "Startup Deals", path: "/deals/startup-deals" };
+  }
+  return { label: "All Deals", path: "/deals" };
+};
+

@@ -111,7 +111,8 @@
   color: #9CA3AF;
 }
 
-.ipo-review-summary-text h4 {
+.ipo-review-summary-text h4,
+.ipo-review-summary-text h3 {
   font-size: 16px;
   font-weight: 500;
   margin: 0 0 4px 0;
@@ -330,7 +331,8 @@
   margin-bottom: 0;
 }
 
-.ipo-nested-block h5 {
+.ipo-nested-block h5,
+.ipo-nested-block h4 {
   font-size: 12px;
   font-weight: 500;
   color: #1F2937;
@@ -526,7 +528,8 @@
     font-size: 12px !important;
   }
 
-  .ipo-nested-block h5 {
+  .ipo-nested-block h5,
+  .ipo-nested-block h4 {
     font-size: 11px !important;
   }
 

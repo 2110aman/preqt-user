@@ -128,7 +128,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                         </small>
 
                         {dealData?.issue_price_per_share?.status ? (
-                            <h5 className={styles.largeText}>
+                            <div className={styles.largeText}>
                                 {dealData.issue_price_per_share.data?.from === 0 && dealData.issue_price_per_share.data?.to === 0 ? (
                                     "TBD"
                                 ) : (
@@ -136,9 +136,9 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                         ₹{Number(dealData.issue_price_per_share.data?.from || 0).toFixed(1)} to ₹{Number(dealData.issue_price_per_share.data?.to || 0).toFixed(1)}
                                     </>
                                 )}
-                            </h5>
+                            </div>
                         ) : isPrivateDeal && dealData?.price_per_ccps?.status ? (
-                            <h5 className={styles.largeText}>
+                            <div className={styles.largeText}>
                                 {isccps && dealData?.price_per_ccps?.data === 0 ? (
                                     "TBD"
                                 ) : (
@@ -147,10 +147,10 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                         <small className={styles.smll}> per CCPS</small>
                                     </>
                                 )}
-                            </h5>
+                            </div>
                         ) : (
                             dealData?.per_share_price?.status && (
-                                <h5 className={styles.largeText}>
+                                <div className={styles.largeText}>
                                     {dealData?.per_share_price?.data === "0" ? (
                                         "TBD"
                                     ) : (
@@ -158,7 +158,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                             ₹{dealData?.per_share_price?.data}
                                         </>
                                     )}
-                                </h5>
+                                </div>
                             )
                         )}
 
@@ -188,13 +188,13 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                             </OverlayTrigger>
                                         )}
                                     </small>
-                                    <h5 className={styles.largeText}>
+                                    <div className={styles.largeText}>
                                         {dealData?.gmp?.data !== null && dealData?.gmp?.data !== undefined && dealData?.gmp?.data !== "" ? (
                                             <>₹{formatNumber(dealData?.gmp?.data)}</>
                                         ) : (
                                             "-"
                                         )}
-                                    </h5>
+                                    </div>
                                     {asOfDateText && (
                                         <div className={styles.asOfDateText}>
                                             As of {asOfDateText}
@@ -220,7 +220,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                             </OverlayTrigger>
                                         )}
                                     </small>
-                                    <h5 className={styles.gainTextgreen} style={{ color: Number(dealData?.estimated_gain_loss?.data) < 0 ? 'red' : undefined }}>
+                                    <div className={styles.gainTextgreen} style={{ color: Number(dealData?.estimated_gain_loss?.data) < 0 ? 'red' : undefined }}>
                                         {dealData?.estimated_gain_loss?.data !== undefined && dealData?.estimated_gain_loss?.data !== null && dealData?.estimated_gain_loss?.data !== "" ? (
                                             <>
                                                 {dealData.estimated_gain_loss.data > 0 ? "+" : ""}{dealData.estimated_gain_loss.data}%
@@ -240,7 +240,7 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                                 </svg>
                                             </>
                                         )}
-                                    </h5>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -264,11 +264,11 @@ const IPOCollapse = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsPro
                                     </OverlayTrigger>
                                 )}
                             </small>
-                            <h5 className={styles.largeText}>
+                            <div className={styles.largeText}>
                                 {dealData?.lot_size?.data === null || dealData?.lot_size?.data === undefined || dealData?.lot_size?.data === ""
                                     ? "TBD"
                                     : `${formatNumber(dealData?.lot_size?.data)} Shares`}
-                            </h5>
+                            </div>
                         </div>
                     )}
                     {!isofs && dealData?.issue_size?.status && (

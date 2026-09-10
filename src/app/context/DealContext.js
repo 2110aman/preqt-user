@@ -21,7 +21,7 @@ export const DealsProvider = ({ children }) => {
         const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
         const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
         const res = await fetch(
-          `${baseUrl}admin/api/deals/all-deals/?page=1&limit=500&deal_type=[unlisted,public]`,
+          `${baseUrl}admin/api/deals/all-deals/?page=1&limit=15&deal_type=[unlisted,public]`,
           {
             headers: {
               "Content-Type": "application/json",

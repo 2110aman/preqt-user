@@ -14,7 +14,7 @@ const About = ({ isPrivateDeal }) => {
 
   return (
     <section className="about-section">
-      <h4>About</h4>
+      <h3>About</h3>
 
       {/* Render HTML safely */}
       <div

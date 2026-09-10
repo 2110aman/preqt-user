@@ -298,15 +298,15 @@ const Fundamentals = ({ isPrivateDeal }) => {
                 visibleCards.map((item, index) => (
                   <div className="Fundamentals-body-section1-item" key={index}>
                     <p>{item.title}</p>
-                    <h6>{item.value}</h6>
-                    <h5>{item.description}</h5>
+                    <div className="item-value">{item.value}</div>
+                    <div className="item-desc">{item.description}</div>
                   </div>
                 ))
               ) : (
                 <div className="Fundamentals-body-section1-item">
                   <p>No IPO key highlights data available</p>
-                  <h6>-</h6>
-                  <h5>Data will be displayed when available</h5>
+                  <div className="item-value">-</div>
+                  <div className="item-desc">Data will be displayed when available</div>
                 </div>
               )}
             </div>
@@ -392,7 +392,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                       <section className="ipoObjectiveSection">
                         <PrimaryObjective />
 
-                        <h2>Primary Objective</h2>
+                        <h4>Primary Objective</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{
@@ -409,7 +409,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                       <section className="ipoObjectiveSection">
                         <UseProceeds />
 
-                        <h2>Use of Proceeds</h2>
+                        <h4>Use of Proceeds</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{
@@ -426,7 +426,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                       <section className="ipoObjectiveSection">
                         <CapitalRaisingTarget />
 
-                        <h2>Capital Raising Target</h2>
+                        <h4>Capital Raising Target</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{
@@ -443,7 +443,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                       <section className="ipoObjectiveSection">
                         <CreditRatingOutlook />
 
-                        <h2>Credit Rating Outlook</h2>
+                        <h4>Credit Rating Outlook</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{
@@ -487,7 +487,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                       <section className="ipoObjectiveSection">
                         <RiskFactors />
 
-                        <h2>Risk Factors</h2>
+                        <h4>Risk Factors</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{
@@ -504,7 +504,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                     {ipoNotes?.additional_activities?.status && (
                       <section className="ipoObjectiveSection">
                         <AllocationAvilable />
-                        <h2>Allocation Available</h2>
+                        <h4>Allocation Available</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{
@@ -521,7 +521,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                       <section className="ipoObjectiveSection">
                         <img src={'/importantDates.svg'} alt="Important dates" />
 
-                        <h2>Important Dates</h2>
+                        <h4>Important Dates</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{
@@ -536,7 +536,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                       <section className="ipoObjectiveSection">
                         <AdditionalNotes />
 
-                        <h2>Additional Notes</h2>
+                        <h4>Additional Notes</h4>
                         <div
                           className="ipoObjectiveContent"
                           dangerouslySetInnerHTML={{

@@ -24,3 +24,16 @@ export const formatDealCountText = (totalDeals, context = "general") => {
 
   return safeTotal > 0 ? `We have ${safeTotal} new deal${safeTotal === 1 ? '' : 's'}` : 'Explore deals';
 };
+
+/**
+ * Transforms h1 and h2 tags into h5 and h6 inside Observations & Insights rich text
+ * to maintain strict SEO heading hierarchy under h4 section headers.
+ */
+export const transformObservationHtml = (html) => {
+  if (!html || typeof html !== "string") return html;
+  return html
+    .replace(/<h1(\b[^>]*)>/gi, "<h5$1>")
+    .replace(/<\/h1\s*>/gi, "</h5>")
+    .replace(/<h2(\b[^>]*)>/gi, "<h6$1>")
+    .replace(/<\/h2\s*>/gi, "</h6>");
+};

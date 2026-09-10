@@ -69,7 +69,8 @@
   display: none;
 }
 
-.chatbot-body-section1 h2 {
+.chatbot-body-section1 h2,
+.chatbot-body-section1 h3 {
   background: linear-gradient(to bottom, #E7DFC2, #CCB264, #6691EF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -462,7 +463,8 @@
     color: white;
   }
 
-  .chatbot-body-section1 h2 {
+  .chatbot-body-section1 h2,
+  .chatbot-body-section1 h3 {
     font-size: 40px;
   }
 
@@ -500,7 +502,8 @@
     min-width: unset;
   }
 
-  .chatbot-body-section1 h2 {
+  .chatbot-body-section1 h2,
+  .chatbot-body-section1 h3 {
     font-size: 34px;
   }
 

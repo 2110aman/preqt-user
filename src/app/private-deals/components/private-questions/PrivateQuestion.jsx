@@ -503,7 +503,7 @@ const PrivateQuestion = ({ onBack, handleAskAI, qaCount, replies }) => {
                         </defs>
                       </svg>
                       <div className={styles.noQnaYetTextPvt}>
-                        <h2>No questions have been asked yet</h2>
+                        <h4 className={styles.emptyTitle}>No questions have been asked yet</h4>
                         <p>Be the first one to ask what matters about this deal.</p>
                       </div>
                     </div>

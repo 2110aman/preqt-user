@@ -42,8 +42,9 @@
     grid-template-columns: 510px 240px 1fr;
     gap: 32px;
     padding: 20px 24px;
-    width: 100% ;
-    max-width: 97.5%;
+    width: 100%;
+    max-width: 1440px !important;
+    margin: 0 auto !important;
     align-items: flex-start;
 }
 
@@ -467,7 +468,7 @@
     display: flex;
     /* width: 300px; */
     overflow: hidden;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-end;
     gap: 10px;
     max-height: 30px;
@@ -1481,5 +1482,682 @@
         /* width: 32%; */
         min-width: 270px;
     }
-    
+}
+
+/* ==========================================================================
+   List View: Compact Row (>920px Default) & Hover Full Expansion
+   ========================================================================== */
+
+.compactRow {
+    display: none;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* ==========================================================================
+   Table List View Styles (Semantic <tbody> / <tr> / <td>)
+   ========================================================================== */
+
+.dealRowGroup {
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* 1. Default Compact Table Row */
+.compactRowTr {
+    transition: all 0.2s ease;
+}
+
+.compactRowTr td {
+    background: #FFFFFF;
+    border-top: 1px solid #EFEAE0;
+    border-bottom: 1px solid #EFEAE0;
+    padding: 5px 14px;
+    vertical-align: middle;
+    white-space: nowrap;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.compactRowTr td:first-child {
+    border-left: 1px solid #EFEAE0;
+    border-top-left-radius: 18px;
+    border-bottom-left-radius: 18px;
+    padding-left: 18px;
+}
+
+.compactRowTr td:last-child {
+    border-right: 1px solid #EFEAE0;
+    border-top-right-radius: 18px;
+    border-bottom-right-radius: 18px;
+    padding-right: 20px;
+}
+
+.dark .compactRowTr td {
+    background: #121212;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Column: Company Name */
+.tdCompany {
+    vertical-align: middle;
+    min-width: 220px;
+    width: 1%;
+    white-space: nowrap;
+}
+
+.companyInfoRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.compactLogo {
+    width: 32px;
+    height: 32px;
+    border-radius: 5px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.companyTextGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.tableColHeader {
+    font-size: 11px;
+    color: #9CA3AF;
+    line-height: 11px;
+    white-space: nowrap;
+    margin-bottom: 4px;
+}
+
+.compactCompanyName {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1F2937;
+    line-height: 1;
+    white-space: nowrap;
+    max-width: 175px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dark .compactCompanyName {
+    color: #F8FAFC;
+}
+
+/* Column: Divider */
+.tdDivider {
+    width: 1px;
+    padding: 6px 12px !important;
+    vertical-align: middle;
+}
+
+.compactDivider {
+    width: 1px;
+    height: 32px;
+    background-color: #E2E8F0;
+}
+
+.dark .compactDivider {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.tdDivider:empty {
+    padding: 0 !important;
+    width: 0 !important;
+}
+
+/* Column: Rating */
+.tdRating {
+    vertical-align: middle;
+    padding: 0px 14px;
+    min-width: 105px;
+    width: 1%;
+    white-space: nowrap;
+}
+
+.tdRating:empty {
+    min-width: 0 !important;
+    padding: 0 !important;
+    width: 0 !important;
+}
+
+.ratingColGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+}
+
+.ratingColGroup .tableColHeader {
+    margin-bottom: 0 !important;
+}
+
+.ratingContent {
+    display: flex;
+    align-items: center;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Column: Tagline Pill */
+.tdTagline {
+    vertical-align: middle;
+    padding: 0 8px 0 14px;
+    text-align: right;
+    width: 100%;
+}
+
+.taglinePill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.dark .taglinePill {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Column: Hero Metric Boxes (Issue Size, GMP) */
+.tdHero {
+    vertical-align: middle;
+    padding: 8px 6px;
+    width: 1%;
+    white-space: nowrap;
+}
+
+.compactHeroBox {
+    background: #FAF8F2;
+    border-radius: 12px;
+    padding: 6px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
+    max-width: 160px;
+    gap: 4px;
+    border: 1px solid #FAF4E6;
+}
+
+.compactHeroLabel {
+    font-size: 12px;
+    font-weight: 500;
+    color: #A8893D;
+    line-height: 12px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.compactHeroValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1E293B;
+    line-height: 14px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dark .compactHeroBox {
+    background: rgba(181, 145, 49, 0.12);
+    border-color: rgba(181, 145, 49, 0.2);
+}
+
+.dark .compactHeroLabel {
+    color: #E5C365;
+}
+
+.dark .compactHeroValue {
+    color: #F8FAFC;
+}
+
+/* Column: Plain Metrics (Expected Val, Open Date) */
+.tdPlain {
+    vertical-align: middle;
+    padding: 10px 14px;
+    width: 1%;
+    white-space: nowrap;
+}
+
+.compactPlainItem {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-width: 100px;
+    max-width: 120px;
+    gap: 3px;
+}
+
+.compactPlainLabel {
+    font-size: 11px;
+    font-weight: 500;
+    color: #9CA3AF;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.compactPlainValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1E293B;
+    line-height: 14px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.dark .compactPlainValue {
+    color: #F8FAFC;
+}
+
+.compactGainLoss {
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.compactGainLoss.gain {
+    color: #16A34A;
+}
+
+.compactGainLoss.loss {
+    color: #DC2626;
+}
+
+/* 2. Expanded Hover Table Row & TD */
+.expandedRowTr td.expandedTd {
+    padding: 16px 22px;
+    background: #FFFFFF;
+    border: 1px solid #EFEAE0;
+    border-radius: 20px;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+    animation: dealCardExpandIn 0.2s ease-out forwards;
+    box-sizing: border-box;
+}
+
+.dark .expandedRowTr td.expandedTd {
+    background: #121212;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.expandedCardContainer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 14px;
+}
+
+/* 1. Top Bar */
+.expandedTopBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.expandedTopLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.expandedTopLeft .headerRow {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+.expandedTopLeft .leftBadges {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    flex-wrap: nowrap !important;
+}
+
+.expandedTopRight {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-left: auto;
+}
+
+.expandedTopRight .tagChips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    max-width: 500px !important;
+    height: 24px !important;
+    max-height: 24px !important;
+    overflow: hidden !important;
+}
+
+.expandedTopRight .tagChip {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 24px !important;
+    padding: 0 10px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    color: #475569 !important;
+    letter-spacing: 0.3px !important;
+    background: #FFFFFF !important;
+    white-space: nowrap !important;
+    text-transform: uppercase !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.dark .expandedTopRight .tagChip {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #E2E8F0 !important;
+}
+
+/* 2. Main Row */
+.expandedMainRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+}
+
+/* Left: Company Section */
+.expandedCompanySection {
+    flex: 0 0 550px;
+    max-width: 550px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.expandedCompanyTop {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.expandedCompanyLogo {
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+    object-fit: contain;
+    flex-shrink: 0;
+    background: transparent;
+}
+
+.expandedCompanyText {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+}
+
+.expandedCompanyName {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.25;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dark .expandedCompanyName {
+    color: #F8FAFC;
+}
+
+.expandedCompanyTagline {
+    font-size: 13px;
+    font-weight: 400;
+    color: #475569;
+    line-height: 1.35;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dark .expandedCompanyTagline {
+    color: #94A3B8;
+}
+
+.expandedCompanyFooter {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.expandedCompanyFooter .footer {
+    border-top: none !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    background: transparent !important;
+    width: 100%;
+}
+
+/* Middle: Hero Section */
+.expandedHeroSection {
+    border-left: 1px solid #F1F5F9;
+    padding-left: 20px;
+    flex: 0 0 160px;
+    width: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dark .expandedHeroSection {
+    border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+.expandedHeroSection .heroBoxes {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+
+.expandedHeroSection .heroBox {
+    background: #FBF8ED !important;
+    border: 1px solid #FAF4E6 !important;
+    border-radius: 12px !important;
+    padding: 7px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 2px !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.dark .expandedHeroSection .heroBox {
+    background: rgba(181, 145, 49, 0.12) !important;
+    border-color: rgba(181, 145, 49, 0.2) !important;
+}
+
+.expandedHeroSection .heroBox .metricLabel {
+    color: #A8893D !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.2px !important;
+    text-transform: capitalize !important;
+    line-height: 1.2 !important;
+}
+
+.expandedHeroSection .heroBox .metricValue {
+    color: #1E293B !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+}
+
+.dark .expandedHeroSection .heroBox .metricValue {
+    color: #F8FAFC !important;
+}
+
+/* Right: Plain Metrics Grid */
+.expandedMetricsSection {
+    flex: 1;
+    max-width: 550px;
+    min-width: 360px;
+    padding-left: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+}
+
+.expandedMetricsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 10px;
+    column-gap: 24px;
+    width: 100%;
+}
+
+.expandedMetricCell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+}
+
+.expandedMetricLabel {
+    font-size: 11px;
+    font-weight: 500;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.expandedMetricValue {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #1E293B;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.dark .expandedMetricValue {
+    color: #F8FAFC;
+}
+
+/* --------------------------------------------------------------------------
+   Desktop (>=1024px): Show compact row by default; expand on hover
+   -------------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+    .dealRowGroup .compactRowTr {
+        display: table-row;
+    }
+
+    .dealRowGroup .expandedRowTr {
+        display: none;
+    }
+
+    /* On Hover of the dealRowGroup */
+    .dealRowGroup:hover .compactRowTr {
+        display: none;
+    }
+
+    .dealRowGroup:hover .expandedRowTr {
+        display: table-row;
+    }
+}
+
+/* Below 1400px: remove min investment and valuation in plain */
+@media (max-width: 1400px) {
+    .tdPlainMinVal {
+        display: none !important;
+    }
+}
+
+/* Below 1200px: remove opendate and revenue in plain */
+@media (max-width: 1200px) {
+    .tdPlainDateRev {
+        display: none !important;
+    }
+
+    .taglinePill {
+        max-width: 160px;
+    }
+}
+
+@keyframes dealCardExpandIn {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

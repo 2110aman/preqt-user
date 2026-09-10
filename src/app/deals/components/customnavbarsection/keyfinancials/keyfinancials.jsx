@@ -12,6 +12,7 @@ import ROABarchart from "../charts/ROABarchart";
 import ROEBarchart from "../charts/ROEBarchart";
 import ROCEBarchart from "../charts/ROCEBarchart";
 import { useDealStore } from "@/store/dealStore";
+import { transformObservationHtml } from "@/app/utils/formatUtils";
 // import { useSearchParams } from "next/navigation";
 
 const extractMetricData = (val) => {
@@ -78,7 +79,7 @@ const extractObservationHtml = (sectionNode, dataArray) => {
     const obsObj = sectionNode.observation_and_insights;
     if (obsObj) {
       if (obsObj.status !== false && obsObj.data) {
-        return obsObj.data;
+        return transformObservationHtml(obsObj.data);
       }
     }
     // Check observations_and_insights object/field
@@ -86,18 +87,18 @@ const extractObservationHtml = (sectionNode, dataArray) => {
     if (obsPlural) {
       if (typeof obsPlural === "object") {
         if (obsPlural.status !== false && obsPlural.data) {
-          return obsPlural.data;
+          return transformObservationHtml(obsPlural.data);
         }
       } else if (typeof obsPlural === "string" && sectionNode.status !== false) {
-        return obsPlural;
+        return transformObservationHtml(obsPlural);
       }
     }
     // Check observations/observations_status
     if (sectionNode.observations && sectionNode.observations_status !== false) {
       if (typeof sectionNode.observations === "string") {
-        return sectionNode.observations;
+        return transformObservationHtml(sectionNode.observations);
       } else if (sectionNode.observations.data) {
-        return sectionNode.observations.data;
+        return transformObservationHtml(sectionNode.observations.data);
       }
     }
   }
@@ -111,7 +112,7 @@ const extractObservationHtml = (sectionNode, dataArray) => {
     if (item.observation_and_insights) {
       const o = item.observation_and_insights;
       if (o.status !== false && o.data) {
-        return o.data;
+        return transformObservationHtml(o.data);
       }
     }
 
@@ -120,19 +121,19 @@ const extractObservationHtml = (sectionNode, dataArray) => {
       const o = item.observations_and_insights;
       if (typeof o === "object") {
         if (o.status !== false && o.data) {
-          return o.data;
+          return transformObservationHtml(o.data);
         }
       } else if (typeof o === "string" && item.status !== false) {
-        return o;
+        return transformObservationHtml(o);
       }
     }
 
     // Check item.observations / item.status / item.observation
     if (item.observations && item.status !== false) {
       if (typeof item.observations === "string") {
-        return item.observations;
+        return transformObservationHtml(item.observations);
       } else if (item.observations.data) {
-        return item.observations.data;
+        return transformObservationHtml(item.observations.data);
       }
     }
   }
@@ -661,7 +662,7 @@ const BalanceSheetSection = ({ isPrivateDeal, data }) => {
   // Parse observations correctly checking status
   const obsNode = bsTreeData.find(node => node && node.observation_and_insights);
   const observationHtml = (isNewBSDynamicShape && obsNode?.observation_and_insights)
-    ? (obsNode.observation_and_insights.status ? obsNode.observation_and_insights.data : null)
+    ? (obsNode.observation_and_insights.status ? transformObservationHtml(obsNode.observation_and_insights.data) : null)
     : (extractObservationHtml(financialHighlights?.balance_sheet, rawApiData) 
        || extractObservationHtml(financialHighlights?.financial_performance, financialHighlights?.financial_performance?.data));
   const showObservations = (isNewBSDynamicShape && obsNode?.observation_and_insights)

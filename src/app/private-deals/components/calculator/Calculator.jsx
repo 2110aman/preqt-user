@@ -240,10 +240,9 @@ const Calculator = ({ dealDetails, onBack, handleAskAI, isPrivateDeal, deal_id, 
                 </div>
               </div>
 
-              {/* Investment amount */}
               <div className={styles.amount}>
                 <p>Investment amount </p>
-                <h2>₹{((lots * pricePerLot) / minLots).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</h2>
+                <div className={styles.amountValue}>₹{((lots * pricePerLot) / minLots).toLocaleString("en-IN", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
               </div>
 
               <button

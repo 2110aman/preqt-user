@@ -10,3 +10,5 @@ export { default as HiddenOverlay } from './HiddenOverlay';
 export { default as CardHeaderFeatured } from './CardHeaderFeatured';
 export { default as CardRatingLarge } from './CardRatingLarge';
 export { default as CardActionButton } from './CardActionButton';
+export { default as CompactDealRow } from './CompactDealRow';
+export { default as ExpandedDealTable } from './ExpandedDealTable';

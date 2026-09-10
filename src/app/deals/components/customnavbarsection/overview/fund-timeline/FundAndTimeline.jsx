@@ -188,7 +188,7 @@ export default function FundAndTimeline() {
       {/* Left Card: Fund Allocation */}
       <div className={styles.card}>
         <div className={styles.cardHeader}>
-          <h2 className={styles.title}>Fund Allocation</h2>
+          <h3 className={styles.title}>Fund Allocation</h3>
           <span className={styles.totalValue}>Total: ₹{totalAmountCr % 1 === 0 ? totalAmountCr.toFixed(0) : totalAmountCr.toFixed(1)} Cr</span>
         </div>
 
@@ -214,7 +214,7 @@ export default function FundAndTimeline() {
 
       {/* Right Card: Timeline */}
       <div className={styles.card}>
-        <h2 className={styles.title}>Timeline</h2>
+        <h3 className={styles.title}>Timeline</h3>
         
         <div className={styles.timelineWrapper}>
           {timelineData.map((step, i) => {

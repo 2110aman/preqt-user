@@ -267,7 +267,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
 
     return (
       <section className="others" key={fieldKey}>
-        <h6 className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
+        <div className="label-with-tooltip" style={{ display: "flex", alignItems: "center" }}>
           {fieldKey === "company_website" && (
             isDarkTheme ? (
               <img src="/companyWebsiteLogoprivate.svg" alt="web" className="company-web-icon" style={{ marginRight: '8px' }} />
@@ -303,7 +303,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
               <div className="custom-tooltip-box">{tooltipData}</div>
             </div>
           )}
-        </h6>
+        </div>
 
         {isLink && displayValue !== "-" && displayValue !== "TBD" ? (
           <Link
@@ -403,9 +403,9 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                   )}
                 </div>
-                <h6 className="mb-0">
+                <div className="mb-0">
                   ₹{dealData?.min_investment?.data?.amount_in_inr ? formatCommaseparated(Number(dealData.min_investment.data.amount_in_inr).toFixed(1)) : formatCommaseparated(typeof pricePerLot === 'number' && !isNaN(pricePerLot) ? pricePerLot.toFixed(1) : pricePerLot)} / {formatCommaseparated((Number(dealData?.min_investment?.data?.lot_size) || 0) * (Number(dealData?.lot_size?.data) || 0))} shares
-                </h6>
+                </div>
               </section>
             )}
 
@@ -430,7 +430,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                           </div>
                         )}
                       </div>
-                      <h6 className="mb-0">{dealData?.merchant_banker?.data?.banker_name || "-"}</h6>
+                      <div className="mb-0">{dealData?.merchant_banker?.data?.banker_name || "-"}</div>
                     </div>
                   </div>
                 </section>
@@ -450,7 +450,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                   )}
                 </div>
-                <h6 className="drhp mb-0">
+                <div className="drhp mb-0">
                   {ipoDocUrl ? (
                     <>
                       {dealData?.ipo_doc?.data?.label_name || "IPO Document"}
@@ -468,7 +468,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                   ) : (
                     "No Document"
                   )}
-                </h6>
+                </div>
               </section>
             )}
 
@@ -662,7 +662,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                     <span className="valuation-bg-light"><OfferDateIcon /></span>
                   </div>
-                  <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)}</h6>
+                  <span className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)}</span>
                 </section>
               )}
 
@@ -683,7 +683,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                     <span className="valuation-bg-light"><OfferDateIcon /></span>
                   </div>
-                  <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.to)}</h6>
+                  <span className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.to)}</span>
                 </section>
               )}
 
@@ -710,7 +710,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                               <span className={isPrivateLike ? "valuation-bg" : "valuation-bg-light"}><OfferDateIcon /></span>
                             </div>
                             <div className="ipo-dropdown">
-                              <h6 className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)} to {formatDateForIPO(dealData?.offer_date?.data?.to)}</h6>
+                              <span className="offer-day">{formatDateForIPO(dealData?.offer_date?.data?.from)} to {formatDateForIPO(dealData?.offer_date?.data?.to)}</span>
                               {/* <span className="dropDown">{open ? <ChevronUp /> : <ChevronDown />}</span> */}
                             </div>
                           </>
@@ -733,11 +733,11 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                         </div>
                         <span className="valuation-bg-light"><OfferDateIcon /></span>
                       </div>
-                      <h6 className="offer-day">
+                      <span className="offer-day">
                         {hasFromAndTo 
                           ? `${formatDateForIPO(dealData.offer_date.data.from)} to ${formatDateForIPO(dealData.offer_date.data.to)}` 
                           : formatDateForIPO(dealData?.offer_date?.data)}
-                      </h6>
+                      </span>
                     </>
                   )}
                 </section>
@@ -760,7 +760,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                     <span className="valuation-bg-light"><Valuation /></span>
                   </div>
-                  <h6 className="offer-day">₹{formatNumber(dealData?.valuation_in_cr?.data)} Cr</h6>
+                  <span className="offer-day">₹{formatNumber(dealData?.valuation_in_cr?.data)} Cr</span>
                 </section>
               )}
 
@@ -781,7 +781,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                     <span className="valuation-bg-light"><RevenueIcon /></span>
                   </div>
-                  <h6 className="offer-day">₹{formatNumber(dealData?.revenue_fy25_in_cr?.data)} Cr</h6>
+                  <span className="offer-day">₹{formatNumber(dealData?.revenue_fy25_in_cr?.data)} Cr</span>
                 </section>
               )}
 
@@ -802,7 +802,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                     <span className="valuation-bg-light"><PatIcon /></span>
                   </div>
-                  <h6 className="offer-day">₹{formatNumber(dealData?.pat_fy25_in_cr?.data)} Cr</h6>
+                  <span className="offer-day">₹{formatNumber(dealData?.pat_fy25_in_cr?.data)} Cr</span>
                 </section>
               )}
 
@@ -823,7 +823,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     </div>
                     <span className="valuation-bg-light"><PeMultiple /></span>
                   </div>
-                  <h6 className="offer-day">₹{formatNumber(dealData?.issue_size?.data?.overall || dealData?.issue_size?.data)} Cr</h6>
+                  <span className="offer-day">₹{formatNumber(dealData?.issue_size?.data?.overall || dealData?.issue_size?.data)} Cr</span>
                 </section>
               )}
             </>

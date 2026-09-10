@@ -75,9 +75,9 @@ const Valuation = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsProp 
             <div className="investmentHeader">
               <div>
                 <p className="label">{dealData?.min_investment?.label_name || "Minimum Investment"}</p>
-                <h2 className="amt">
+                <div className="amt">
                   ₹{formatCommaseparated(typeof pricePerLot === 'number' && !isNaN(pricePerLot) ? pricePerLot.toFixed(1) : pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
-                </h2>
+                </div>
               </div>
             </div>
           )}
@@ -183,9 +183,9 @@ const Valuation = ({ isPrivateDeal, isccps, isofs, dealDetails: dealDetailsProp 
                     )}
                 </div>
 
-                <h2 className="amt">
+                <div className="amt">
                   ₹{formatCommaseparated(typeof pricePerLot === 'number' && !isNaN(pricePerLot) ? pricePerLot.toFixed(1) : pricePerLot)} / {formatCommaseparated(sharesPerLot * minLots)} shares
-                </h2>
+                </div>
               </div>
             </div>
           )}

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ExistingInvestors.module.css";
 import { ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { transformObservationHtml } from "@/app/utils/formatUtils";
 
 // Helper function to resolve backend file paths to full URLs
 const toAbsoluteImageUrl = (path) => {
@@ -268,7 +269,7 @@ export default function ExistingInvestors({ isPrivateDeal, dealDetails }) {
                     lineHeight: "1.6",
                     color: isPrivateDeal ? "#fff" : "#1F2937",
                   }}
-                  dangerouslySetInnerHTML={{ __html: rawData }}
+                  dangerouslySetInnerHTML={{ __html: transformObservationHtml(rawData) }}
                 />
               ) : (
                 <ul

@@ -173,7 +173,7 @@ const PeerComparison = ({ isPrivateDeal }) => {
       className={`${styles.container} ${themeClass}`}
       onClick={handleContainerClick}
     >
-      <h2 className={styles.title}>Peer Comparison</h2>
+      <h3 className={styles.title}>Peer Comparison</h3>
 
       <div className={styles.wrapperRelative}>
         <div className={`${styles.scrollShadowRight} ${showRightShadow ? styles.visible : ""}`} />

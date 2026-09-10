@@ -71,7 +71,7 @@ const Pitchdeck = ({ isPrivateDeal, pdfUrl }) => {
   return (
     <section className="pitch-deck">
       <div className="pitch-deck-header">
-        <h4>Pitch Deck </h4>
+        <h3>Pitch Deck </h3>
         <a href={resolvedPdfUrl}
           target="_blank"
           rel="noopener noreferrer"

@@ -97,7 +97,7 @@ export default function Shareholding({ isPrivateDeal, dealDetails: dealDetailsPr
           {/* Pre-Issue */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h3>Pre-issue shareholding</h3>
+              <h4>Pre-issue shareholding</h4>
               <p className={styles.progressLabel}>
                 Promoter Holding <strong>{preprogressbar?.toFixed(1)}%</strong>
               </p>
@@ -118,7 +118,7 @@ export default function Shareholding({ isPrivateDeal, dealDetails: dealDetailsPr
           {hasPostIssueData && (
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <h3>Post-Issue Shareholding</h3>
+                <h4>Post-Issue Shareholding</h4>
                 <p className={styles.progressLabel}>
                   Promoter Holding <strong>{postprogressbar?.toFixed(1)}%</strong>
                 </p>

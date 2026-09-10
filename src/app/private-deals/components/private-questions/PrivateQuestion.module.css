@@ -322,7 +322,9 @@ line-height: normal;
   align-items: center;
   gap: 60px;
 }
-.noQnaYetTextPvt h2{
+.noQnaYetTextPvt h2,
+.noQnaYetTextPvt h4,
+.noQnaYetTextPvt .emptyTitle {
   color: var(--Gray-800, #FFF);
   text-align: center;
   font-size: 20px;

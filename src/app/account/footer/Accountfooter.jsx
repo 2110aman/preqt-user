@@ -7,9 +7,9 @@ export default function Home() {
 
       <div className={styles.main_container}>
         <div className={styles.left}>
-          <h2 className={styles.h2}>
+          <h3 className={styles.h2}>
             Get the <span>Preqt</span> App and keep in touch around the clock!
-          </h2>
+          </h3>
           <ul className={styles.ul}>
             <li><img className={styles.check_icon} src="/acconutfooter/tick-icon.svg" alt="tick-icon" /><span> Monitor your investments in real-time.</span></li>
             <li><img className={styles.check_icon} src="/acconutfooter/tick-icon.svg" alt="tick-icon" /><span> Receive tailored deal suggestions.</span></li>

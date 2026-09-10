@@ -30,15 +30,15 @@ const Shares = ({ isPrivateDeal, isccps }) => {
     <div className={`shares-card ${isPrivateDeal ? "private" : "public"}`}>
       {/* Header */}
       <div className="shares-header">
-        <h5>
+        <div className="shares-title">
           {dealData?.share_allocation?.label_name || "Pre-Issue Shareholding"}: Promoters – {preIssue?.promoters_percent ?? "N/A"}%, Others –{" "}
           {preIssue?.other_percent ?? "N/A"}%
-        </h5>
+        </div>
 
-        {!isccps ? <><h5>{postIssue?.label_name || "Total Shares Post Issue"}
+        {!isccps ? <><div className="shares-title">{postIssue?.label_name || "Total Shares Post Issue"}
           {/* : 
           {formatNumber(totalShares)} */}
-          </h5></> : ""}
+          </div></> : ""}
 
       </div>
 

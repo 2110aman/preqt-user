@@ -565,7 +565,7 @@ const QuestionAnswer = ({ handleQuesAns, handleAskAI, qaCount, setShowPrivateQna
                         </defs>
                       </svg>
                       <div className={styles.noQnaYetText}>
-                        <h2>No questions have been asked yet</h2>
+                        <h4 className={styles.emptyTitle}>No questions have been asked yet</h4>
                         <p>Be the first one to ask what matters about this deal.</p>
                       </div>
                     </div>

@@ -2,11 +2,12 @@ import { cache } from "react";
 import { getRobotsDirectives } from "../utils/seoUtils";
 import AllDeals from "./components/AllDeals/AllDeals";
 
-const getInitialDeals = cache(async () => {
+const getInitialDeals = cache(async (page = 1, sortBy = "latest") => {
   try {
     const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
     const baseUrl = rawBaseUrl.replace(/\/$/, "");
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=1&limit=500&deal_type=[unlisted,public]`, {
+    const sortQuery = sortBy ? `&sort_by=${encodeURIComponent(sortBy)}` : "";
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=${page}&limit=15&deal_type=[unlisted,public]${sortQuery}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },
@@ -20,9 +21,15 @@ const getInitialDeals = cache(async () => {
   return { data: [], pagination: {} };
 });
 
-export async function generateMetadata() {
+export async function generateMetadata({ searchParams }) {
+  const resolvedSearchParams = await searchParams;
+  const pageParam = parseInt(resolvedSearchParams?.page, 10);
+  const pageNum = !isNaN(pageParam) && pageParam > 1 ? pageParam : null;
+
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
-  const title = "Exclusive Private Equity, Pre-IPO & Unlisted Deals | PrEqt";
+  const baseTitle = "Exclusive Private Equity, Pre-IPO & Unlisted Deals | PrEqt";
+  const title = pageNum ? `Exclusive Private Equity, Pre-IPO & Unlisted Deals - Page ${pageNum} | PrEqt` : baseTitle;
+  const canonical = pageNum ? `${siteUrl}/deals?page=${pageNum}` : `${siteUrl}/deals`;
   const description =
     "Explore verified private equity deals, upcoming IPOs, and unlisted share investment opportunities on PrEqt. Access live analytics and high-conviction deal flow.";
 
@@ -40,12 +47,12 @@ export async function generateMetadata() {
       "exclusive investment deals"
     ],
     alternates: {
-      canonical: `${siteUrl}/deals`,
+      canonical,
     },
     openGraph: {
       title,
       description,
-      url: `${siteUrl}/deals`,
+      url: canonical,
       siteName: "PrEqt",
       locale: "en_IN",
       type: "website",
@@ -68,8 +75,13 @@ export async function generateMetadata() {
   };
 }
 
-export default async function Page() {
-  const initialDealsData = await getInitialDeals();
+export default async function Page({ searchParams }) {
+  const resolvedSearchParams = await searchParams;
+  const pageParam = parseInt(resolvedSearchParams?.page, 10);
+  const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
+  const sortBy = resolvedSearchParams?.sort_by || resolvedSearchParams?.sortBy || "latest";
+
+  const initialDealsData = await getInitialDeals(page, sortBy);
   const deals = initialDealsData?.data || [];
   const pagination = initialDealsData?.pagination || {};
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
@@ -100,7 +112,7 @@ export default async function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
-      <AllDeals initialDeals={deals} initialPagination={pagination} />
+      <AllDeals initialDeals={deals} initialPagination={pagination} initialSort={sortBy} />
     </div>
   );
 }

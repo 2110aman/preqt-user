@@ -8,15 +8,15 @@ import styles from './RatingBadge.module.css';
  * Features fractional star filling (e.g., 4.7 results in 4 full stars and one 70% filled star).
  */
 
-const Star = ({ fillPercent, id }) => {
+const Star = ({ fillPercent, id, compact = false }) => {
     return (
         <svg
-            width="14"
-            height="16"
+            width={compact ? "11" : "14"}
+            height={compact ? "12" : "16"}
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className={styles.starIcon}
+            className={compact ? styles.starIconCompact : styles.starIcon}
         >
             <defs>
                 {/* 
@@ -36,7 +36,7 @@ const Star = ({ fillPercent, id }) => {
     );
 };
 
-export default function RatingBadge({ rating, variant = 'pill', isListView = false }) {
+export default function RatingBadge({ rating, variant = 'pill', isListView = false, hideLabel = false, compact = false }) {
     // Generate a unique ID to prevent gradient conflicts when multiple badges are rendered
     const uniqueId = useId().replace(/:/g, '');
 
@@ -45,7 +45,7 @@ export default function RatingBadge({ rating, variant = 'pill', isListView = fal
     const numericRating = parseFloat(rating) || 0;
 
     const renderStars = () => (
-        <div className={`${styles.stars} ${variant === 'starsWithLabel' ? styles.featuredStarsGap : ''}`}>
+        <div className={`${styles.stars} ${variant === 'starsWithLabel' ? styles.featuredStarsGap : ''} ${compact ? styles.starsCompact : ''}`}>
             {[1, 2, 3, 4, 5].map((index) => {
                 let fillPercent = 0;
 
@@ -62,6 +62,7 @@ export default function RatingBadge({ rating, variant = 'pill', isListView = fal
                         key={index}
                         fillPercent={fillPercent}
                         id={`star-grad-${uniqueId}-${index}`}
+                        compact={compact}
                     />
                 );
             })}
@@ -71,7 +72,7 @@ export default function RatingBadge({ rating, variant = 'pill', isListView = fal
     if (variant === 'starsOnly') {
         return (
             <div className={`${styles.ratingWrapper} ${isListView ? styles.isListView : ''}`}>
-                <div className={styles.desktopRatingContainer}>
+                <div className={`${styles.desktopRatingContainer} ${compact ? styles.compactRatingContainer : ''}`}>
                     {renderStars()}
                 </div>
                 <div className={styles.simpleMobileBadge}>
@@ -85,9 +86,9 @@ export default function RatingBadge({ rating, variant = 'pill', isListView = fal
     if (variant === 'starsWithLabel') {
         return (
             <div className={`${styles.ratingWrapper} ${isListView ? styles.isListView : ''}`}>
-                <div className={styles.desktopRatingContainer}>
+                <div className={`${styles.desktopRatingContainer} ${compact ? styles.compactRatingContainer : ''}`}>
                     {renderStars()}
-                    <div className={styles.ratingLabelNoMargin}>Pr.eqt Rating</div>
+                    {!hideLabel && <div className={styles.ratingLabelNoMargin}>Pr.eqt Rating</div>}
                 </div>
                 <div className={styles.simpleMobileBadge}>
                     <span className={styles.starGlyph}>★</span>
@@ -98,13 +99,13 @@ export default function RatingBadge({ rating, variant = 'pill', isListView = fal
     }
 
     return (
-        <div className={`${styles.ratingWrapper} ${isListView ? styles.isListView : ''}`}>
-            <div className={styles.desktopRatingContainer}>
-                <div className={`${styles.ratingBadge} ${styles[variant]}`}>
-                    <div className={styles.ratingValueBox}>{numericRating.toFixed(1)}</div>
+        <div className={`${styles.ratingWrapper} ${isListView ? styles.isListView : ''} ${compact ? styles.compactWrapper : ''}`}>
+            <div className={`${styles.desktopRatingContainer} ${compact ? styles.compactRatingContainer : ''}`}>
+                <div className={`${styles.ratingBadge} ${styles[variant]} ${compact ? styles.compactRatingBadge : ''}`}>
+                    <div className={`${styles.ratingValueBox} ${compact ? styles.compactRatingValueBox : ''}`}>{numericRating.toFixed(1)}</div>
                     {renderStars()}
                 </div>
-                <div className={styles.ratingLabel}>Pr.eqt Rating</div>
+                {!hideLabel && <div className={styles.ratingLabel}>Pr.eqt Rating</div>}
             </div>
 
             <div className={styles.simpleMobileBadge}>

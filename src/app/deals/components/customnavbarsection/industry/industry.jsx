@@ -303,17 +303,24 @@ const Industry = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
       {!isOfs && overview?.industry_drivers?.status && (
         <>
           <section className={styles.growthSection}>
-            <h2 className={styles.growthHeading} onClick={() => setShowGrowth(!showGrowth)}>
+            <h3 
+              className={styles.growthHeading} 
+              onClick={() => setShowGrowth(!showGrowth)}
+              role="button"
+              tabIndex={0}
+              aria-expanded={showGrowth}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowGrowth(!showGrowth); } }}
+            >
               {overview?.industry_drivers?.label_name}
               <div>{showGrowth ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</div>
-            </h2>
+            </h3>
 
             {showGrowth && (
               <div>
                 {industryDriver?.length > 0 ? (
                   industryDriver.map((item, idx) => (
                     <div key={idx} className={styles.growthItem}>
-                      <h3 className={styles.subTitle}>{getValue(item.label_name)}</h3>
+                      <h4 className={styles.subTitle}>{getValue(item.label_name)}</h4>
                       <div
                         className={styles.p}
                         dangerouslySetInnerHTML={{ __html: getValue(item.description) }}
@@ -335,10 +342,17 @@ const Industry = ({ isPrivateDeal, dealDetails: dealDetailsProp }) => {
       {!isOfs && overview?.government_policy_support?.status && (
         <>
           <section className={styles.growthSection}>
-            <h2 className={styles.growthHeading} onClick={() => setShowPolicy(!showPolicy)}>
+            <h3 
+              className={styles.growthHeading} 
+              onClick={() => setShowPolicy(!showPolicy)}
+              role="button"
+              tabIndex={0}
+              aria-expanded={showPolicy}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowPolicy(!showPolicy); } }}
+            >
               {overview?.government_policy_support?.label_name || "Government Policy Support"}
               <div>{showPolicy ? <ChevronUp size={20} /> : <ChevronDown size={20} />}</div>
-            </h2>
+            </h3>
 
             {showPolicy && (
               <div>

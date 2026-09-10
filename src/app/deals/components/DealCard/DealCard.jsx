@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CARD_THEMES, CARD_LAYOUTS, METRICS_CONFIG, determineVariant } from './config';
 import * as Sections from './sections';
 import CardFooter from './sections/CardFooter';
@@ -15,10 +16,12 @@ export default function DealCard({
     qaCount,
     replies,
     isListView,
+    isTableView = false,
     ignoreFeatured = false,
     disableLink = false,
     onTagClick
 }) {
+    const router = useRouter();
    
     const deal = React.useMemo(() => {
         if (!originalDeal) return originalDeal;
@@ -57,6 +60,7 @@ export default function DealCard({
         
         if (variantKey === 'featured_deal') {
             metrics = {
+                ...metrics,
                 hero: [
                     { label: "VALUATION", key: "valuation_in_cr", format: "currency", suffix: "Cr" },
                     { label: "SHARE PRICE", keys: ["per_share_price", "offer_price"], format: "currency", perShare: true },
@@ -83,13 +87,12 @@ export default function DealCard({
 
     // Handle Auth Locked State for Private deals
     const hasRatingBadge = layout.ratingStyle !== 'none' && !!(deal?.ipo_review_rating?.status && deal?.ipo_review_rating?.weighted_composite_score);
-    const isPrivate = ['private', 'ccps', 'ofs'].includes((deal.deal_type || '').toLowerCase());
+    const isPrivate = ['private', 'ccps', 'ofs'].includes((deal?.deal_type || '').toLowerCase());
     if (isPrivate && !isAuthenticated) {
         return <Sections.HiddenOverlay onLoginClick={onLoginClick} />;
     }
 
     const isSeriesA = deal?.deal_type?.toLowerCase() === 'series-a';
-    const isPrivateDeal = deal?.deal_type?.toLowerCase() === 'private' || isSeriesA;
     
     const statusRaw = (deal?.hidden_status || '').toLowerCase();
     let statusKey = 'upcoming';
@@ -104,6 +107,59 @@ export default function DealCard({
     };
     const shouldRenderStatus = deal?.deal_type?.toLowerCase() === 'public';
 
+    // Desktop Table View (1024px and above)
+    if (isTableView) {
+        return (
+            <tbody
+                className={`${styles.dealRowGroup} ${styles[theme.theme]} ${theme.gradient ? styles[theme.gradient] : ''} ${layout.hasOFSGradient ? styles.ofsCard : ''} ${styles[variantKey] || ''}`}
+                tabIndex={0}
+                role="rowgroup"
+            >
+                {/* 1. Default Compact Table Row */}
+                <tr
+                    className={styles.compactRowTr}
+                    onClick={(e) => {
+                        const target = e.target;
+                        if (target.closest('button') || target.closest('a') || target.closest('[data-no-navigate]')) return;
+                        if (!disableLink && deal?.slug) {
+                            router.push(`/deals/${deal.slug}`);
+                        }
+                    }}
+                >
+                    <Sections.CompactDealRow
+                        deal={deal}
+                        metrics={metrics}
+                        onTagClick={onTagClick}
+                    />
+                </tr>
+
+                {/* 2. Expanded Hover Table Row */}
+                <tr
+                    className={styles.expandedRowTr}
+                    onClick={(e) => {
+                        const target = e.target;
+                        if (target.closest('button') || target.closest('a') || target.closest('[data-no-navigate]')) return;
+                        if (!disableLink && deal?.slug) {
+                            router.push(`/deals/${deal.slug}`);
+                        }
+                    }}
+                >
+                    <td colSpan={9} className={styles.expandedTd}>
+                        <Sections.ExpandedDealTable
+                            deal={deal}
+                            layout={layout}
+                            metrics={metrics}
+                            qaCount={qaCount}
+                            replies={replies}
+                            onTagClick={onTagClick}
+                        />
+                    </td>
+                </tr>
+            </tbody>
+        );
+    }
+
+    // Original List View (below 1024px) or Standard Grid Card
     const content = isListView ? (
         <div className={`${styles.cardContainer} ${styles.listView} ${styles[theme.theme]} ${theme.gradient ? styles[theme.gradient] : ''} ${layout.hasOFSGradient ? styles.ofsCard : ''} ${styles[variantKey] || ''}`}>
             {/* Mobile/Tablet Header: Spans full width above both sections */}
@@ -137,14 +193,16 @@ export default function DealCard({
             </div>
 
             {/* 2. Hero Section: Stacked boxes */}
-            <div className={styles.heroSection}>
-                <Sections.CardHeroMetrics
-                    deal={deal}
-                    config={metrics.hero}
-                    style="boxes"
-                    isListView={true}
-                />
-            </div>
+            {metrics?.hero && metrics.hero.length > 0 && (
+                <div className={styles.heroSection}>
+                    <Sections.CardHeroMetrics
+                        deal={deal}
+                        config={metrics.hero}
+                        style="boxes"
+                        isListView={true}
+                    />
+                </div>
+            )}
 
             {/* 3. Metrics & Tags Section */}
             <div className={styles.mainSection}>

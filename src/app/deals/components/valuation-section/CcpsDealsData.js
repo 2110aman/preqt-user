@@ -123,7 +123,7 @@ const CcpsDealsData = ({ isccps, dealDetails: dealDetailsProp }) => {
 
         return (
             <section className="others" key={fieldKey}>
-                <h6 className="label-with-tooltip">
+                <div className="label-with-tooltip">
                     {label}
                     {showTooltip && (
                         <div className="custom-tooltip-wrapper">
@@ -133,7 +133,7 @@ const CcpsDealsData = ({ isccps, dealDetails: dealDetailsProp }) => {
                             <div className="custom-tooltip-box">{tooltipData}</div>
                         </div>
                     )}
-                </h6>
+                </div>
 
                 {isLink ? (
                     <Link

@@ -71,8 +71,56 @@
     width: 100%;
 }
 
+.compactWrapper {
+    align-items: flex-start !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .desktopRatingContainer {
     display: block;
+}
+
+.compactRatingContainer {
+    width: 93px !important;
+    height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.compactRatingBadge {
+    width: 93px !important;
+    height: 22px !important;
+    max-width: 93px !important;
+    padding: 1px 6px 1px 2px !important;
+    gap: 4px !important;
+    box-sizing: border-box !important;
+    border-radius: 20px !important;
+}
+
+.compactRatingValueBox {
+    width: 22px !important;
+    height: 18px !important;
+    padding: 0 !important;
+    font-size: 9.5px !important;
+    border-radius: 12px !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.starsCompact {
+    display: flex !important;
+    gap: 0.5px !important;
+    margin-top: 0 !important;
+    align-items: center !important;
+}
+
+.starIconCompact {
+    width: 11px !important;
+    height: 12px !important;
 }
 
 .simpleMobileBadge {

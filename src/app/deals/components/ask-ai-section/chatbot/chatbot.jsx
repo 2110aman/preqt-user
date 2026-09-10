@@ -307,7 +307,7 @@ const Chatbot = ({ onBack, showInModal = false, onClose, isPrivate, isPrivateLik
         {userChat.length === 0 && (
           <>
             <section className="chatbot-body-section1">
-              <h2>Discuss This Deal with Your Personal AI Assistant</h2>
+              <h3>Discuss This Deal with Your Personal AI Assistant</h3>
               <p>Ask anything about this Pre-IPO Deal</p>
             </section>
 

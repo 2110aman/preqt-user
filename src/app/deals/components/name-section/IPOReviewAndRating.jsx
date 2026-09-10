@@ -162,7 +162,7 @@ const IPOReviewAndRating = ({ reviewData }) => {
     <div className="ipo-review-container">
       {/* Header bar */}
       <div className="ipo-review-header-flex">
-        <h3 className="ipo-review-title">{reviewData.label_name || "IPO Review and Rating"}</h3>
+        <h2 className="ipo-review-title">{reviewData.label_name || "IPO Review and Rating"}</h2>
         <div className="ipo-review-badge-col">
           {reviewData.badge_text?.status && (
             <div className="ipo-review-badge">
@@ -179,7 +179,7 @@ const IPOReviewAndRating = ({ reviewData }) => {
       <div className="ipo-review-summaryBox">
         <CircularRating score={currentScore} />
         <div className="ipo-review-summary-text">
-          <h4>{reviewData.overall_recommendation || "Overall Recommendation"}</h4>
+          <h3>{reviewData.overall_recommendation || "Overall Recommendation"}</h3>
           {reviewData.recommendation_description && (
             <div 
               className="ipo-recommendation-p"
@@ -234,7 +234,7 @@ const IPOReviewAndRating = ({ reviewData }) => {
                       <div className="ipo-review-nested-details-inner">
                         <div className="ipo-review-nested-details">
                           <div className="ipo-nested-block">
-                            <h5>Detailed Analysis</h5>
+                            <h4>Detailed Analysis</h4>
                             <div dangerouslySetInnerHTML={{ __html: row.detailed_analysis }} />
                           </div>
                         </div>
