@@ -124,6 +124,7 @@ const FilterPopup = ({
     ticketSizeRange = { min: 0, max: 10000, ranges: [], options: [] },
     revenueRange = { min: 0, max: 10000, ranges: [], options: [] },
     valuationRange: valuationRangeProp = { min: 0, max: 20000, ranges: [], options: [] },
+    availableFundingStatus = [],
     availableActivities = [],
     availableParticipations = [],
     availableSectors = [],
@@ -326,20 +327,38 @@ const FilterPopup = ({
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Deal Rating</h3>
                     <div className={styles.pillGroup}>
-                        {["4.5 & above", "4.0 – 4.5", "Below 4.0"].map(lbl => {
-                            const isActive = dealRatings.includes(lbl);
+                        {[
+                            { label: "4.5 & above", value: "4.5+" },
+                            { label: "4.0 – 4.5", value: "4.0 - 4.5" },
+                            { label: "Below 4.0", value: "Below 4.0" }
+                        ].map(opt => {
+                            const isActive = dealRatings.includes(opt.value) ||
+                                dealRatings.includes(opt.label) ||
+                                (opt.value === "4.5+" && (dealRatings.includes("4.5 & above") || dealRatings.includes("4.5 and above"))) ||
+                                (opt.value === "4.0 - 4.5" && dealRatings.includes("4.0 – 4.5"));
                             return (
                                 <div
-                                    key={lbl}
+                                    key={opt.value}
                                     className={`${styles.pillBtn} ${isActive ? styles.pillBtnActive : ''}`}
-                                    onClick={() => toggleArrayItem(dealRatings, setDealRatings, lbl)}
+                                    onClick={() => {
+                                        if (isActive) {
+                                            setDealRatings(dealRatings.filter(r => 
+                                                r !== opt.value && 
+                                                r !== opt.label && 
+                                                !(opt.value === "4.5+" && (r === "4.5 & above" || r === "4.5 and above")) &&
+                                                !(opt.value === "4.0 - 4.5" && r === "4.0 – 4.5")
+                                            ));
+                                        } else {
+                                            setDealRatings([...dealRatings, opt.value]);
+                                        }
+                                    }}
                                 >
                                     {isActive ? (
                                         <img src="/starwhite.svg" className={styles.activeStar} alt="star" />
                                     ) : (
                                         <div className={styles.inactiveStar} aria-label="star" />
                                     )}
-                                    <p className={styles.pillLabel}>{lbl}</p>
+                                    <p className={styles.pillLabel}>{opt.label}</p>
                                 </div>
                             );
                         })}
@@ -349,29 +368,6 @@ const FilterPopup = ({
                 {/* 4. Ticket Size / Allocation */}
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Ticket Size / Allocation</h3>
-                    {ticketRanges.length > 0 && (
-                        <div className={styles.pillGroup} style={{ marginBottom: "16px" }}>
-                            {ticketRanges.map((r) => {
-                                const targetMax = (r.max !== null && r.max !== undefined) ? r.max : ticketMax;
-                                const isSelected = ticketSize[0] === r.min && ticketSize[1] === targetMax;
-                                return (
-                                    <div
-                                        key={r.label}
-                                        className={`${styles.pillBtn} ${isSelected ? styles.pillBtnActive : ''}`}
-                                        onClick={() => {
-                                            if (isSelected) {
-                                                setTicketSize([ticketMin, ticketMax]);
-                                            } else {
-                                                setTicketSize([r.min, targetMax]);
-                                            }
-                                        }}
-                                    >
-                                        <p className={styles.pillLabel}>{r.label}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
                     <DualSlider
                         values={ticketSize}
                         setValues={setTicketSize}
@@ -385,43 +381,33 @@ const FilterPopup = ({
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Funding Status</h3>
                     <div className={styles.checkboxContainer}>
-                        {["< 50% Funded", "80%+ Funded", "50% – 80% Funded"].map(lbl => (
-                            <Checkbox
-                                key={lbl}
-                                label={lbl}
-                                checked={fundingStatus.includes(lbl)}
-                                onChange={() => toggleArrayItem(fundingStatus, setFundingStatus, lbl)}
-                            />
-                        ))}
+                        {(() => {
+                            const defaultFunding = ["< 50%", "50% - 80%", "80%+"];
+                            const fundingList = availableFundingStatus && availableFundingStatus.length > 0
+                                ? availableFundingStatus
+                                : defaultFunding;
+                            const uniqueFunding = Array.from(new Set(fundingList.map(f => String(f).trim()).filter(Boolean)));
+                            return uniqueFunding.map(val => {
+                                const isChecked = fundingStatus.includes(val) ||
+                                    fundingStatus.includes(`${val} Funded`) ||
+                                    fundingStatus.some(s => s.replace(/\s*Funded/i, '').replace(/–/g, '-').trim() === val.replace(/–/g, '-').trim());
+                                const displayLabel = val.includes("%") && !val.toLowerCase().includes("funded") ? `${val} Funded` : val;
+                                return (
+                                    <Checkbox
+                                        key={val}
+                                        label={displayLabel}
+                                        checked={isChecked}
+                                        onChange={() => toggleArrayItem(fundingStatus, setFundingStatus, val)}
+                                    />
+                                );
+                            });
+                        })()}
                     </div>
                 </div>
 
                 {/* 6. Valuation Range */}
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Valuation Range</h3>
-                    {valRanges.length > 0 && (
-                        <div className={styles.pillGroup} style={{ marginBottom: "16px" }}>
-                            {valRanges.map((r) => {
-                                const targetMax = (r.max !== null && r.max !== undefined) ? r.max : valMax;
-                                const isSelected = valuationRange[0] === r.min && valuationRange[1] === targetMax;
-                                return (
-                                    <div
-                                        key={r.label}
-                                        className={`${styles.pillBtn} ${isSelected ? styles.pillBtnActive : ''}`}
-                                        onClick={() => {
-                                            if (isSelected) {
-                                                setValuationRange([valMin, valMax]);
-                                            } else {
-                                                setValuationRange([r.min, targetMax]);
-                                            }
-                                        }}
-                                    >
-                                        <p className={styles.pillLabel}>{r.label}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
                     <DualSlider
                         values={valuationRange}
                         setValues={setValuationRange}
@@ -436,7 +422,7 @@ const FilterPopup = ({
                     <h3 className={styles.sectionTitle}>Activity & Freshness</h3>
                     <div className={styles.pillGroup}>
                         {(() => {
-                            const defaultActivities = ["New Deals", "Trending Deals", "Most Viewed", "Recently Updated"];
+                            const defaultActivities = ["New Deals", "Trending Deals", "Most Viewed", "Recently Updated", "Closing Soon"];
                             const activityList = availableActivities.length > 0 ? availableActivities : defaultActivities;
                             const uniqueActivities = Array.from(new Set(activityList.map(a => String(a).trim()).filter(Boolean)));
                             return uniqueActivities.map(lbl => (

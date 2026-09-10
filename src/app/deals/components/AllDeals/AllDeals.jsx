@@ -451,7 +451,15 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         if (Array.isArray(filterOptionsData?.activities) && filterOptionsData.activities.length > 0) {
             return Array.from(new Set(filterOptionsData.activities.map(a => String(a).trim()).filter(Boolean)));
         }
-        return ["New Deals", "Trending Deals", "Most Viewed", "Recently Updated"];
+        return ["New Deals", "Trending Deals", "Most Viewed", "Recently Updated", "Closing Soon"];
+    }, [filterOptionsData]);
+
+    const availableFundingStatus = useMemo(() => {
+        const fs = filterOptionsData?.fundingStatus || filterOptionsData?.funding_status || filterOptionsData?.funding;
+        if (Array.isArray(fs) && fs.length > 0) {
+            return Array.from(new Set(fs.map(f => String(f).trim()).filter(Boolean)));
+        }
+        return ["< 50%", "50% - 80%", "80%+"];
     }, [filterOptionsData]);
 
     const availableParticipations = useMemo(() => {
@@ -1118,7 +1126,9 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             const t = (dealType || "").toLowerCase();
             if (t === "unlisted") {
                 dealTypeQuery = "deal_type=unlisted";
-            } else if (t === "upcoming" || t === "public" || t === "ipo") {
+            } else if (t === "upcoming") {
+                dealTypeQuery = "deal_type=public&is_upcoming=true";
+            } else if (t === "public" || t === "ipo") {
                 dealTypeQuery = "deal_type=public";
             } else if (t === "private") {
                 dealTypeQuery = "deal_type=[private,ofs,ccps]";
@@ -1172,13 +1182,29 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 ? dealRatings.map(item => String(item).trim()).filter(Boolean)
                 : (typeof dealRatings === 'string' && dealRatings.trim() ? [dealRatings.trim()] : []);
             if (cleanDealRatings.length > 0) {
-                queryString += `&dealRatings=${encodeURIComponent(cleanDealRatings.join(','))}`;
+                const normalizedRatings = cleanDealRatings.map(r => {
+                    const s = r.replace(/–/g, '-').trim();
+                    if (s === '4.5 & above' || s === '4.5 and above') return '4.5+';
+                    return s;
+                });
+                queryString += `&dealRatings=${encodeURIComponent(normalizedRatings.join(','))}`;
             }
 
             // Ticket Size
             if (filters?.ticketSize !== undefined && filters?.ticketSize !== null) {
-                const ticketVal = Array.isArray(filters.ticketSize) ? filters.ticketSize[1] : filters.ticketSize;
-                if (ticketVal !== undefined && ticketVal !== null && ticketVal !== '') {
+                let ticketVal = "";
+                if (Array.isArray(filters.ticketSize) && filters.ticketSize.length >= 2) {
+                    const [min, max] = filters.ticketSize;
+                    const maxLimit = ticketSizeData?.max || 10000;
+                    if (max === null || max === undefined || (maxLimit && max >= maxLimit && min > 0)) {
+                        ticketVal = `${min}+`;
+                    } else {
+                        ticketVal = `${min}-${max}`;
+                    }
+                } else if (typeof filters.ticketSize === 'string' && filters.ticketSize.trim()) {
+                    ticketVal = filters.ticketSize.trim();
+                }
+                if (ticketVal) {
                     queryString += `&ticketSize=${encodeURIComponent(ticketVal)}`;
                 }
             }
@@ -1189,13 +1215,27 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 ? fundingStatus.map(item => String(item).trim()).filter(Boolean)
                 : (typeof fundingStatus === 'string' && fundingStatus.trim() ? [fundingStatus.trim()] : []);
             if (cleanFundingStatus.length > 0) {
-                queryString += `&fundingStatus=${encodeURIComponent(cleanFundingStatus.join(','))}`;
+                const normalizedFunding = cleanFundingStatus.map(s => {
+                    return s.replace(/\s*Funded/i, '').replace(/–/g, '-').trim();
+                });
+                queryString += `&fundingStatus=${encodeURIComponent(normalizedFunding.join(','))}`;
             }
 
             // Valuation Range
             if (filters?.valuationRange !== undefined && filters?.valuationRange !== null) {
-                const valRangeVal = Array.isArray(filters.valuationRange) ? filters.valuationRange[1] : filters.valuationRange;
-                if (valRangeVal !== undefined && valRangeVal !== null && valRangeVal !== '') {
+                let valRangeVal = "";
+                if (Array.isArray(filters.valuationRange) && filters.valuationRange.length >= 2) {
+                    const [min, max] = filters.valuationRange;
+                    const maxLimit = valuationRangeData?.max || 20000;
+                    if (max === null || max === undefined || (maxLimit && max >= maxLimit && min > 0)) {
+                        valRangeVal = `${min}+`;
+                    } else {
+                        valRangeVal = `${min}-${max}`;
+                    }
+                } else if (typeof filters.valuationRange === 'string' && filters.valuationRange.trim()) {
+                    valRangeVal = filters.valuationRange.trim();
+                }
+                if (valRangeVal) {
                     queryString += `&valuationRange=${encodeURIComponent(valRangeVal)}`;
                 }
             }
@@ -1879,6 +1919,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 ticketSizeRange={ticketSizeData}
                 revenueRange={ticketSizeData}
                 valuationRange={valuationRangeData}
+                availableFundingStatus={availableFundingStatus}
                 availableActivities={availableActivities}
                 availableParticipations={availableParticipations}
                 availableSectors={availableSectors}

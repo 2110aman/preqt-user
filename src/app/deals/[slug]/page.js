@@ -101,7 +101,9 @@ const getInitialDeals = cache(async (categoryType = "", page = 1) => {
     const t = (categoryType || "").toLowerCase();
     if (t === "unlisted") {
       dealTypeQuery = "deal_type=unlisted";
-    } else if (t === "upcoming" || t === "public" || t === "ipo") {
+    } else if (t === "upcoming") {
+      dealTypeQuery = "deal_type=public&is_upcoming=true";
+    } else if (t === "public" || t === "ipo") {
       dealTypeQuery = "deal_type=public";
     } else if (t === "private") {
       dealTypeQuery = "deal_type=[private,ofs,ccps]";
