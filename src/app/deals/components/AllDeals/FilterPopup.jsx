@@ -29,7 +29,8 @@ const DualSlider = ({ values, setValues, minVal = 0, maxVal = 10, formatLabel })
         const rect = trackRef.current.getBoundingClientRect();
         let percent = (e.clientX - rect.left) / rect.width;
         percent = Math.max(0, Math.min(1, percent));
-        let val = Math.round((percent * range + minVal) * 2) / 2; // Step of 0.5
+        const step = range > 1000 ? 50 : (range > 100 ? 5 : 0.5);
+        let val = Math.round((percent * range + minVal) / step) * step;
 
         const currentVals = valuesRef.current;
         if (activeHandleRef.current === "min") {
@@ -69,7 +70,8 @@ const DualSlider = ({ values, setValues, minVal = 0, maxVal = 10, formatLabel })
         const rect = trackRef.current.getBoundingClientRect();
         let percent = (e.clientX - rect.left) / rect.width;
         percent = Math.max(0, Math.min(1, percent));
-        let val = Math.round((percent * range + minVal) * 2) / 2;
+        const step = range > 1000 ? 50 : (range > 100 ? 5 : 0.5);
+        let val = Math.round((percent * range + minVal) / step) * step;
 
         if (Math.abs(val - values[0]) <= Math.abs(val - values[1])) {
             setValues([val, values[1]]);
@@ -78,13 +80,15 @@ const DualSlider = ({ values, setValues, minVal = 0, maxVal = 10, formatLabel })
         }
     };
 
-    const leftPercent = ((values[0] - minVal) / range) * 100;
-    const widthPercent = ((values[1] - values[0]) / range) * 100;
+    const safeMin = Math.max(minVal, Math.min(maxVal, values[0] ?? minVal));
+    const safeMax = Math.max(minVal, Math.min(maxVal, values[1] ?? maxVal));
+    const leftPercent = Math.max(0, Math.min(100, ((safeMin - minVal) / range) * 100));
+    const widthPercent = Math.max(0, Math.min(100 - leftPercent, ((safeMax - safeMin) / range) * 100));
 
     return (
         <div style={{ touchAction: 'none' }}>
             <div className={styles.sliderMinMax}>
-                {formatLabel(values[0], values[1])}
+                {formatLabel(safeMin, safeMax)}
             </div>
             <div className={styles.sliderTrack} ref={trackRef} onClick={handleTrackClick}>
                 <div
@@ -117,66 +121,76 @@ const FilterPopup = ({
     onHide, 
     onApply, 
     availableStages = [], 
-    revenueRange = { min: 0, max: 100 },
-    valuationRange: valuationRangeProp = { min: 0, max: 10000 },
+    ticketSizeRange = { min: 0, max: 10000, ranges: [], options: [] },
+    revenueRange = { min: 0, max: 10000, ranges: [], options: [] },
+    valuationRange: valuationRangeProp = { min: 0, max: 20000, ranges: [], options: [] },
     availableActivities = [],
     availableParticipations = [],
     availableSectors = [],
     initialFilters = null 
 }) => {
+    // Ticket size min, max, ranges
+    const effectiveTicketSize = ticketSizeRange?.ranges?.length || typeof ticketSizeRange?.min === 'number'
+        ? ticketSizeRange
+        : revenueRange;
+    const ticketMin = effectiveTicketSize?.min ?? 0;
+    const ticketMax = effectiveTicketSize?.max ?? 10000;
+    const ticketRanges = effectiveTicketSize?.ranges ?? [];
+
+    // Valuation range min, max, ranges
+    const valMin = valuationRangeProp?.min ?? 0;
+    const valMax = valuationRangeProp?.max ?? 20000;
+    const valRanges = valuationRangeProp?.ranges ?? [];
+
     // State for all filters
     const [dealStages, setDealStages] = useState([]);
-
-    // Use dynamic stages if available, otherwise fallback to design defaults
-    const stageOptions = availableStages.length > 0
-        ? availableStages
-        : ["IPO – SME", "IPO – Mainboard", "Pre-IPO – SME", "Pre-IPO – Mainboard"];
     const [sectors, setSectors] = useState([]);
     const [searchSector, setSearchSector] = useState("");
     const [dealRatings, setDealRatings] = useState([]);
-    const [ticketSize, setTicketSize] = useState([revenueRange.min, revenueRange.max]); // In Cr
-    
-    // Sync ticketSize with revenueRange when it updates
-    useEffect(() => {
-        setTicketSize([revenueRange.min, revenueRange.max]);
-    }, [revenueRange]);
-
+    const [ticketSize, setTicketSize] = useState([ticketMin, ticketMax]); // In Cr
     const [fundingStatus, setFundingStatus] = useState([]);
-    const [valuationRange, setValuationRange] = useState([valuationRangeProp.min, valuationRangeProp.max]); // In Cr
-
-    // Sync valuationRange with valuationRangeProp when it updates
-    useEffect(() => {
-        setValuationRange([valuationRangeProp.min, valuationRangeProp.max]);
-    }, [valuationRangeProp]);
+    const [valuationRange, setValuationRange] = useState([valMin, valMax]); // In Cr
     const [activities, setActivities] = useState([]);
     const [participation, setParticipation] = useState([]);
 
-    // 2. Synchronize local state with active filters when modal opens
+    // Keep ticketSize and valuationRange synced with min/max if no initialFilters
+    useEffect(() => {
+        if (!initialFilters?.ticketSize) {
+            setTicketSize([ticketMin, ticketMax]);
+        }
+    }, [ticketMin, ticketMax]);
+
+    useEffect(() => {
+        if (!initialFilters?.valuationRange) {
+            setValuationRange([valMin, valMax]);
+        }
+    }, [valMin, valMax]);
+
+    // Synchronize local state with active filters when modal opens
     useEffect(() => {
         if (show) {
             if (initialFilters) {
                 setDealStages(initialFilters.dealStages || []);
                 setSectors(initialFilters.sectors || []);
                 setDealRatings(initialFilters.dealRatings || []);
-                setTicketSize(initialFilters.ticketSize || [revenueRange.min, revenueRange.max]);
+                setTicketSize(initialFilters.ticketSize || [ticketMin, ticketMax]);
                 setFundingStatus(initialFilters.fundingStatus || []);
-                setValuationRange(initialFilters.valuationRange || [valuationRangeProp.min, valuationRangeProp.max]);
+                setValuationRange(initialFilters.valuationRange || [valMin, valMax]);
                 setActivities(initialFilters.activities || []);
                 setParticipation(initialFilters.participation || []);
             } else {
-                // If no filters applied, reset to defaults
                 setDealStages([]);
                 setSectors([]);
                 setSearchSector("");
                 setDealRatings([]);
-                setTicketSize([revenueRange.min, revenueRange.max]);
+                setTicketSize([ticketMin, ticketMax]);
                 setFundingStatus([]);
-                setValuationRange([valuationRangeProp.min, valuationRangeProp.max]);
+                setValuationRange([valMin, valMax]);
                 setActivities([]);
                 setParticipation([]);
             }
         }
-    }, [show, initialFilters, revenueRange.min, revenueRange.max, valuationRangeProp.min, valuationRangeProp.max]);
+    }, [show, initialFilters, ticketMin, ticketMax, valMin, valMax]);
 
     const toggleArrayItem = (array, setArray, item) => {
         if (array.includes(item)) {
@@ -191,9 +205,9 @@ const FilterPopup = ({
         setSectors([]);
         setSearchSector("");
         setDealRatings([]);
-        setTicketSize([revenueRange.min, revenueRange.max]);
+        setTicketSize([ticketMin, ticketMax]);
         setFundingStatus([]);
-        setValuationRange([valuationRangeProp.min, valuationRangeProp.max]);
+        setValuationRange([valMin, valMax]);
         setActivities([]);
         setParticipation([]);
     };
@@ -215,10 +229,10 @@ const FilterPopup = ({
         if (participation.length > 0) filters.participation = participation;
 
         // Only include range filters if they've been moved from default
-        if (ticketSize[0] !== revenueRange.min || ticketSize[1] !== revenueRange.max) {
+        if (ticketSize[0] !== ticketMin || ticketSize[1] !== ticketMax) {
             filters.ticketSize = ticketSize;
         }
-        if (valuationRange[0] !== valuationRangeProp.min || valuationRange[1] !== valuationRangeProp.max) {
+        if (valuationRange[0] !== valMin || valuationRange[1] !== valMax) {
             filters.valuationRange = valuationRange;
         }
 
@@ -267,17 +281,13 @@ const FilterPopup = ({
                     <h3 className={styles.sectionTitle}>Deal Stage</h3>
                     <div className={styles.checkboxContainer}>
                         {(() => {
-                            const formatStageLabel = (stage) => {
-                                if (!stage) return "";
-                                if (stage.toLowerCase() === "sme") return "SME";
-                                if (stage.toLowerCase() === "pre ipo") return "Pre-IPO";
-                                return stage.charAt(0).toUpperCase() + stage.slice(1);
-                            };
-
-                            return stageOptions.map(lbl => (
+                            const defaultStages = ["IPO – SME", "IPO – Mainboard", "Pre-IPO – SME", "Pre-IPO – Mainboard"];
+                            const stageList = availableStages.length > 0 ? availableStages : defaultStages;
+                            const uniqueStages = Array.from(new Set(stageList.map(s => String(s).trim()).filter(Boolean)));
+                            return uniqueStages.map(lbl => (
                                 <Checkbox
                                     key={lbl}
-                                    label={formatStageLabel(lbl)}
+                                    label={lbl}
                                     checked={dealStages.includes(lbl)}
                                     onChange={() => toggleArrayItem(dealStages, setDealStages, lbl)}
                                 />
@@ -339,11 +349,34 @@ const FilterPopup = ({
                 {/* 4. Ticket Size / Allocation */}
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Ticket Size / Allocation</h3>
+                    {ticketRanges.length > 0 && (
+                        <div className={styles.pillGroup} style={{ marginBottom: "16px" }}>
+                            {ticketRanges.map((r) => {
+                                const targetMax = (r.max !== null && r.max !== undefined) ? r.max : ticketMax;
+                                const isSelected = ticketSize[0] === r.min && ticketSize[1] === targetMax;
+                                return (
+                                    <div
+                                        key={r.label}
+                                        className={`${styles.pillBtn} ${isSelected ? styles.pillBtnActive : ''}`}
+                                        onClick={() => {
+                                            if (isSelected) {
+                                                setTicketSize([ticketMin, ticketMax]);
+                                            } else {
+                                                setTicketSize([r.min, targetMax]);
+                                            }
+                                        }}
+                                    >
+                                        <p className={styles.pillLabel}>{r.label}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                     <DualSlider
                         values={ticketSize}
                         setValues={setTicketSize}
-                        minVal={revenueRange.min}
-                        maxVal={revenueRange.max}
+                        minVal={ticketMin}
+                        maxVal={ticketMax}
                         formatLabel={(min, max) => `₹${formatNumberWithCommas(min)} Cr – ₹${formatNumberWithCommas(max)} Cr`}
                     />
                 </div>
@@ -366,11 +399,34 @@ const FilterPopup = ({
                 {/* 6. Valuation Range */}
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Valuation Range</h3>
+                    {valRanges.length > 0 && (
+                        <div className={styles.pillGroup} style={{ marginBottom: "16px" }}>
+                            {valRanges.map((r) => {
+                                const targetMax = (r.max !== null && r.max !== undefined) ? r.max : valMax;
+                                const isSelected = valuationRange[0] === r.min && valuationRange[1] === targetMax;
+                                return (
+                                    <div
+                                        key={r.label}
+                                        className={`${styles.pillBtn} ${isSelected ? styles.pillBtnActive : ''}`}
+                                        onClick={() => {
+                                            if (isSelected) {
+                                                setValuationRange([valMin, valMax]);
+                                            } else {
+                                                setValuationRange([r.min, targetMax]);
+                                            }
+                                        }}
+                                    >
+                                        <p className={styles.pillLabel}>{r.label}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                     <DualSlider
                         values={valuationRange}
                         setValues={setValuationRange}
-                        minVal={valuationRangeProp.min}
-                        maxVal={valuationRangeProp.max}
+                        minVal={valMin}
+                        maxVal={valMax}
                         formatLabel={(min, max) => `₹${formatNumberWithCommas(min)} Cr – ₹${formatNumberWithCommas(max)} Cr`}
                     />
                 </div>
@@ -379,15 +435,20 @@ const FilterPopup = ({
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Activity & Freshness</h3>
                     <div className={styles.pillGroup}>
-                        {(availableActivities.length > 0 ? availableActivities : ["New Deals", "Trending Deals", "Most Viewed", "Recently Updated"]).map(lbl => (
-                            <div
-                                key={lbl}
-                                className={`${styles.pillBtn} ${activities.includes(lbl) ? styles.pillBtnActive : ''}`}
-                                onClick={() => toggleArrayItem(activities, setActivities, lbl)}
-                            >
-                                <p className={styles.pillLabel}>{lbl}</p>
-                            </div>
-                        ))}
+                        {(() => {
+                            const defaultActivities = ["New Deals", "Trending Deals", "Most Viewed", "Recently Updated"];
+                            const activityList = availableActivities.length > 0 ? availableActivities : defaultActivities;
+                            const uniqueActivities = Array.from(new Set(activityList.map(a => String(a).trim()).filter(Boolean)));
+                            return uniqueActivities.map(lbl => (
+                                <div
+                                    key={lbl}
+                                    className={`${styles.pillBtn} ${activities.includes(lbl) ? styles.pillBtnActive : ''}`}
+                                    onClick={() => toggleArrayItem(activities, setActivities, lbl)}
+                                >
+                                    <p className={styles.pillLabel}>{lbl}</p>
+                                </div>
+                            ));
+                        })()}
                     </div>
                 </div>
 
@@ -395,14 +456,24 @@ const FilterPopup = ({
                 <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>Participation & Validation</h3>
                     <div className={styles.checkboxContainer}>
-                        {(availableParticipations.length > 0 ? availableParticipations : ["Merchant Banker Appointed", "Anchor / Strategic Investors", "Institutional / Fund Participation", "Strong Promoter Background"]).map(lbl => (
-                            <Checkbox
-                                key={lbl}
-                                label={lbl}
-                                checked={participation.includes(lbl)}
-                                onChange={() => toggleArrayItem(participation, setParticipation, lbl)}
-                            />
-                        ))}
+                        {(() => {
+                            const defaultParticipations = [
+                                "Merchant Banker Appointed",
+                                "Anchor / Strategic Investors",
+                                "Institutional / Fund Participation",
+                                "Strong Promoter Background"
+                            ];
+                            const participationList = availableParticipations.length > 0 ? availableParticipations : defaultParticipations;
+                            const uniqueParticipations = Array.from(new Set(participationList.map(p => String(p).trim()).filter(Boolean)));
+                            return uniqueParticipations.map(lbl => (
+                                <Checkbox
+                                    key={lbl}
+                                    label={lbl}
+                                    checked={participation.includes(lbl)}
+                                    onChange={() => toggleArrayItem(participation, setParticipation, lbl)}
+                                />
+                            ));
+                        })()}
                     </div>
                 </div>
 

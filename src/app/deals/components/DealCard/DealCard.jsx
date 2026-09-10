@@ -19,7 +19,11 @@ export default function DealCard({
     isTableView = false,
     ignoreFeatured = false,
     disableLink = false,
-    onTagClick
+    onTagClick,
+    isExpanded = false,
+    isClosing = false,
+    onHover,
+    onHoverLeave
 }) {
     const router = useRouter();
    
@@ -107,17 +111,18 @@ export default function DealCard({
     };
     const shouldRenderStatus = deal?.deal_type?.toLowerCase() === 'public';
 
-    // Desktop Table View (1024px and above)
+    // Desktop Table View (1024px and above) - Unified Single-Row Card Architecture
     if (isTableView) {
         return (
             <tbody
-                className={`${styles.dealRowGroup} ${styles[theme.theme]} ${theme.gradient ? styles[theme.gradient] : ''} ${layout.hasOFSGradient ? styles.ofsCard : ''} ${styles[variantKey] || ''}`}
+                className={`${styles.dealRowGroup} ${isExpanded ? styles.isExpandedGroup : ''} ${styles[theme.theme]} ${theme.gradient ? styles[theme.gradient] : ''} ${layout.hasOFSGradient ? styles.ofsCard : ''} ${styles[variantKey] || ''}`}
                 tabIndex={0}
                 role="rowgroup"
+                onMouseEnter={onHover}
+                onMouseLeave={onHoverLeave}
             >
-                {/* 1. Default Compact Table Row */}
                 <tr
-                    className={styles.compactRowTr}
+                    className={styles.unifiedCardRow}
                     onClick={(e) => {
                         const target = e.target;
                         if (target.closest('button') || target.closest('a') || target.closest('[data-no-navigate]')) return;
@@ -126,33 +131,33 @@ export default function DealCard({
                         }
                     }}
                 >
-                    <Sections.CompactDealRow
-                        deal={deal}
-                        metrics={metrics}
-                        onTagClick={onTagClick}
-                    />
-                </tr>
+                    <td colSpan={9} className={styles.unifiedCardTd}>
+                        <div className={`${styles.unifiedCardShell} ${isExpanded ? styles.shellExpanded : styles.shellCompact}`}>
+                            {/* 1. Compact View Layer */}
+                            <div className={`${styles.compactLayer} ${isExpanded ? styles.compactLayerHidden : ''}`}>
+                                <div className={styles.compactLayerInner}>
+                                    <Sections.CompactDealRow
+                                        deal={deal}
+                                        metrics={metrics}
+                                        onTagClick={onTagClick}
+                                    />
+                                </div>
+                            </div>
 
-                {/* 2. Expanded Hover Table Row */}
-                <tr
-                    className={styles.expandedRowTr}
-                    onClick={(e) => {
-                        const target = e.target;
-                        if (target.closest('button') || target.closest('a') || target.closest('[data-no-navigate]')) return;
-                        if (!disableLink && deal?.slug) {
-                            router.push(`/deals/${deal.slug}`);
-                        }
-                    }}
-                >
-                    <td colSpan={9} className={styles.expandedTd}>
-                        <Sections.ExpandedDealTable
-                            deal={deal}
-                            layout={layout}
-                            metrics={metrics}
-                            qaCount={qaCount}
-                            replies={replies}
-                            onTagClick={onTagClick}
-                        />
+                            {/* 2. Expanded View Layer */}
+                            <div className={`${styles.expandedLayer} ${isExpanded ? styles.expandedLayerVisible : ''}`}>
+                                <div className={styles.expandedLayerInner}>
+                                    <Sections.ExpandedDealTable
+                                        deal={deal}
+                                        layout={layout}
+                                        metrics={metrics}
+                                        qaCount={qaCount}
+                                        replies={replies}
+                                        onTagClick={onTagClick}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             </tbody>

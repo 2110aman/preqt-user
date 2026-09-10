@@ -430,8 +430,54 @@ export default async function DealPage({ params, searchParams }) {
       })),
     };
 
+    const breadcrumbSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": siteUrl,
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Deals",
+          "item": `${siteUrl}/deals`,
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": categoryConfig.label,
+          "item": `${siteUrl}/deals/${slug}`,
+        },
+      ],
+    };
+
+    const collectionPageSchema = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": `PrEqt ${categoryConfig.label} Deals`,
+      "url": `${siteUrl}/deals/${slug}`,
+      "description": categoryConfig.description,
+      "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": deals.length,
+        "itemListElement": itemListSchema.itemListElement,
+      },
+    };
+
     return (
       <div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}

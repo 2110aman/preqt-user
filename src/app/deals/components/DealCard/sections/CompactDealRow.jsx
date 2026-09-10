@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import RatingBadge from '../ui/RatingBadge';
 import { getMetricDetail } from '../config';
 import styles from '../DealCard.module.css';
@@ -170,33 +171,47 @@ export default function CompactDealRow({
     const plain2LabelFormatted = formatPlainLabel(plain2RawLabel, false, isUnlisted);
 
     return (
-        <>
+        <div className={styles.compactRowFlex}>
             {/* 1. Company Name Column */}
-            <td className={styles.tdCompany}>
+            <div className={styles.tdCompany}>
                 <div className={styles.companyInfoRow}>
                     <img
                         src={src}
                         alt={deal?.company_name || "Company Logo"}
                         className={styles.compactLogo}
+                        width={32}
+                        height={32}
+                        loading="lazy"
+                        decoding="async"
                         onError={() => setLogoFailed(true)}
                     />
                     <div className={styles.companyTextGroup}>
                         <span className={styles.tableColHeader}>Company Name</span>
-                        <span className={styles.compactCompanyName} title={deal?.company_name}>
-                            {deal?.company_name}
-                        </span>
+                        {deal?.slug ? (
+                            <Link href={`/deals/${deal.slug}`} className={styles.compactCompanyLink}>
+                                <h2 className={styles.compactCompanyName} title={deal?.company_name}>
+                                    {deal?.company_name}
+                                </h2>
+                            </Link>
+                        ) : (
+                            <h2 className={styles.compactCompanyName} title={deal?.company_name}>
+                                {deal?.company_name}
+                            </h2>
+                        )}
                     </div>
                 </div>
-            </td>
+            </div>
 
             {/* 2. Vertical Divider 1 */}
-            <td className={styles.tdDivider}>
-                {hasRating ? <div className={styles.compactDivider} /> : null}
-            </td>
+            {hasRating && (
+                <div className={styles.tdDivider}>
+                    <div className={styles.compactDivider} />
+                </div>
+            )}
 
             {/* 3. Pr.eqt Rating Column */}
-            <td className={styles.tdRating}>
-                {hasRating ? (
+            {hasRating && (
+                <div className={styles.tdRating}>
                     <div className={styles.ratingColGroup}>
                         <span className={styles.tableColHeader}>Pr.eqt Rating</span>
                         <div className={styles.ratingContent}>
@@ -209,12 +224,12 @@ export default function CompactDealRow({
                             />
                         </div>
                     </div>
-                ) : null}
-            </td>
+                </div>
+            )}
 
             {/* 4. Tagline / 1st Tag Pill Column */}
-            <td className={styles.tdTagline}>
-                {tagText ? (
+            <div className={styles.tdTagline}>
+                {tagText && (
                     <div
                         className={styles.taglinePill}
                         title={tagText}
@@ -230,27 +245,27 @@ export default function CompactDealRow({
                     >
                         {tagText}
                     </div>
-                ) : null}
-            </td>
+                )}
+            </div>
 
             {/* 5. Vertical Divider 2 */}
-            <td className={styles.tdDivider}>
+            <div className={styles.tdDivider}>
                 <div className={styles.compactDivider} />
-            </td>
+            </div>
 
             {/* 6. Hero Metric Box 1 (Issue Size / Valuation) */}
-            <td className={styles.tdHero}>
-                {hero1 && (
+            {hero1 && (
+                <div className={styles.tdHero}>
                     <div className={styles.compactHeroBox}>
                         <span className={styles.compactHeroLabel}>{formatPlainLabel(hero1.label, true)}</span>
                         <span className={styles.compactHeroValue}>{formatHeroValue(hero1, metrics.hero[0])}</span>
                     </div>
-                )}
-            </td>
+                </div>
+            )}
 
             {/* 7. Hero Metric Box 2 (GMP / Share Price) */}
-            <td className={styles.tdHero}>
-                {hero2 && (
+            {hero2 && (
+                <div className={styles.tdHero}>
                     <div className={styles.compactHeroBox}>
                         <span className={styles.compactHeroLabel}>{formatPlainLabel(hero2.label, true)}</span>
                         <span className={styles.compactHeroValue}>
@@ -264,28 +279,28 @@ export default function CompactDealRow({
                             )}
                         </span>
                     </div>
-                )}
-            </td>
+                </div>
+            )}
 
             {/* 8. Plain Metric 1 (Valuation / Min. Investment) */}
-            <td className={`${styles.tdPlain} ${styles.tdPlainMinVal}`}>
-                {plain1 && (
+            {plain1 && (
+                <div className={`${styles.tdPlain} ${styles.tdPlainMinVal}`}>
                     <div className={styles.compactPlainItem}>
                         <span className={styles.compactPlainLabel}>{plain1LabelFormatted}</span>
                         <span className={styles.compactPlainValue}>{formatValueByMetric(plain1.value, plain1.metric)}</span>
                     </div>
-                )}
-            </td>
+                </div>
+            )}
 
             {/* 9. Plain Metric 2 (Open Date / Expected Listing / Revenue) */}
-            <td className={`${styles.tdPlain} ${styles.tdPlainDateRev}`}>
-                {plain2 && (
+            {plain2 && (
+                <div className={`${styles.tdPlain} ${styles.tdPlainDateRev}`}>
                     <div className={styles.compactPlainItem}>
                         <span className={styles.compactPlainLabel}>{plain2LabelFormatted}</span>
                         <span className={styles.compactPlainValue}>{formatValueByMetric(plain2.value, plain2.metric)}</span>
                     </div>
-                )}
-            </td>
-        </>
+                </div>
+            )}
+        </div>
     );
 }

@@ -5,7 +5,7 @@ import styles from "../../../components/home/DealsTalk/DealsTalk.module.css";
 import stylesdeals from "./AllDeals.module.css";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cookies from "js-cookie";
 
 import React from "react";
@@ -120,6 +120,125 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     const mobileSortDropdownRef = useRef(null);
     const tagDropdownRef = useRef(null);
 
+    // Desktop Table View: Persistent Hover & Smooth Closing State with Intent Delay
+    const [activeDealId, setActiveDealId] = useState(null);
+    const [closingDealId, setClosingDealId] = useState(null);
+    const openTimerRef = useRef(null);
+    const closeTimerRef = useRef(null);
+    const leaveTimerRef = useRef(null);
+
+    const handleHoverDeal = useCallback((dealId) => {
+        // Clear any pending leave/close timer
+        if (leaveTimerRef.current) {
+            clearTimeout(leaveTimerRef.current);
+            leaveTimerRef.current = null;
+        }
+
+        // Clear any pending open timer from another card
+        if (openTimerRef.current) {
+            clearTimeout(openTimerRef.current);
+            openTimerRef.current = null;
+        }
+
+        // Delay opening by 80ms so the card opens quickly when intended
+        openTimerRef.current = setTimeout(() => {
+            setActiveDealId((prevActive) => {
+                if (prevActive === dealId) return prevActive;
+                if (prevActive) {
+                    setClosingDealId(prevActive);
+                    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+                    closeTimerRef.current = setTimeout(() => {
+                        setClosingDealId(null);
+                    }, 380);
+                }
+                return dealId;
+            });
+            setClosingDealId((prevClosing) => {
+                if (prevClosing === dealId) {
+                    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+                    return null;
+                }
+                return prevClosing;
+            });
+        }, 80);
+    }, []);
+
+    const handleHoverLeave = useCallback((dealId) => {
+        // Cancel pending open timer if user swiped past before delay completed
+        if (openTimerRef.current) {
+            clearTimeout(openTimerRef.current);
+            openTimerRef.current = null;
+        }
+
+        // Clear any existing leave timer
+        if (leaveTimerRef.current) {
+            clearTimeout(leaveTimerRef.current);
+            leaveTimerRef.current = null;
+        }
+
+        // When mouse leaves the card, smoothly close back to compact form after 120ms
+        leaveTimerRef.current = setTimeout(() => {
+            setActiveDealId((prevActive) => {
+                if (prevActive === dealId) {
+                    return null;
+                }
+                return prevActive;
+            });
+        }, 120);
+    }, []);
+
+    const handleCloseActiveDeal = useCallback(() => {
+        if (openTimerRef.current) {
+            clearTimeout(openTimerRef.current);
+            openTimerRef.current = null;
+        }
+        if (leaveTimerRef.current) {
+            clearTimeout(leaveTimerRef.current);
+            leaveTimerRef.current = null;
+        }
+        setActiveDealId((prevActive) => {
+            if (prevActive) {
+                setClosingDealId(prevActive);
+                if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+                closeTimerRef.current = setTimeout(() => {
+                    setClosingDealId(null);
+                }, 380);
+            }
+            return null;
+        });
+    }, []);
+
+    // Global listener: close active expanded card smoothly when user clicks any button/interactive control
+    useEffect(() => {
+        const handleGlobalClick = (e) => {
+            const btn = e.target.closest('button, [role="button"], input[type="button"], input[type="submit"], a, select') ||
+                        e.target.closest(`.${stylesdeals.tabItem}`) ||
+                        e.target.closest(`.${stylesdeals.sortOption}`) ||
+                        e.target.closest(`.${stylesdeals.viewToggleBtn}`) ||
+                        e.target.closest(`.${stylesdeals.pill}`) ||
+                        e.target.closest(`.${stylesdeals.selectedTagPill}`) ||
+                        e.target.closest(`.${stylesdeals.companySearchClear}`);
+            if (btn) {
+                handleCloseActiveDeal();
+            }
+        };
+        window.addEventListener('click', handleGlobalClick, true);
+        return () => {
+            window.removeEventListener('click', handleGlobalClick, true);
+            if (openTimerRef.current) clearTimeout(openTimerRef.current);
+            if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+            if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+        };
+    }, [handleCloseActiveDeal]);
+
+    useEffect(() => {
+        if (openTimerRef.current) clearTimeout(openTimerRef.current);
+        if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+        if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+        setActiveDealId(null);
+        setClosingDealId(null);
+    }, [currentPage, viewType]);
+
     const sortOptions = useMemo(() => {
         const isUnlisted = (selectedDealType || "").toLowerCase() === "unlisted";
         const allOptions = [
@@ -206,6 +325,42 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         { label: "Startup Deals", value: "Startup", slug: "startup-deals" }
     ];
 
+    const getCategoryHeading = () => {
+        const type = (selectedDealType || "").toLowerCase();
+        switch (type) {
+            case "upcoming":
+                return "Upcoming IPO Deals & Issues";
+            case "public":
+                return "Live IPO Deals & Investment Opportunities";
+            case "unlisted":
+                return "Unlisted Shares & Pre-IPO Investments";
+            case "private":
+                return "Exclusive Private Equity Deals";
+            case "startup":
+                return "Curated Startup Deals & Venture Investments";
+            default:
+                return "Invest Opportunities";
+        }
+    };
+
+    const getCategorySubtitle = () => {
+        const type = (selectedDealType || "").toLowerCase();
+        switch (type) {
+            case "upcoming":
+                return "Discover upcoming IPOs and pre-IPO investment opportunities on PrEqt. Access live analytics, timeline tracking, and issue size details.";
+            case "public":
+                return "Access verified IPO opportunities with live GMP, valuation scores, financials, and company analytics on PrEqt.";
+            case "unlisted":
+                return "Invest in verified unlisted company shares, explore valuations, price trends, and financial reports on PrEqt.";
+            case "private":
+                return "Explore institutional-grade private equity opportunities and exclusive co-investment deals on PrEqt.";
+            case "startup":
+                return "Invest in high-growth startups and venture-backed companies. Verified deal flow for early-stage capital.";
+            default:
+                return "Browse through institutional-grade private equity, SME IPOs, and unlisted shares. Verified data for sophisticated capital.";
+        }
+    };
+
     useEffect(() => {
         if (initialCategory) {
             setLocalCategory(initialCategory);
@@ -238,56 +393,73 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         }
     }, [searchParams, setSelectedDealType]);
 
-    const availableStages = useMemo(() => {
-        const defaultStages = ["IPO – SME", "IPO – Mainboard", "Pre-IPO – SME", "Pre-IPO – Mainboard", "Early Stage", "Growth Stage", "Late Stage"];
-        if (!allDeals) return defaultStages;
-        const allStages = allDeals.map(deal => deal.company_stage).filter(Boolean);
-        return [...new Set([...defaultStages, ...allStages])].sort();
-    }, [allDeals]);
+    const [filterOptionsData, setFilterOptionsData] = useState(null);
 
-    const getVal = (val) => (typeof val === 'object' && val !== null && 'data' in val) ? val.data : val;
-
-    const revenueRange = useMemo(() => {
-        if (!allDeals || allDeals.length === 0) return { min: 0, max: 100 };
-        const revenues = allDeals.map(d => parseFloat(getVal(d.revenue_fy25_in_cr))).filter(n => !isNaN(n));
-        if (revenues.length === 0) return { min: 0, max: 100 };
-        return {
-            min: Math.min(0, Math.floor(Math.min(...revenues))),
-            max: Math.max(100, Math.ceil(Math.max(...revenues)))
+    useEffect(() => {
+        const fetchFilterOptions = async () => {
+            try {
+                const token = Cookies.get('accessToken');
+                const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
+                const baseUrl = rawBaseUrl.endsWith('/') ? rawBaseUrl : `${rawBaseUrl}/`;
+                const res = await fetch(`${baseUrl}admin/api/deals/filter-options`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` }),
+                    },
+                });
+                if (res.ok) {
+                    const result = await res.json();
+                    const options = result?.data?.data || result?.data || {};
+                    setFilterOptionsData(options);
+                }
+            } catch (err) {
+                console.error("Error fetching filter options:", err);
+            }
         };
-    }, [allDeals]);
+        fetchFilterOptions();
+    }, []);
+
+    const availableStages = useMemo(() => {
+        if (Array.isArray(filterOptionsData?.dealStages) && filterOptionsData.dealStages.length > 0) {
+            return Array.from(new Set(filterOptionsData.dealStages.map(s => String(s).trim()).filter(Boolean)));
+        }
+        return ["IPO – SME", "IPO – Mainboard", "Pre-IPO – SME", "Pre-IPO – Mainboard", "Early Stage", "Growth Stage", "Late Stage"];
+    }, [filterOptionsData]);
+
+    const ticketSizeData = useMemo(() => {
+        const ts = filterOptionsData?.ticketSize;
+        return {
+            min: typeof ts?.min === 'number' ? ts.min : 0,
+            max: typeof ts?.max === 'number' ? ts.max : 10000,
+            ranges: Array.isArray(ts?.ranges) ? ts.ranges : [],
+            options: Array.isArray(ts?.options) ? ts.options : [],
+        };
+    }, [filterOptionsData]);
 
     const valuationRangeData = useMemo(() => {
-        if (!allDeals || allDeals.length === 0) return { min: 0, max: 10000 };
-        const valuations = allDeals.map(d => parseFloat(getVal(d.valuation_in_cr) || getVal(d.target_valuation_in_cr))).filter(n => !isNaN(n));
-        if (valuations.length === 0) return { min: 0, max: 10000 };
+        const vr = filterOptionsData?.valuationRange;
         return {
-            min: Math.min(0, Math.floor(Math.min(...valuations))),
-            max: Math.max(10000, Math.ceil(Math.max(...valuations)))
+            min: typeof vr?.min === 'number' ? vr.min : 0,
+            max: typeof vr?.max === 'number' ? vr.max : 20000,
+            ranges: Array.isArray(vr?.ranges) ? vr.ranges : [],
+            options: Array.isArray(vr?.options) ? vr.options : [],
         };
-    }, [allDeals]);
+    }, [filterOptionsData]);
 
     const availableActivities = useMemo(() => {
-        if (!allDeals) return [];
-        const allActs = allDeals.flatMap(deal => {
-            const freshness = deal.activity_freshness;
-            if (Array.isArray(freshness)) return freshness;
-            if (freshness && Array.isArray(freshness.data)) return freshness.data;
-            return [];
-        }).filter(Boolean);
-        return [...new Set(allActs)].sort();
-    }, [allDeals]);
+        if (Array.isArray(filterOptionsData?.activities) && filterOptionsData.activities.length > 0) {
+            return Array.from(new Set(filterOptionsData.activities.map(a => String(a).trim()).filter(Boolean)));
+        }
+        return ["New Deals", "Trending Deals", "Most Viewed", "Recently Updated"];
+    }, [filterOptionsData]);
 
     const availableParticipations = useMemo(() => {
-        if (!allDeals) return [];
-        const allParts = allDeals.flatMap(deal => {
-            const validations = deal.participation_validations;
-            if (Array.isArray(validations)) return validations;
-            if (validations && Array.isArray(validations.data)) return validations.data;
-            return [];
-        }).filter(Boolean);
-        return [...new Set(allParts)].sort();
-    }, [allDeals]);
+        if (Array.isArray(filterOptionsData?.participation) && filterOptionsData.participation.length > 0) {
+            return Array.from(new Set(filterOptionsData.participation.map(p => String(p).trim()).filter(Boolean)));
+        }
+        return ["Merchant Banker Appointed", "Anchor / Strategic Investors", "Institutional / Fund Participation", "Strong Promoter Background"];
+    }, [filterOptionsData]);
 
     const availableSectors = useMemo(() => {
         if (!fetchedSectors || !Array.isArray(fetchedSectors)) return [];
@@ -695,13 +867,28 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
     const showUnlockTeaser = (selectedDealType || '').toLowerCase() === "all";
 
-    const teaserRandomIndex = useMemo(() => {
-        if (!dealsToRender || dealsToRender.length === 0) return -1;
-        if (dealsToRender.length === 1) return 0;
-        const min = 1;
-        const max = Math.max(1, dealsToRender.length - 1);
-        if (max === min) return 1;
-        return Math.floor(Math.random() * (max - min)) + min;
+    const teaserIndices = useMemo(() => {
+        if (!dealsToRender || dealsToRender.length === 0) return [];
+        const count = dealsToRender.length;
+        if (count < 10) {
+            // Less than 10 cards: show 1 private unlock teaser
+            if (count === 1) return [0];
+            const min = 1;
+            const max = Math.max(1, count - 1);
+            const idx = Math.floor(Math.random() * (max - min)) + min;
+            return [idx];
+        } else {
+            // 10 or more cards: show 2 private unlock teasers
+            const firstMin = 2;
+            const firstMax = Math.max(firstMin, Math.floor(count / 2) - 1);
+            const idx1 = Math.floor(Math.random() * (firstMax - firstMin + 1)) + firstMin;
+
+            const secondMin = Math.max(idx1 + 3, Math.floor(count / 2) + 1);
+            const secondMax = Math.max(secondMin, count - 2);
+            const idx2 = Math.floor(Math.random() * (secondMax - secondMin + 1)) + secondMin;
+
+            return [idx1, idx2];
+        }
     }, [dealsToRender?.length, currentPage, selectedDealType]);
 
     const handlePageChange = (page) => {
@@ -1096,37 +1283,41 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 <section ref={dealsSectionRef} id="dealsSection" className={`${styles.DealsTalkMainContainer} ${stylesdeals.DealsTalkMainContainer} ${appliedFilters ? stylesdeals.filtersActive : ""}`} >
                     <div className={`${stylesdeals.allDealsHeaderRow} ${appliedFilters ? stylesdeals.filtersActive : ""}`}>
                         <div className={stylesdeals.pageHeader}>
-                            <div className={stylesdeals.backButtonHeader} onClick={() => router.push('/')}>
+                            <div className={stylesdeals.backButtonHeader} onClick={() => router.push('/')} role="button" tabIndex={0} aria-label="Go to Home">
                                 <span className={stylesdeals.backArrow}>
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="15 18 9 12 15 6"></polyline>
                                     </svg>
                                 </span>
-                                <h1 className={stylesdeals.mobileDealsTitle}>Deals</h1>
+                                <span className={stylesdeals.mobileDealsTitle}>Deals</span>
                             </div>
-                            <h1 className={stylesdeals.desktopTitle}>Invest Opportunities</h1>
-                            <p className={stylesdeals.desktopSubtitle}>Browse through institutional-grade private equity, SME IPOs, and<br />unlisted shares. Verified data for sophisticated capital.</p>
+                            <h1 className={stylesdeals.desktopTitle}>{getCategoryHeading()}</h1>
+                            <p className={stylesdeals.desktopSubtitle}>{getCategorySubtitle()}</p>
                         </div>
 
                         <div className={stylesdeals.filterBarRow}>
                             {/* Row 1: Filter button + View Toggle + Deal Type Dropdown (Mobile) / Full Desktop Row */}
                             <div className={stylesdeals.filterRowTop}>
-                                <button className={stylesdeals.desktopFilterBtn} onClick={() => setShowFilterPopup(!showFilterPopup)} title="Filters">
+                                <button className={stylesdeals.desktopFilterBtn} onClick={() => setShowFilterPopup(!showFilterPopup)} title="Filters" aria-label="Filters">
                                     <SlidersHorizontal size={18} />
                                 </button>
 
                                 {/* Static Pill Tabs for Deal Types (Desktop only) */}
-                                <div className={stylesdeals.dealTypeTabs}>
+                                <nav className={stylesdeals.dealTypeTabs} aria-label="Deal Categories">
                                     {dealTypeTabs.map(tab => (
-                                        <div
+                                        <Link
                                             key={tab.value}
+                                            href={tab.slug ? `/deals/${tab.slug}` : "/deals"}
                                             className={`${stylesdeals.tabItem} ${selectedDealType === tab.value ? stylesdeals.activeTab : ""}`}
-                                            onClick={() => handleTabSelect(tab)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleTabSelect(tab);
+                                            }}
                                         >
                                             {tab.label}
-                                        </div>
+                                        </Link>
                                     ))}
-                                </div>
+                                </nav>
 
                                 {/* Search Company Input (Desktop only) */}
                                 <div className={`${stylesdeals.companySearchContainer} ${stylesdeals.desktopOnly}`}>
@@ -1472,8 +1663,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                                     <table className={stylesdeals.dealsTable}>
                                                         {dealsToRender.map((deal, index) => (
                                                             <React.Fragment key={`table-${deal.id}`}>
-                                                                {showUnlockTeaser && index === teaserRandomIndex && (
-                                                                    <tbody key="unlock-teaser-group" className={stylesdeals.teaserTbody} role="rowgroup">
+                                                                {showUnlockTeaser && teaserIndices.includes(index) && (
+                                                                    <tbody key={`unlock-teaser-group-${index}`} className={stylesdeals.teaserTbody} role="rowgroup">
                                                                         <tr className={stylesdeals.teaserTr}>
                                                                             <td colSpan={9} className={stylesdeals.teaserTd}>
                                                                                 <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={true} />
@@ -1489,6 +1680,10 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                                                     isTableView={true}
                                                                     ignoreFeatured={true}
                                                                     onTagClick={handleAddTag}
+                                                                    isExpanded={activeDealId === deal.id}
+                                                                    isClosing={closingDealId === deal.id}
+                                                                    onHover={() => handleHoverDeal(deal.id)}
+                                                                    onHoverLeave={() => handleHoverLeave(deal.id)}
                                                                 />
                                                             </React.Fragment>
                                                         ))}
@@ -1500,8 +1695,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                             <div className={stylesdeals.mobileListWrapper}>
                                                 {dealsToRender.map((deal, index) => (
                                                     <React.Fragment key={`list-${deal.id}`}>
-                                                        {showUnlockTeaser && index === teaserRandomIndex && (
-                                                            <div className="col-12 px-0" style={{ width: "100%", marginBottom: "16px" }}>
+                                                        {showUnlockTeaser && teaserIndices.includes(index) && (
+                                                            <div key={`unlock-teaser-mobile-${index}`} className="col-12 px-0" style={{ width: "100%", marginBottom: "16px" }}>
                                                                 <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={false} />
                                                             </div>
                                                         )}
@@ -1524,8 +1719,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                         <>
                                             {dealsToRender.map((deal, index) => (
                                                 <React.Fragment key={deal.id}>
-                                                    {showUnlockTeaser && index === teaserRandomIndex && (
-                                                        <div key="unlock-teaser-grid" className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
+                                                    {showUnlockTeaser && teaserIndices.includes(index) && (
+                                                        <div key={`unlock-teaser-grid-${index}`} className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
                                                             <UnlockTeaser isGridCard={true} isAllDeals={true} />
                                                         </div>
                                                     )}
@@ -1576,6 +1771,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                         key={`page-${p}`}
                                         className={`${stylesdeals.paginationBtn} ${currentPage === p ? stylesdeals.paginationActive : ''}`}
                                         onClick={() => handlePageChange(p)}
+                                        aria-label={`Page ${p}`}
+                                        aria-current={currentPage === p ? "page" : undefined}
                                     >
                                         {p}
                                     </button>
@@ -1679,7 +1876,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 show={showFilterPopup}
                 onHide={() => setShowFilterPopup(false)}
                 availableStages={availableStages}
-                revenueRange={revenueRange}
+                ticketSizeRange={ticketSizeData}
+                revenueRange={ticketSizeData}
                 valuationRange={valuationRangeData}
                 availableActivities={availableActivities}
                 availableParticipations={availableParticipations}

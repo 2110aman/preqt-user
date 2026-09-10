@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Link from 'next/link';
 import RatingBadge from '../ui/RatingBadge';
 import CardFooter from './CardFooter';
 import CardHeader from './CardHeader';
@@ -138,10 +139,20 @@ export default function ExpandedDealTable({
                             src={logoSrc}
                             alt={deal?.company_name}
                             className={styles.expandedCompanyLogo}
+                            width={58}
+                            height={58}
+                            loading="lazy"
+                            decoding="async"
                             onError={() => setLogoFailed(true)}
                         />
                         <div className={styles.expandedCompanyText}>
-                            <h3 className={styles.expandedCompanyName}>{deal?.company_name}</h3>
+                            {deal?.slug ? (
+                                <Link href={`/deals/${deal.slug}`} className={styles.compactCompanyLink}>
+                                    <h2 className={styles.expandedCompanyName}>{deal?.company_name}</h2>
+                                </Link>
+                            ) : (
+                                <h2 className={styles.expandedCompanyName}>{deal?.company_name}</h2>
+                            )}
                             <p className={styles.expandedCompanyTagline}>
                                 {deal?.tag_line || "No description available"}
                             </p>

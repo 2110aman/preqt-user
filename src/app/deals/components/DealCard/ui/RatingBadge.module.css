@@ -101,7 +101,7 @@
 .compactRatingValueBox {
     width: 22px !important;
     height: 18px !important;
-    padding: 0 !important;
+    padding: 2.5px 0px 0px 0px !important;
     font-size: 9.5px !important;
     border-radius: 12px !important;
     flex-shrink: 0 !important;

@@ -106,8 +106,50 @@ export default async function Page({ searchParams }) {
     }),
   };
 
+  // Breadcrumb schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Deals",
+        "item": `${siteUrl}/deals`,
+      },
+    ],
+  };
+
+  // CollectionPage schema
+  const collectionPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Exclusive Private Equity, Pre-IPO & Unlisted Deals | PrEqt",
+    "url": `${siteUrl}/deals`,
+    "description": "Explore verified private equity deals, upcoming IPOs, and unlisted share investment opportunities on PrEqt. Access live analytics and high-conviction deal flow.",
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": deals.length,
+      "itemListElement": itemListSchema.itemListElement,
+    },
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}

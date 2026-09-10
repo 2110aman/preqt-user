@@ -21,6 +21,8 @@ export default function CardCompanyInfo({ deal, isListView, hideAvatar }) {
                     src={src} 
                     alt={deal?.company_name} 
                     className={styles.companyLogo}
+                    loading="lazy"
+                    decoding="async"
                     onError={() => setLogoFailed(true)}
                 />
             )}
