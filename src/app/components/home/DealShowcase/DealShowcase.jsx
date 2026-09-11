@@ -7,6 +7,12 @@ import styles from './DealShowcase.module.css';
 import DealCard from '@/app/deals/components/DealCard';
 import Link from 'next/link';
 
+const isFeaturedDeal = (deal) => {
+    const subType = (deal?.deal_sub_type || '').toLowerCase().trim();
+    const type = (deal?.deal_type || '').toLowerCase().trim();
+    return subType === 'featured' || type === 'featured';
+};
+
 export default function DealShowcase() {
     const [featuredDeals, setFeaturedDeals] = useState([]);
     const [ipoDeals, setIpoDeals] = useState([]);
@@ -72,7 +78,8 @@ export default function DealShowcase() {
                     const resJson = await publicRes.value.json();
                     const deals = resJson.data || [];
                     const pagination = resJson.pagination || {};
-                    setIpoDeals(deals);
+                    const nonFeaturedDeals = deals.filter((deal) => !isFeaturedDeal(deal));
+                    setIpoDeals(nonFeaturedDeals);
                     const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
                     setHasMorePublic(totalRecords > 0 ? totalRecords > deals.length : deals.length >= 20);
                 }
@@ -81,7 +88,8 @@ export default function DealShowcase() {
                     const resJson = await unlistedRes.value.json();
                     const deals = resJson.data || [];
                     const pagination = resJson.pagination || {};
-                    setUnlistedDeals(deals);
+                    const nonFeaturedDeals = deals.filter((deal) => !isFeaturedDeal(deal));
+                    setUnlistedDeals(nonFeaturedDeals);
                     const totalRecords = Number(pagination.totalRecords || pagination.total || 0);
                     setHasMoreUnlisted(totalRecords > 0 ? totalRecords > deals.length : deals.length >= 40);
                 }
@@ -170,9 +178,10 @@ export default function DealShowcase() {
                 const pagination = responseData.pagination || {};
 
                 if (newDeals.length > 0) {
+                    const nonFeaturedNewDeals = newDeals.filter((deal) => !isFeaturedDeal(deal));
                     setIpoDeals((prev) => {
                         const existingIds = new Set(prev.map((d) => d.id));
-                        const uniqueNew = newDeals.filter((d) => !existingIds.has(d.id));
+                        const uniqueNew = nonFeaturedNewDeals.filter((d) => !existingIds.has(d.id));
                         return [...prev, ...uniqueNew];
                     });
 
@@ -219,9 +228,10 @@ export default function DealShowcase() {
                 const pagination = responseData.pagination || {};
 
                 if (newDeals.length > 0) {
+                    const nonFeaturedNewDeals = newDeals.filter((deal) => !isFeaturedDeal(deal));
                     setUnlistedDeals((prev) => {
                         const existingIds = new Set(prev.map((d) => d.id));
-                        const uniqueNew = newDeals.filter((d) => !existingIds.has(d.id));
+                        const uniqueNew = nonFeaturedNewDeals.filter((d) => !existingIds.has(d.id));
                         return [...prev, ...uniqueNew];
                     });
 
