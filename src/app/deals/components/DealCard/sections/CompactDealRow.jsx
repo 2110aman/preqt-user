@@ -39,7 +39,7 @@ const formatValueByMetric = (value, metric) => {
 
     switch (metric?.format) {
         case 'currency':
-            return `₹${formatNumberWithCommas(value)}${metric?.suffix ? ` ${metric.suffix}` : ''}${metric?.perShare ? ' /sh' : ''}`;
+            return `₹${formatNumberWithCommas(value)}${metric?.suffix ? ` ${metric.suffix}` : ''}${metric?.perShare ? ' /share' : ''}`;
         case 'multiplier':
             return `${formatNumberWithCommas(value)}x`;
         case 'percent':
@@ -157,7 +157,7 @@ export default function CompactDealRow({
     const formatHeroValue = (hero, config) => {
         if (!hero || hero.value === "TBD") return "TBD";
         if (config?.format === "currency") {
-            return `₹${formatNumberWithCommas(hero.value)}${config?.suffix ? ` ${config.suffix}` : ''}${config?.perShare ? ' /sh' : ''}`;
+            return `₹${formatNumberWithCommas(hero.value)}${config?.suffix ? ` ${config.suffix}` : ''}${config?.perShare ? ' /share' : ''}`;
         }
         return formatNumberWithCommas(hero.value);
     };

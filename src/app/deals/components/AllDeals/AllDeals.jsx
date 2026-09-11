@@ -886,12 +886,13 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             const idx = Math.floor(Math.random() * (max - min)) + min;
             return [idx];
         } else {
-            // 10 or more cards: show 2 private unlock teasers
+            // 10 or more cards: show 2 private unlock teasers with at least 4 to 5 cards gap
+            const minGap = 5; // Minimum cards between teasers so they are never adjacent
             const firstMin = 2;
-            const firstMax = Math.max(firstMin, Math.floor(count / 2) - 1);
+            const firstMax = Math.max(firstMin, Math.min(Math.floor(count / 2) - 1, count - minGap - 2));
             const idx1 = Math.floor(Math.random() * (firstMax - firstMin + 1)) + firstMin;
 
-            const secondMin = Math.max(idx1 + 3, Math.floor(count / 2) + 1);
+            const secondMin = Math.max(idx1 + minGap, Math.floor(count / 2) + 1);
             const secondMax = Math.max(secondMin, count - 2);
             const idx2 = Math.floor(Math.random() * (secondMax - secondMin + 1)) + secondMin;
 
@@ -1662,7 +1663,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                     <div className={`${styles.carouselWrapper} carouselWrapper`}>
                         <div className={`row g-0 ${styles.dealsRow} ${stylesdeals.dealsRow} ${viewType === 'list' ? stylesdeals.listView : ""}`}>
                             {loading ? (
-                                [...Array(8)].map((_, i) => (
+                                [...Array(15)].map((_, i) => (
                                     <div
                                         key={`skeleton-${i}`}
                                         className={`${viewType === 'grid' ? 'col-lg-3' : 'col-lg-12'} col-md-6 col-sm-12 ${stylesdeals.dealCardCol} ${viewType === 'list' ? stylesdeals.listViewCol : ""}`}

@@ -304,42 +304,162 @@ export async function generateMetadata({ params, searchParams }) {
 
     const description = apiMetaDescription || fallbackDescription;
 
-    const rawTags = Array.isArray(dealData?.deal_setpData?.tags?.data)
-      ? dealData.deal_setpData.tags.data
-      : Array.isArray(dealData?.tags?.data)
-      ? dealData.tags.data
-      : Array.isArray(dealData?.tags)
-      ? dealData.tags
-      : [];
+    // Dynamic Meta Keywords extraction (handles array of strings/objects, wrapped data, or strings)
+    const rawMetaKeywords =
+      dealData?.meta_keywords ||
+      dealData?.deal_setpData?.meta_keywords ||
+      deal?.data?.meta_keywords ||
+      dealData?.data?.meta_keywords ||
+      deal?.meta_keywords;
 
-    const rawHighlights = Array.isArray(
-      dealData?.deal_setpData?.key_highlights?.data
-    )
-      ? dealData.deal_setpData.key_highlights.data
-      : Array.isArray(dealData?.key_highlights?.data)
-      ? dealData.key_highlights.data
-      : Array.isArray(dealData?.key_highlights)
-      ? dealData.key_highlights
-      : [];
+    let apiKeywords = [];
 
-    const combinedItems = [...rawTags, ...rawHighlights]
-      .map((item) =>
-        typeof item === "string"
-          ? item
-          : item?.description || item?.name || item?.label || ""
-      )
-      .filter((item) => Boolean(item && item.trim()));
+    let keywordCandidate = rawMetaKeywords;
+    if (
+      keywordCandidate &&
+      typeof keywordCandidate === "object" &&
+      !Array.isArray(keywordCandidate)
+    ) {
+      if (Array.isArray(keywordCandidate.data)) {
+        keywordCandidate = keywordCandidate.data;
+      } else if (typeof keywordCandidate.data === "string") {
+        keywordCandidate = keywordCandidate.data;
+      }
+    }
 
-    const keywordList = combinedItems.map((item) =>
-      dealName ? `${dealName} - ${item.trim()}` : item.trim()
-    );
+    if (Array.isArray(keywordCandidate)) {
+      apiKeywords = keywordCandidate
+        .map((item) => {
+          if (typeof item === "string") return item.trim();
+          if (item && typeof item === "object") {
+            return (
+              item.name ||
+              item.value ||
+              item.label ||
+              item.keyword ||
+              item.title ||
+              ""
+            ).trim();
+          }
+          return String(item || "").trim();
+        })
+        .filter(Boolean);
+    } else if (typeof keywordCandidate === "string" && keywordCandidate.trim()) {
+      const trimmed = keywordCandidate.trim();
+      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) {
+            apiKeywords = parsed
+              .map((item) => {
+                if (typeof item === "string") return item.trim();
+                if (item && typeof item === "object") {
+                  return (
+                    item.name ||
+                    item.value ||
+                    item.label ||
+                    item.keyword ||
+                    item.title ||
+                    ""
+                  ).trim();
+                }
+                return String(item || "").trim();
+              })
+              .filter(Boolean);
+          }
+        } catch (_) {
+          apiKeywords = trimmed
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+        }
+      } else {
+        apiKeywords = trimmed
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+      }
+    }
+
+    // Helper to safely extract string array from fields formatted as { status, data: [...] } or plain arrays
+    const extractArrayData = (field) => {
+      if (!field) return [];
+      let list = field;
+      if (typeof field === "object" && !Array.isArray(field)) {
+        if (field.status === false || field.status === "false") return [];
+        if (Array.isArray(field.data)) {
+          list = field.data;
+        } else if (typeof field.data === "string" && field.data.trim()) {
+          list = [field.data];
+        } else {
+          return [];
+        }
+      }
+      if (!Array.isArray(list)) return [];
+      return list
+        .map((item) => {
+          if (typeof item === "string") return item.trim();
+          if (item && typeof item === "object") {
+            return (
+              item.name ||
+              item.label ||
+              item.sector ||
+              item.tag ||
+              item.description ||
+              item.point ||
+              item.value ||
+              item.title ||
+              ""
+            ).trim();
+          }
+          return String(item || "").trim();
+        })
+        .filter(Boolean);
+    };
+
+    // Fallback Keywords: Combination of tags, companies_sectors, and key_highlights
+    const rawTags = [
+      ...extractArrayData(dealData?.deal_setpData?.tags),
+      ...extractArrayData(dealData?.tags),
+      ...extractArrayData(dealData?.data?.tags),
+    ];
+
+    const rawSectors = [
+      ...extractArrayData(dealData?.deal_setpData?.companies_sectors),
+      ...extractArrayData(dealData?.companies_sectors),
+      ...extractArrayData(dealData?.data?.companies_sectors),
+      ...extractArrayData(dealData?.deal_setpData?.company_sectors),
+      ...extractArrayData(dealData?.company_sectors),
+    ];
+
+    const rawHighlights = [
+      ...extractArrayData(dealData?.deal_setpData?.key_highlights),
+      ...extractArrayData(dealData?.key_highlights),
+      ...extractArrayData(dealData?.data?.key_highlights),
+    ];
+
+    // Combine and deduplicate unique values across tags, sectors, and highlights
+    const fallbackCombinedValues = Array.from(
+      new Set([...rawTags, ...rawSectors, ...rawHighlights])
+    ).filter(Boolean);
+
+    const fallbackKeywordsList = [];
+    if (dealName) {
+      fallbackKeywordsList.push(dealName);
+    }
+    fallbackCombinedValues.forEach((val) => {
+      if (!fallbackKeywordsList.includes(val)) {
+        fallbackKeywordsList.push(val);
+      }
+    });
+
+    const fallbackKeywords =
+      fallbackKeywordsList.length > 0
+        ? fallbackKeywordsList.join(", ")
+        : "Deals, Investments, Opportunities";
 
     const keywords =
-      keywordList.length > 0
-        ? keywordList.join(", ")
-        : dealName
-        ? `${dealName}, Deals, Investments, Opportunities`
-        : "Deals, Investments, Opportunities";
+      apiKeywords.length > 0 ? apiKeywords.join(", ") : fallbackKeywords;
 
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
     const normalizedSlug = encodeURIComponent((slug || "").toLowerCase().trim());

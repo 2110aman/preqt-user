@@ -769,7 +769,7 @@
 }
 
 .skeletonCardList {
-    height: 140px;
+    height: 55px;
 }
 
 @keyframes skeletonShimmer {
