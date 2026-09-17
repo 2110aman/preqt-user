@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "react-bootstrap";
 import Signin from "./Signin";
 // hypothetical component

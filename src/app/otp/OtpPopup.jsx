@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "react-bootstrap";
 import styles from "./otp.module.css";
 import { showErrorToast, showSuccessToast } from "../components/ToastProvider";

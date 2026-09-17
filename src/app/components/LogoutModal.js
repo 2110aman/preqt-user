@@ -1,5 +1,6 @@
 "use client"
 import React, { useEffect } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal, Button } from "react-bootstrap";
 
 const LogoutModal = ({ show = false, onClose = () => { }, onLogout = () => { } }) => {

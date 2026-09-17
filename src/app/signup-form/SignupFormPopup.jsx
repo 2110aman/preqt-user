@@ -1,4 +1,5 @@
 "use client";
+import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "react-bootstrap";
 import { useState, useEffect, useRef } from "react";
 import { useMultiStepContext } from "@/app/utils/MultiStepContext";

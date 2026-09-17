@@ -1,5 +1,4 @@
 import "./globals.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import { MultiStepProvider } from "./utils/MultiStepContext";
 import { DealTypeProvider } from "./utils/DealTypeContext";
