@@ -39,7 +39,10 @@
 }
 
 .cta {
-
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   color: #F7FCFF;
   text-align: center;
   font-family: Manrope;

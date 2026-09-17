@@ -87,7 +87,7 @@ export default function Page() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Support</h2>
+      <h1 className={styles.title}>Support</h1>
       <p className={styles.subtitle}>
         Fill out the form below and we'll get back to you as soon as possible.
       </p>

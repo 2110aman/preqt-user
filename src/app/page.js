@@ -1,16 +1,20 @@
 import { cookies } from "next/headers";
 import { getRobotsDirectives, checkIsStaging } from "./utils/seoUtils";
-import HomeComponent from "./components/home/home";
-import LandingPage from "./components/LandingPage/LandingPage";
+import dynamic from "next/dynamic";
 import HeroBanner from "./new-landing/fillequitymarket.module.css/HeroBanner";
-import FillEquityMarket from "./new-landing/fillequitymarket.module.css/FillEquityMarket";
-import DealFlow from "./new-landing/fillequitymarket.module.css/DealFlow";
-import DealsMatter from "./new-landing/fillequitymarket.module.css/dealsMatter";
-import Pillar from "./new-landing/fillequitymarket.module.css/Pillar";
-import ScrollShowcase from "./new-landing/ScrollShowcase";
-import Investors from "./new-landing/fillequitymarket.module.css/Investors";
-import BenefitSection from "./new-landing/fillequitymarket.module.css/BenefitSection";
-import NetworkGlobal from "./new-landing/fillequitymarket.module.css/NetworkGlobal";
+
+// Dynamic code-split for offscreen below-the-fold sections and authenticated dashboard:
+// ssr: true guarantees Googlebot and search crawlers receive 100% full HTML on initial request,
+// while breaking up client-side JavaScript execution into non-blocking asynchronous chunks.
+const HomeComponent = dynamic(() => import("./components/home/home"), { ssr: true });
+const FillEquityMarket = dynamic(() => import("./new-landing/fillequitymarket.module.css/FillEquityMarket"), { ssr: true });
+const DealFlow = dynamic(() => import("./new-landing/fillequitymarket.module.css/DealFlow"), { ssr: true });
+const DealsMatter = dynamic(() => import("./new-landing/fillequitymarket.module.css/dealsMatter"), { ssr: true });
+const Pillar = dynamic(() => import("./new-landing/fillequitymarket.module.css/Pillar"), { ssr: true });
+const ScrollShowcase = dynamic(() => import("./new-landing/ScrollShowcase"), { ssr: true });
+const Investors = dynamic(() => import("./new-landing/fillequitymarket.module.css/Investors"), { ssr: true });
+const BenefitSection = dynamic(() => import("./new-landing/fillequitymarket.module.css/BenefitSection"), { ssr: true });
+const NetworkGlobal = dynamic(() => import("./new-landing/fillequitymarket.module.css/NetworkGlobal"), { ssr: true });
 
 const FALLBACK_DESCRIPTION =
   "PrEqt – Access exclusive private equity deals, pre-IPO investments, and premium investor networks through verified opportunities, live analytics, and smart tracking for confident capital raising.";
@@ -160,14 +164,6 @@ export default async function Page() {
         process.env.NEXT_PUBLIC_TWITTER_URL,
         process.env.NEXT_PUBLIC_LINKEDIN_URL,
       ].filter(Boolean),
-    },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
     },
     mainEntity: {
       "@type": "FinancialService",

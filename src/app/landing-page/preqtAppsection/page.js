@@ -24,7 +24,7 @@ export default function PreqtAppSection({ forPartner = false }) {
                 <div className={styles.partnerDiv}>
                   <div>
                     <div className={styles.header}>
-                      <h1>Join the revolution in private  <br className={styles.hideOnMobile} />market investing.</h1>
+                      <h2 className={styles.HeadingTagReplace}>Join the revolution in private  <br className={styles.hideOnMobile} />market investing.</h2>
                     </div>
 
                     <div className={styles.bodyPartner}>

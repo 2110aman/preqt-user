@@ -1,8 +1,9 @@
+import { Suspense } from "react";
 import PostDealcontainer from "./components/PostDealContainer/PostDealcontainer";
 import { getRobotsDirectives } from "../utils/seoUtils";
 
 export const revalidate = 300;
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 20;
 const REVALIDATE_SECONDS = revalidate;
 const FALLBACK_DESCRIPTION =
   "Join the Preqt community for exclusive market talks, live polls, and pre-IPO investing insights.";
@@ -210,7 +211,9 @@ export default async function CommunityPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <PostDealcontainer initialPosts={posts} initialNoPosts={noPosts} />
+      <Suspense fallback={null}>
+        <PostDealcontainer initialPosts={posts} initialNoPosts={noPosts} />
+      </Suspense>
     </>
   );
 }

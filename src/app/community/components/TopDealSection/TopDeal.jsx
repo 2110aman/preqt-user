@@ -502,11 +502,21 @@ const TopDeal = () => {
           Tags
           <div className={Styles.tagContainer}>
             {(() => {
-              let totalChars = 0;
               return (postTags || []).map((tag, index) => {
                 const tagName = typeof tag === 'string' ? tag : (tag?.name || tag?.title || tag?.tag_name || '');
                 if (!tagName) return null;
-                return <span key={index} className={Styles.tag}>{tagName}</span>;
+                const cleanTag = tagName.replace(/^#/, '').trim();
+                return (
+                  <Link
+                    key={index}
+                    href={`/community?tags=${encodeURIComponent(cleanTag)}`}
+                    className={Styles.tag}
+                    style={{ textDecoration: 'none', cursor: 'pointer' }}
+                    title={`View community posts tagged with ${cleanTag}`}
+                  >
+                    {tagName}
+                  </Link>
+                );
               });
             })()}
           </div>

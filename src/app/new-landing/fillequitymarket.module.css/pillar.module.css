@@ -109,7 +109,8 @@
   max-width: 290px;
 }
 
-.initialTitleOverlay h1 {
+.initialTitleOverlay h1,
+.initialTitleOverlay h2 {
   color: #FFF;
   font-family: Manrope;
   font-size: 40px;
@@ -474,7 +475,8 @@
     line-height: 38px;
   }
 
-  .initialTitleOverlay h1 {
+  .initialTitleOverlay h1,
+  .initialTitleOverlay h2 {
     font-size: 32px;
     line-height: 40px;
 
@@ -622,7 +624,8 @@
     font-size: 1rem;
   }
 
-  .initialTitleOverlay h1 {
+  .initialTitleOverlay h1,
+  .initialTitleOverlay h2 {
     font-size: 38px;
   }
 
@@ -782,7 +785,8 @@
     line-height: 36px;
   }
 
-  .initialTitleOverlay h1 {
+  .initialTitleOverlay h1,
+  .initialTitleOverlay h2 {
     font-size: 30px;
     line-height: 36px;
   }
@@ -881,7 +885,8 @@
     font-size: 1rem;
   }
 
-  .initialTitleOverlay h1 {
+  .initialTitleOverlay h1,
+  .initialTitleOverlay h2 {
     font-size: 32px;
   }
 
@@ -932,7 +937,8 @@
     width: 100%;
   }
 
-  .initialTitleOverlay h1 {
+  .initialTitleOverlay h1,
+  .initialTitleOverlay h2 {
     font-size: 40px;
     /* line-height: 20px; */
     text-align: center;
@@ -1125,7 +1131,8 @@
     top: 53%;
   }
 
-  .initialTitleOverlay h1 {
+  .initialTitleOverlay h1,
+  .initialTitleOverlay h2 {
     font-size: 32px;
     line-height: 36px;
   }

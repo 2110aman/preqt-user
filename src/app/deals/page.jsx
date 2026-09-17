@@ -1,13 +1,14 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import { getRobotsDirectives } from "../utils/seoUtils";
+import { pruneDealForListing } from "../utils/dealUtils";
 import AllDeals from "./components/AllDeals/AllDeals";
 
-const getInitialDeals = cache(async (page = 1, sortBy = "latest") => {
+const getInitialDeals = cache(async (page = 1, sortBy = "latest", limit = 16) => {
   try {
     const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
     const baseUrl = rawBaseUrl.replace(/\/$/, "");
     const sortQuery = sortBy ? `&sort_by=${encodeURIComponent(sortBy)}` : "";
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=${page}&limit=15&deal_type=[unlisted,public]${sortQuery}`, {
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=${page}&limit=${limit}&deal_type=[unlisted,public]${sortQuery}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },
@@ -79,10 +80,13 @@ export default async function Page({ searchParams }) {
   const resolvedSearchParams = await searchParams;
   const pageParam = parseInt(resolvedSearchParams?.page, 10);
   const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
+  const limitParam = parseInt(resolvedSearchParams?.limit, 10);
+  const limit = !isNaN(limitParam) && limitParam > 0 ? limitParam : 16;
   const sortBy = resolvedSearchParams?.sort_by || resolvedSearchParams?.sortBy || "latest";
 
-  const initialDealsData = await getInitialDeals(page, sortBy);
-  const deals = initialDealsData?.data || [];
+  const initialDealsData = await getInitialDeals(page, sortBy, limit);
+  const rawDeals = initialDealsData?.data || [];
+  const deals = rawDeals.map(pruneDealForListing);
   const pagination = initialDealsData?.pagination || {};
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
 
@@ -154,7 +158,9 @@ export default async function Page({ searchParams }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
-      <AllDeals initialDeals={deals} initialPagination={pagination} initialSort={sortBy} />
+      <Suspense fallback={null}>
+        <AllDeals initialDeals={deals} initialPagination={pagination} initialCategory="All" initialSort={sortBy} />
+      </Suspense>
     </div>
   );
 }

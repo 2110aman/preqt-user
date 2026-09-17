@@ -14,9 +14,9 @@ export default function NewFooter({ isPrivateDeals }) {
 
   return (
     <footer className={styles.footer}>
-      <div className={styles.logo} onClick={() => { router.push('/') }} style={{ cursor: 'pointer' }}>
+      <Link href="/" className={styles.logo}>
         <img src="/footerLogo.png" alt="PrEqt footer logo - Private Equity and Pre-IPO Investment Platform" title="PrEqt footer logo - Private Equity and Pre-IPO Investment Platform" />
-      </div>
+      </Link>
 
 
       <nav className={styles.nav}>

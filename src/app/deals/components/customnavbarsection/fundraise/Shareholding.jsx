@@ -52,8 +52,8 @@ export default function Shareholding({ isPrivateDeal, dealDetails: dealDetailsPr
   const hasPostIssueData = totalPostShares > 0;
 
   useEffect(() => {
-    setTimeout(() => setPreprogressbar(totalPromoterPre || 100), 100);
-    setTimeout(() => setPostprogressbar(totalPromoterPost || 80), 100);
+    setTimeout(() => setPreprogressbar(Number.isFinite(totalPromoterPre) ? totalPromoterPre : 0), 100);
+    setTimeout(() => setPostprogressbar(Number.isFinite(totalPromoterPost) ? totalPromoterPost : 0), 100);
   }, [totalPromoterPre, totalPromoterPost]);
 
   const isccps = dealDetails?.data?.deal_type === "ccps";

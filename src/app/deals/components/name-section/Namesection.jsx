@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import FAQSection from "@/app/components/home/FAQSection/FAQSection";
@@ -36,6 +36,63 @@ import OtpPopup from "@/app/otp/OtpPopup";
 import { useSearchParams } from "next/navigation";
 import { getDealCategoryInfo } from "@/app/utils/seoUtils";
 
+const extractBadgeItems = (field) => {
+  if (!field) return [];
+  let list = field;
+  if (typeof field === "object" && !Array.isArray(field)) {
+    if (field.status === false || field.status === "false") return [];
+    if (Array.isArray(field.data)) {
+      list = field.data;
+    } else if (typeof field.data === "string" && field.data.trim()) {
+      list = [field.data];
+    } else {
+      return [];
+    }
+  } else if (typeof field === "string" && field.trim()) {
+    list = [field];
+  }
+  if (!Array.isArray(list)) return [];
+
+  return list
+    .flatMap((item) => {
+      if (!item) return [];
+      let text = "";
+      if (typeof item === "string") {
+        text = item.trim();
+      } else if (typeof item === "object") {
+        text = (
+          item.name ||
+          item.label ||
+          item.sector ||
+          item.tag ||
+          item.description ||
+          item.title ||
+          ""
+        ).trim();
+      } else {
+        text = String(item || "").trim();
+      }
+
+      if (!text) return [];
+
+      // If text is a stringified JSON array, e.g. '["Tag 1", "Tag 2"]'
+      if (text.startsWith("[") && text.endsWith("]")) {
+        try {
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed)) {
+            return parsed.map((p) => {
+              return typeof p === "string" ? p.trim() : (p?.name || p?.label || p?.sector || p?.tag || "").trim();
+            }).filter(Boolean);
+          }
+        } catch (_) {
+          // Fall through
+        }
+      }
+
+      return [text];
+    })
+    .filter(Boolean);
+};
 
 const Namedetailsection = ({ slug, initialDealData }) => {
   const [bellactive, setBellactive] = useState(false);
@@ -502,6 +559,45 @@ const Namedetailsection = ({ slug, initialDealData }) => {
   const rawDealType = dealDetails?.data?.deal_type || initialDealData?.data?.deal_type || currentDealType || "";
   const dealCategory = getDealCategoryInfo(rawDealType, dealDetails?.data || initialDealData?.data);
 
+  const sectorBadges = useMemo(() => {
+    const raw = [
+      ...extractBadgeItems(dealData?.companies_sectors),
+      ...extractBadgeItems(dealDetails?.data?.companies_sectors),
+      ...extractBadgeItems(initialDealData?.data?.deal_setpData?.companies_sectors),
+      ...extractBadgeItems(initialDealData?.data?.companies_sectors),
+      ...extractBadgeItems(dealData?.company_sectors),
+      ...extractBadgeItems(dealDetails?.data?.company_sectors),
+    ];
+    return Array.from(new Set(raw));
+  }, [
+    dealData?.companies_sectors,
+    dealDetails?.data?.companies_sectors,
+    initialDealData?.data?.deal_setpData?.companies_sectors,
+    initialDealData?.data?.companies_sectors,
+    dealData?.company_sectors,
+    dealDetails?.data?.company_sectors,
+  ]);
+
+  const tagBadges = useMemo(() => {
+    const raw = [
+      ...extractBadgeItems(dealData?.tags),
+      ...extractBadgeItems(dealDetails?.data?.tags),
+      ...extractBadgeItems(initialDealData?.data?.deal_setpData?.tags),
+      ...extractBadgeItems(initialDealData?.data?.tags),
+    ];
+    return Array.from(new Set(raw));
+  }, [
+    dealData?.tags,
+    dealDetails?.data?.tags,
+    initialDealData?.data?.deal_setpData?.tags,
+    initialDealData?.data?.tags,
+  ]);
+
+  const uniqueSectorBadges = useMemo(() => {
+    const tagSet = new Set(tagBadges.map((t) => t.toLowerCase()));
+    return sectorBadges.filter((s) => !tagSet.has(s.toLowerCase()));
+  }, [sectorBadges, tagBadges]);
+
   const isShowInterest = dealDetails?.data?.is_user_showed_interest;
 
   const limit = Number(dealDetails?.data?.deal_setpData?.target_funding_in_cr?.data) * 10000000;
@@ -534,62 +630,6 @@ const Namedetailsection = ({ slug, initialDealData }) => {
       setImgSrc("/logo-fallback.png");
     }
   }, [dealData?.company_logo?.[0]?.path]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !slug) return;
-
-    const ua = navigator.userAgent.toLowerCase();
-    const isAndroid = /android/.test(ua);
-    const isIOS = /iphone|ipad|ipod/.test(ua);
-
-    // Only mobile devices
-    if (!isAndroid && !isIOS) return;
-
-    // Prevent redirect loop (per deal session)
-    const hasRedirected = sessionStorage.getItem(`appDeepLinkAttempted_${slug}`);
-    if (hasRedirected) return;
-    sessionStorage.setItem(`appDeepLinkAttempted_${slug}`, "true");
-
-    const dealSlug = encodeURIComponent(slug);
-    const playStoreUrl = "https://play.google.com/store/apps/details?id=com.preqt.app";
-    const appStoreUrl = "https://apps.apple.com/in/app/preqt/id6751903472";
-    const storeUrl = isAndroid ? playStoreUrl : appStoreUrl;
-
-    let appOpened = false;
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        appOpened = true;
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    const startTime = Date.now();
-
-    // 1. Attempt to launch the installed app directly
-    if (isAndroid) {
-      // Matches AndroidManifest.xml: scheme=https, host=www.preqt.club, pathPrefix=/deals
-      window.location.href = `intent://www.preqt.club/deals/${dealSlug}#Intent;scheme=https;package=com.preqt.app;end`;
-    } else if (isIOS) {
-      window.location.href = `preqt://deals/${dealSlug}`;
-    }
-
-    // 2. Fallback to Store ONLY if app is NOT installed and page remains visible
-    const timer = setTimeout(() => {
-      const elapsed = Date.now() - startTime;
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-
-      // If document is not hidden, the mobile OS did not open any native app
-      if (!document.hidden && !appOpened && elapsed < 2500) {
-        window.location.href = storeUrl;
-      }
-    }, 1500);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [slug]);
-
 
   if (loading || mainLoader) {
     return <Loader />;
@@ -740,24 +780,41 @@ const Namedetailsection = ({ slug, initialDealData }) => {
             <div className={"firsthalf"}>
               <div className="deal-header-top-row">
                 <div className="deal-tags-column">
-                  {(isofs || (dealData?.tags?.status && Array.isArray(dealData?.tags?.data) && dealData?.tags?.data.length > 0)) && (
+                  {(isofs || tagBadges.length > 0 || uniqueSectorBadges.length > 0) && (
                     <section className={`body1-buttons ${dealDetails?.data?.deal_type === "unlisted" ? "unlisted-buttons" : ""}`}>
                       {isofs && (
-                        <div className="ofsDefaultTag">
-                          <p className="ofsDefaultTagText">Unlisted Shares</p>
-                        </div>
+                        <Link href="/deals/unlisted-shares" className="ofsDefaultTagLink" title="View all Unlisted Shares">
+                          <div className="ofsDefaultTag">
+                            <p className="ofsDefaultTagText">Unlisted Shares</p>
+                          </div>
+                        </Link>
                       )}
-                      {dealData?.tags?.status &&
-                        Array.isArray(dealData?.tags.data) &&
-                        dealData?.tags.data.map((tag, index) => (
-                          <span key={index}>{tag}</span>
-                        ))}
+                      {tagBadges.map((tag, index) => (
+                        <Link
+                          key={`tag-${index}`}
+                          href={`/deals?tag=${encodeURIComponent(tag)}`}
+                          className="deal-tag-badge-link"
+                          title={`View all deals tagged with ${tag}`}
+                        >
+                          <span>{tag}</span>
+                        </Link>
+                      ))}
+                      {uniqueSectorBadges.map((sector, index) => (
+                        <Link
+                          key={`sector-${index}`}
+                          href={`/deals?sector=${encodeURIComponent(sector)}`}
+                          className="deal-tag-badge-link"
+                          title={`View all deals in ${sector}`}
+                        >
+                          <span>{sector}</span>
+                        </Link>
+                      ))}
                     </section>
                   )}
                 </div>
 
                 {(() => {
-                  const hasTags = dealData?.tags?.status && Array.isArray(dealData?.tags?.data) && dealData?.tags?.data?.length > 0;
+                  const hasTags = isofs || tagBadges.length > 0 || uniqueSectorBadges.length > 0;
                   const isIpoReviewStatusTrue = dealData?.ipo_review_rating?.status === true || dealData?.ipo_review_rating?.status === "true";
                   const rating = (isIpoReviewStatusTrue && (dealData?.ipo_review_rating?.data?.weighted_composite_score || dealData?.ipo_review_rating?.weighted_composite_score));
                   const numericRating = parseFloat(rating) || 0;

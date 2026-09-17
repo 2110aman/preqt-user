@@ -11,9 +11,9 @@ export default function Footer({ handleSigninOpen }) {
                 <div className={styles.marqueeInner}>
                     {
                         Array(100).fill().map((_, idx) => (
-                            <h2 key={idx} className={styles.heading} id={idx}>
+                            <span key={idx} className={styles.heading} id={idx}>
                                 Connect with a <span>Network of Trusted Investors</span>
-                            </h2>
+                            </span>
                         ))
                     }
                 </div>

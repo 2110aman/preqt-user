@@ -24,8 +24,34 @@ export default function CardHeaderFeatured({ deal, onTagClick, isListView = fals
 
     const charLimit = isListView ? 25 : 16;
 
-    // Assuming tags are passed as an array of strings in deal.tags
-    const tags = deal.tags || [];
+    const tagsList = React.useMemo(() => {
+        const raw = deal?.tags || [];
+        const list = Array.isArray(raw) ? raw : [raw];
+        return list.flatMap(item => {
+            if (!item) return [];
+            let str = "";
+            if (typeof item === 'string') {
+                str = item.trim();
+            } else if (typeof item === 'object') {
+                str = (item.name || item.tag || item.label || item.title || '').trim();
+            } else {
+                str = String(item || '').trim();
+            }
+            if (!str) return [];
+            if (str.startsWith('[') && str.endsWith(']')) {
+                try {
+                    const parsed = JSON.parse(str);
+                    if (Array.isArray(parsed)) {
+                        return parsed.map(p => {
+                            return typeof p === 'string' ? p.trim() : (p?.name || p?.tag || p?.label || '').trim();
+                        }).filter(Boolean);
+                    }
+                } catch (_) {}
+            }
+            return [str];
+        }).filter(Boolean);
+    }, [deal?.tags]);
+
     const shouldRenderStatus = deal?.deal_type?.toLowerCase() === 'public' || deal?.deal_type?.toLowerCase() === 'featured';
 
     return (
@@ -44,20 +70,14 @@ export default function CardHeaderFeatured({ deal, onTagClick, isListView = fals
                         </Badge>
                     </div>
                 )}
-                {tags.map((tag, idx) => {
-                    const tagText = typeof tag === 'string'
-                        ? tag.trim()
-                        : (tag && typeof tag === 'object' ? (tag.name || tag.tag || tag.label || tag.title || '') : '');
-                    if (!tagText) return null;
+                {tagsList.map((tagText, idx) => {
+                    if (!tagText || tagText.length > charLimit) return null;
                     const isHighConviction = tagText === 'HIGH CONVICTION';
-                    const displayTag = tagText.length > charLimit
-                        ? `${tagText.slice(0, charLimit)}...`
-                        : tagText;
 
                     return (
                         <div key={idx} onClick={handleBadgeClick(tagText)} style={onTagClick ? { cursor: 'pointer' } : undefined} title={tagText}>
                             <Badge color={isHighConviction ? 'highConviction' : 'sme'} variant="solid" className={styles.featureBadge}>
-                                {displayTag}
+                                {tagText}
                             </Badge>
                         </div>
                     );

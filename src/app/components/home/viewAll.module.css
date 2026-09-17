@@ -156,7 +156,7 @@
   align-items: center;
   cursor: pointer;
   z-index: 9;
-  cursor: pointer;
+  text-decoration: none;
 }
 
 

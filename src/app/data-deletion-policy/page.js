@@ -1,9 +1,21 @@
 import styles from "../privacy-policy/page.module.css";
+import { getRobotsDirectives } from "../utils/seoUtils";
+
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+
+export const metadata = {
+  title: "Data Deletion Instructions | PrEqt",
+  description: "Learn how to request deletion of your account and personal data from the PrEqt platform.",
+  alternates: {
+    canonical: `${SITE_URL}/data-deletion-policy`,
+  },
+  robots: getRobotsDirectives(),
+};
 
 export default function page() {
   return (
     <div className={styles.container}>
-      <h2 className={styles.heading}>Data Deletion Instructions</h2>
+      <h1 className={styles.heading}>Data Deletion Instructions</h1>
       <div className={styles.hr}></div>
 
       <section className={styles.section}>

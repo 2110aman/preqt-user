@@ -341,9 +341,11 @@ function DealSection({ title, subtitle, deals, children, redirectUrl, titleColor
         <div className={styles.section}>
             <div className={styles.header}>
                 <div className={styles.headerTop}>
-                    <h2 className={`${styles.title} ${titleColorClass ? styles[titleColorClass] : ''}`}>
-                        {title}
-                    </h2>
+                    {Boolean(title) && (
+                        <h2 className={`${styles.title} ${titleColorClass ? styles[titleColorClass] : ''}`}>
+                            {title}
+                        </h2>
+                    )}
                     {redirectUrl && (
                         <Link href={redirectUrl} className={styles.arrowLink}>
                             <svg 

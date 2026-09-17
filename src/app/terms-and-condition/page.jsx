@@ -1,4 +1,24 @@
 import styles from './page.module.css';
+import { getRobotsDirectives } from '../utils/seoUtils';
+
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+
+export const metadata = {
+  title: "Terms & Conditions | PrEqt",
+  description: "Review the platform terms and conditions for using PrEqt private equity and investment platform.",
+  alternates: {
+    canonical: `${SITE_URL}/terms-and-condition`,
+  },
+  openGraph: {
+    title: "Terms & Conditions | PrEqt",
+    description: "Review the platform terms and conditions for using PrEqt private equity and investment platform.",
+    url: `${SITE_URL}/terms-and-condition`,
+    siteName: "PrEqt",
+    locale: "en_IN",
+    type: "website",
+  },
+  robots: getRobotsDirectives(),
+};
 
 export default function page() {
   return (

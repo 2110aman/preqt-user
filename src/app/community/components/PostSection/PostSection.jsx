@@ -1,6 +1,7 @@
 "use client"
 import Styles from './postSection.module.css'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import Cookies from 'js-cookie'
 import { toast } from 'react-toastify'
@@ -28,7 +29,7 @@ const PostSection = ({
   isMarketSentiment = false
 }) => {
   const hasInitialPayload = Array.isArray(initialPosts);
-  const pageSize = limit ? 7 : 10;
+  const pageSize = limit ? 7 : 20;
 
   const searchParams = useSearchParams();
   const [selectedOption, setSelectedOption] = useState(null)
@@ -262,7 +263,7 @@ const PostSection = ({
       if (limit) {
         api += "&limit=3";
       } else {
-        api += "&limit=10";
+        api += "&limit=20";
       }
       // Ensure we always pass the post type to the API
       if (type) {
@@ -840,9 +841,25 @@ const PostSection = ({
 
                     {/* voting options */}
                     <article className={Styles.votingQuestionWithOptions}>
-                      <div className={Styles.VotingQuestion}>
-                        <p className={Styles.Question}>{post?.pollQuestion}</p>
-                      </div>
+                      {Boolean(post?.pollQuestion) && (
+                        <div className={Styles.VotingQuestion}>
+                          <h2 className={Styles.Question}>
+                            <Link
+                              href={`/community/${post.slug}`}
+                              className={Styles.postTitleLink}
+                              onClick={(e) => {
+                                if (showSignin) {
+                                  e.preventDefault();
+                                  return;
+                                }
+                                saveFeedState();
+                              }}
+                            >
+                              {post.pollQuestion}
+                            </Link>
+                          </h2>
+                        </div>
+                      )}
 
                       <div>
                         {/* option buttons */}
@@ -1037,9 +1054,23 @@ const PostSection = ({
                     </div>
 
                     <div className={Styles.postsAndDescriptionContainer}>
-                      <div className={Styles.postTitle}>
-                        {post?.title}
-                      </div>
+                      {Boolean(post?.title) && (
+                        <h2 className={Styles.postTitle}>
+                          <Link
+                            href={`/community/${post.slug}`}
+                            className={Styles.postTitleLink}
+                            onClick={(e) => {
+                              if (showSignin) {
+                                e.preventDefault();
+                                return;
+                              }
+                              saveFeedState();
+                            }}
+                          >
+                            {post.title}
+                          </Link>
+                        </h2>
+                      )}
                       {(() => {
                         const rawTags = post?.tags || post?.hashtags || [];
                         const tagsList = Array.isArray(rawTags) 
@@ -1071,7 +1102,7 @@ const PostSection = ({
 
                       {/* <p className={Styles.postDescription}>{post?.content}</p> */}
                       <div style={{ width: '100%' }}>
-                        <ImageSlide images={post?.mediaUrl} title={post?.title} />
+                        <ImageSlide images={post?.mediaUrl} title={post?.title} isOpenPost={false} />
                       </div>
 
                       {/* <Image

@@ -32,20 +32,44 @@ export default function CardHeader({ deal, layout, isListView, onTagClick }) {
 
     const charLimit = isListView ? 25 : 16;
 
-    const firstTag = deal?.tags?.[0];
-    const firstTagText = typeof firstTag === 'string'
-        ? firstTag.trim()
-        : (firstTag && typeof firstTag === 'object' ? (firstTag.name || firstTag.tag || firstTag.label || firstTag.title || '') : '');
-    const firstTagDisplay = firstTagText.length > charLimit
-        ? `${firstTagText.slice(0, charLimit)}...`
-        : firstTagText;
+    const headerTags = React.useMemo(() => {
+        const raw = deal?.tags || [];
+        const list = Array.isArray(raw) ? raw : [raw];
+        return list.flatMap(item => {
+            if (!item) return [];
+            let str = "";
+            if (typeof item === 'string') {
+                str = item.trim();
+            } else if (typeof item === 'object') {
+                str = (item.name || item.tag || item.label || item.title || '').trim();
+            } else {
+                str = String(item || '').trim();
+            }
+            if (!str) return [];
+            if (str.startsWith('[') && str.endsWith(']')) {
+                try {
+                    const parsed = JSON.parse(str);
+                    if (Array.isArray(parsed)) {
+                        return parsed.map(p => {
+                            return typeof p === 'string' ? p.trim() : (p?.name || p?.tag || p?.label || '').trim();
+                        }).filter(Boolean);
+                    }
+                } catch (_) {}
+            }
+            return [str];
+        }).filter(Boolean);
+    }, [deal?.tags]);
 
-    const stageText = typeof deal?.stage === 'string'
-        ? deal.stage.trim()
-        : (deal?.stage && typeof deal.stage === 'object' ? (deal.stage.name || deal.stage.label || '') : '');
-    const stageDisplay = stageText.length > charLimit
-        ? `${stageText.slice(0, charLimit)}...`
-        : stageText;
+    const stageItems = React.useMemo(() => {
+        const raw = deal?.stage;
+        if (!raw) return [];
+        const list = Array.isArray(raw) ? raw : [raw];
+        return list.flatMap(item => {
+            const str = typeof item === 'string' ? item.trim() : (item?.name || item?.label || '').trim();
+            if (!str) return [];
+            return [str];
+        }).filter(Boolean);
+    }, [deal?.stage]);
 
     return (
         <div className={styles.headerRow}>
@@ -57,29 +81,39 @@ export default function CardHeader({ deal, layout, isListView, onTagClick }) {
                     </Badge>
                 )}
 
-                {deal?.deal_type?.toLowerCase() === 'unlisted' && firstTagText && (
-                    <div onClick={handleBadgeClick(firstTagText)} style={onTagClick ? { cursor: 'pointer' } : undefined} title={firstTagText}>
-                        <Badge color="sme" variant="pill">
-                            {firstTagDisplay}
-                        </Badge>
-                    </div>
-                )}
+                {['unlisted', 'public'].includes(deal?.deal_type?.toLowerCase()) &&
+                    headerTags.map((tagText, idx) => {
+                        if (!tagText || tagText.length > charLimit) return null;
+                        return (
+                            <div
+                                key={idx}
+                                onClick={handleBadgeClick(tagText)}
+                                style={onTagClick ? { cursor: 'pointer' } : undefined}
+                                title={tagText}
+                            >
+                                <Badge color="sme" variant="pill">
+                                    {tagText}
+                                </Badge>
+                            </div>
+                        );
+                    })}
 
-                {deal?.deal_type?.toLowerCase() === 'public' && firstTagText && (
-                    <div onClick={handleBadgeClick(firstTagText)} style={onTagClick ? { cursor: 'pointer' } : undefined} title={firstTagText}>
-                        <Badge color="sme" variant="pill">
-                            {firstTagDisplay}
-                        </Badge>
-                    </div>
-                )}
-
-                {isPrivateDeal && stageText && (
-                    <div onClick={handleBadgeClick(stageText)} style={onTagClick ? { cursor: 'pointer' } : undefined} title={stageText}>
-                        <Badge color="preIpoSme" variant="pill">
-                            {stageDisplay}
-                        </Badge>
-                    </div>
-                )}
+                {isPrivateDeal &&
+                    stageItems.map((stageText, idx) => {
+                        if (!stageText || stageText.length > charLimit) return null;
+                        return (
+                            <div
+                                key={idx}
+                                onClick={handleBadgeClick(stageText)}
+                                style={onTagClick ? { cursor: 'pointer' } : undefined}
+                                title={stageText}
+                            >
+                                <Badge color="preIpoSme" variant="pill">
+                                    {stageText}
+                                </Badge>
+                            </div>
+                        );
+                    })}
             </div>
 
             {!isListView && layout?.ratingStyle !== 'none' && rating && (

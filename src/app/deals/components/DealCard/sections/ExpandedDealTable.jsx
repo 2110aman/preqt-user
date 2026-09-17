@@ -96,17 +96,17 @@ export default function ExpandedDealTable({
     const gridItems = metrics?.grid || [];
 
     const isPublic = deal?.deal_type?.toLowerCase() === 'public';
-    const firstTag = deal?.tags?.[0];
-    const hasFirstTag = Boolean(typeof firstTag === 'string' ? firstTag.trim() : (firstTag?.name || firstTag?.tag || firstTag?.label || firstTag?.title));
+    const hasTags = Boolean(deal?.tags && (Array.isArray(deal.tags) ? deal.tags.length > 0 : Boolean(deal.tags)));
     const isPrivateDeal = ['private', 'ccps'].includes(deal?.deal_type?.toLowerCase());
     const hasStage = Boolean(isPrivateDeal && deal?.stage);
-    const keyHighlights = (deal?.deal_type?.toLowerCase() === 'unlisted' || deal?.deal_type?.toLowerCase() === 'public')
-        ? (deal?.key_highlights || [])
-        : (deal?.tags || []);
-    const hasKeyHighlights = keyHighlights && keyHighlights.length > 0;
+    const rawHighlights = deal?.key_highlights || deal?.deal_setpData?.key_highlights || deal?.data?.key_highlights;
+    const highlights = Array.isArray(rawHighlights)
+        ? rawHighlights
+        : (Array.isArray(rawHighlights?.data) ? rawHighlights.data : []);
+    const hasKeyHighlights = highlights.length > 0;
     const hasRating = Boolean(deal?.ipo_review_rating?.status && ratingScore);
 
-    const showTopBar = isPublic || hasFirstTag || hasStage || hasKeyHighlights || hasRating || deal?.exclusive_deal;
+    const showTopBar = isPublic || hasTags || hasStage || hasKeyHighlights || hasRating || deal?.exclusive_deal;
     const hasHero = Boolean(metrics?.hero && metrics.hero.length > 0);
 
     return (
@@ -146,13 +146,15 @@ export default function ExpandedDealTable({
                             onError={() => setLogoFailed(true)}
                         />
                         <div className={styles.expandedCompanyText}>
-                            {deal?.slug ? (
-                                <Link href={`/deals/${deal.slug}`} className={styles.compactCompanyLink}>
-                                    <h2 className={styles.expandedCompanyName}>{deal?.company_name}</h2>
-                                </Link>
-                            ) : (
-                                <h2 className={styles.expandedCompanyName}>{deal?.company_name}</h2>
-                            )}
+                            {deal?.company_name ? (
+                                deal?.slug ? (
+                                    <Link href={`/deals/${deal.slug}`} className={styles.compactCompanyLink}>
+                                        <h2 className={styles.expandedCompanyName}>{deal.company_name}</h2>
+                                    </Link>
+                                ) : (
+                                    <h2 className={styles.expandedCompanyName}>{deal.company_name}</h2>
+                                )
+                            ) : null}
                             <p className={styles.expandedCompanyTagline}>
                                 {deal?.tag_line || "No description available"}
                             </p>

@@ -36,12 +36,12 @@ export default function CardCompanyInfo({ deal, isListView, hideAvatar }) {
                         <div className={styles.mobileCompanyBadgeRow}>
                             {deal?.tags && deal.tags.length > 0 && (
                                 <span className={styles.mobileTagsInline}>
-                                    {deal.tags
+                                    {(Array.isArray(deal.tags) ? deal.tags : [deal.tags])
                                         .map(t => {
                                             const tagText = typeof t === 'string' ? t.trim() : (t && typeof t === 'object' ? (t.name || t.tag || t.label || t.title || '') : '');
-                                            return tagText.length > charLimit ? `${tagText.slice(0, charLimit)}...` : tagText;
+                                            return tagText;
                                         })
-                                        .filter(Boolean)
+                                        .filter(tagText => tagText && tagText.length <= charLimit)
                                         .join(' • ')}
                                 </span>
                             )}

@@ -1,5 +1,4 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 3600;
 
 const BASE_URL = (
   process.env.NEXT_PUBLIC_BASE_URL ||
@@ -13,8 +12,13 @@ const API_BASE_URL = (
 ).replace(/\/+$/, "");
 
 // Endpoints
-const DEALS_ENDPOINT = '/admin/api/deals/list-all-deals';
+const DEALS_ENDPOINT = '/admin/api/deals/all-deals';
+const DEALS_FALLBACK_ENDPOINT = '/admin/api/deals/list-all-deals';
 const POSTS_ENDPOINT = '/admin/api/community/posts';
+
+// Fixed baseline date for content missing an explicit database timestamp
+// (prevents Googlebot from detecting synthetic "now" timestamps on unchanged content)
+const FALLBACK_STATIC_DATE = new Date("2025-01-01T00:00:00.000Z");
 
 // Priority and Frequency constants
 const SEO_CONFIG = {
@@ -112,8 +116,17 @@ export async function GET() {
   let postsResult = [];
 
   try {
+    const fetchDeals = async () => {
+      let deals = await fetchAllPages(DEALS_ENDPOINT, {}, 'deals');
+      if (!deals || deals.length === 0) {
+        // Resilient fallback if primary endpoint returns empty
+        deals = await fetchAllPages(DEALS_FALLBACK_ENDPOINT, {}, 'deals fallback');
+      }
+      return deals;
+    };
+
     [dealsResult, postsResult] = await Promise.all([
-      fetchAllPages(DEALS_ENDPOINT, {}, 'deals'),
+      fetchDeals(),
       fetchAllPages(POSTS_ENDPOINT, { type: 'post' }, 'community posts')
     ]);
   } catch (err) {
@@ -131,6 +144,8 @@ export async function GET() {
   });
 
   const extractItemDate = (item) => {
+    if (!item || typeof item !== 'object') return null;
+
     const dateVal =
       item.updatedAt ||
       item.updated_at ||
@@ -149,9 +164,12 @@ export async function GET() {
 
     if (dateVal) {
       const parsed = new Date(dateVal);
-      if (!isNaN(parsed.getTime())) return parsed;
+      // Ensure date is valid and not in the future
+      if (!isNaN(parsed.getTime()) && parsed.getTime() <= Date.now()) {
+        return parsed;
+      }
     }
-    return new Date();
+    return null;
   };
 
   // Helper to validate and map dynamic routes
@@ -160,9 +178,11 @@ export async function GET() {
       .filter(item => item && item.slug && typeof item.slug === 'string' && item.slug.trim() !== "")
       .map(item => {
         const cleanSlug = item.slug.trim().replace(/^\/+|\/+$/g, '');
+        const itemDate = extractItemDate(item);
         return {
           url: `${BASE_URL}${basePath}/${cleanSlug}`,
-          lastModified: extractItemDate(item),
+          lastModified: itemDate || FALLBACK_STATIC_DATE,
+          hasRealDate: Boolean(itemDate),
         };
       });
   };
@@ -170,16 +190,20 @@ export async function GET() {
   const dealUrls = mapDynamicRoutes(sortedDeals, '/deals');
   const communityUrls = mapDynamicRoutes(postsResult, '/community');
 
-  // Compute latest content timestamps for aggregate index pages
-  const latestDealDate = dealUrls.length > 0
-    ? new Date(Math.max(...dealUrls.map(d => d.lastModified.getTime())))
-    : new Date();
+  // Compute latest content timestamps for aggregate index pages using only authentic DB dates
+  const validDealDates = dealUrls.filter(d => d.hasRealDate).map(d => d.lastModified.getTime());
+  const latestDealDate = validDealDates.length > 0
+    ? new Date(Math.max(...validDealDates))
+    : FALLBACK_STATIC_DATE;
 
-  const latestPostDate = communityUrls.length > 0
-    ? new Date(Math.max(...communityUrls.map(c => c.lastModified.getTime())))
-    : new Date();
+  const validPostDates = communityUrls.filter(c => c.hasRealDate).map(c => c.lastModified.getTime());
+  const latestPostDate = validPostDates.length > 0
+    ? new Date(Math.max(...validPostDates))
+    : FALLBACK_STATIC_DATE;
 
-  const latestSiteDate = new Date(Math.max(latestDealDate.getTime(), latestPostDate.getTime()));
+  const latestSiteDate = (validDealDates.length > 0 || validPostDates.length > 0)
+    ? new Date(Math.max(latestDealDate.getTime(), latestPostDate.getTime()))
+    : FALLBACK_STATIC_DATE;
 
   // 2. Define static routes with accurate, real modification dates
   const staticRoutes = [

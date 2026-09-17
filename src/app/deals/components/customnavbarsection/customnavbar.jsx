@@ -99,11 +99,11 @@ const Customnavbar = ({ isPrivateDeal, isccps, dealDetails: dealDetailsProp }) =
     // 2. IPO Key Highlights check
     const ipoHighlights = fundraise.ipo_key_highlights;
     let hasHighlights = false;
-    if (ipoHighlights && ipoHighlights.status !== false) {
+    if (ipoHighlights && ipoHighlights.status !== false && ipoHighlights.status !== "false") {
       const highlightsData = ipoHighlights.data;
       hasHighlights = Array.isArray(highlightsData) && highlightsData.length > 0 && highlightsData.some(item => {
         const key = Object.keys(item)[0];
-        const val = item[key]?.value;
+        const val = item[key]?.value !== undefined ? item[key]?.value : item[key];
         const desc = item[key]?.description;
         return (val?.status && val?.data != null && val?.data !== "") || (desc?.status && desc?.data != null && desc?.data !== "");
       });

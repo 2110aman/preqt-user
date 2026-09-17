@@ -1,15 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import styles from "./header.module.css";
-import { Button } from "react-bootstrap";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from 'next/navigation';
 import AuthAnimatedBtn from "./AuthAnimatedBtn";
-import SigninPopup from "@/app/sign-in/SigninPopup";
-import OtpPopup from "@/app/otp/OtpPopup";
-import SignupTypePopup from "@/app/signup/SignupTypePopup";
-import SignupFormPopup from "@/app/signup-form/SignupFormPopup";
 import { ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
@@ -103,15 +98,40 @@ export default function LandingPageHeader({ onSigninClick }) {
       <section className={`${styles.parentHeader} ${pathname.includes("/deals") && styles.notFixed} ${isLight ? styles.lightHeaderParent : ""}`}>
         <header className={`${styles.header} ${pathname.includes("/deals") || (pathname == "/become-a-partner" || pathname == "/deal-sourcing") && styles.newHeader} ${menuOpen ? styles.activeHeader : ""} ${isLight ? styles.lightHeader : ""}`} style={{ padding: getPadding() }}>
           <div className={styles.firstPart}>
-            <div className={styles.logo} style={{ cursor: 'pointer' }} onClick={() => {
-              router.push("/");
-              setMenuOpen(false)
-            }}>
+            <Link 
+              href="/"
+              className={styles.logo} 
+              style={{ cursor: 'pointer' }} 
+              prefetch={true}
+              onClick={() => {
+                setMenuOpen(false)
+              }}
+            >
               <Image src={isLight ? "/logo.png" : "/landing-logo.svg"} height={32} width={102} alt="PrEqt logo - Private Equity and Pre-IPO Investment Platform" title="PrEqt logo - Private Equity and Pre-IPO Investment Platform" />
-            </div>
+            </Link>
             <nav className={`${styles.nav} ${menuOpen ? styles.active : ""} ${isLight ? styles.lightNav : ""}`}>
-              <Link href="/deals" onClick={() => { setMenuOpen(false) }} className={isActiveLink('/deals') ? "" : ''} title="View all private equity deals and investment opportunities on PrEqt">{menuOpen ? <div className={styles.flexDiv}><p>Deals</p> <ChevronRight color="#4B5563" /> </div> : "Deals"}</Link>
-              <Link href="/community" onClick={() => { setMenuOpen(false) }} className={isActiveLink('/community') ? "" : ''} title="Join PrEqt community for exclusive market discussions and investor insights">{menuOpen ? <div className={styles.flexDiv}><p>Community</p> <ChevronRight color="#4B5563" /> </div> : "Community"}</Link>
+              <Link 
+                href="/deals" 
+                prefetch={true}
+                onMouseEnter={() => router.prefetch('/deals')}
+                onTouchStart={() => router.prefetch('/deals')}
+                onClick={() => { setMenuOpen(false) }} 
+                className={isActiveLink('/deals') ? "" : ''} 
+                title="View all private equity deals and investment opportunities on PrEqt"
+              >
+                {menuOpen ? <div className={styles.flexDiv}><p>Deals</p> <ChevronRight color="#4B5563" /> </div> : "Deals"}
+              </Link>
+              <Link 
+                href="/community" 
+                prefetch={true}
+                onMouseEnter={() => router.prefetch('/community')}
+                onTouchStart={() => router.prefetch('/community')}
+                onClick={() => { setMenuOpen(false) }} 
+                className={isActiveLink('/community') ? "" : ''} 
+                title="Join PrEqt community for exclusive market discussions and investor insights"
+              >
+                {menuOpen ? <div className={styles.flexDiv}><p>Community</p> <ChevronRight color="#4B5563" /> </div> : "Community"}
+              </Link>
               <div className={`${styles.containerBtn} ${styles.showOnMobile}`} onClick={() => { setMenuOpen(false) }}>
                 <AuthAnimatedBtn children="Sign In" onClick={onSigninClick} theme={isLight ? 'light' : 'dark'} />
               </div>

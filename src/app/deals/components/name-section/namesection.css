@@ -184,8 +184,49 @@
   font-style: normal;
   font-weight: 500;
   letter-spacing: 0.2px;
+  white-space: nowrap !important;
+  flex-shrink: 0;
   /* line-height: 28px; */
   /* 233.333% */
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.body1-buttons a {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  white-space: nowrap !important;
+  flex-shrink: 0;
+}
+
+.deal-tag-badge-link {
+  text-decoration: none !important;
+  color: inherit !important;
+  display: inline-flex;
+  cursor: pointer;
+  white-space: nowrap !important;
+  flex-shrink: 0;
+}
+
+.deal-tag-badge-link:hover span {
+  background-color: #DFDFE5;
+  transform: translateY(-1px);
+}
+
+.private-deal-theme .deal-tag-badge-link:hover span {
+  background: rgba(255, 243, 215, 0.35) !important;
+}
+
+.ofsDefaultTagLink {
+  text-decoration: none !important;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.ofsDefaultTagLink:hover .ofsDefaultTag {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  transition: all 0.15s ease;
 }
 
 

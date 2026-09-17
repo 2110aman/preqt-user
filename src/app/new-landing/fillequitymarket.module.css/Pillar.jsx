@@ -158,7 +158,7 @@ export default function Pillar() {
       }
     };
 
-    window.addEventListener('scroll', onScroll, { passive: false });
+    window.addEventListener('scroll', onScroll, { passive: true });
     onScroll(); // Initial check
     return () => {
       window.removeEventListener('scroll', onScroll);
@@ -173,10 +173,10 @@ export default function Pillar() {
         {/* LEFT CONTENT */}
         <div className={styles.left}>
           <div className={`${styles.initialTitleOverlay} ${step === 0 ? styles.visible : styles.hidden}`}>
-            <h1>
+            <h2>
               PrEqt is Built on<br /> 3 Core Pillars.<br />
               <span className={styles.subTitle}>Ambitious Companies.<br  /> Patient Investors.<br /> Institution Grade Execution.</span>
-            </h1>
+            </h2>
           </div>
           {CONTENT.map((content, index) => {
             const stepIndex = index + 1; // Step 1, 2, 3, 4

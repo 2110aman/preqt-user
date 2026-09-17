@@ -367,7 +367,7 @@ export default function SignupFormPopup({ show, onHide, onShowOtp, onBack, setSi
             ←
           </button>
           <div>
-            <h1 className={styles.title}>Tell Us About Yourself as an Investor</h1>
+            <h2 className={styles.title}>Tell Us About Yourself as an Investor</h2>
             <p className={styles.subtitle}>Your information helps us match you with the right IPO opportunities and provide a better experience.</p>
           </div>
 

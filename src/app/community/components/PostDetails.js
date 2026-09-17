@@ -1,6 +1,7 @@
 "use client";
 import Styles from "./PostSection/postSection.module.css";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
@@ -8,6 +9,9 @@ import CommentSection from "./CommentSection/CommentSection";
 import { showErrorToast, showSuccessToast } from "../../components/ToastProvider";
 
 import ImageSlide from "./ImageSlide";
+import imageStyles from "./imageSide.module.css";
+import { X, ExternalLink } from "lucide-react";
+import { formatPostContent } from "../utils/contentFormatter";
 import ShareModal from "./CommentSection/ShareModal";
 import Loader from "../../components/Loader";
 import SigninPopup from "../../sign-in/SigninPopup";
@@ -72,6 +76,34 @@ const PostDetails = ({ slug, initialPost }) => {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [currentPostId, setCurrentPostId] = useState(initialPost?.id || undefined);
   const [commentRefetch, setCommentRefetch] = useState(false);
+  const [contentModalImage, setContentModalImage] = useState(null);
+
+  useEffect(() => {
+    if (contentModalImage) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          setContentModalImage(null);
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = prevOverflow;
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [contentModalImage]);
+
+  const handleContentClick = (e) => {
+    if (e.target && e.target.tagName === "IMG") {
+      const src = e.target.currentSrc || e.target.src;
+      if (src) {
+        e.stopPropagation();
+        setContentModalImage(src);
+      }
+    }
+  };
 
   // Function to calculate time remaining for poll
   const getTimeRemaining = (expiresAt) => {
@@ -671,7 +703,7 @@ const PostDetails = ({ slug, initialPost }) => {
                     {/* voting options */}
                     <article className={Styles.votingQuestionWithOptions}>
                       <div className={Styles.VotingQuestion}>
-                        <p className={Styles.Question}>{post?.pollQuestion}</p>
+                        <h1 className={Styles.Question}>{post?.pollQuestion || "Community Poll"}</h1>
                       </div>
 
                       <div>
@@ -840,12 +872,13 @@ const PostDetails = ({ slug, initialPost }) => {
                       className={`${Styles.postsAndDescriptionContainer} ${Styles.postsAndDescriptionContainer_details}`}
                     >
                       <h1 className={Styles.postTitle}>
-                        {post?.title}
+                        {post?.title || "Community Post"}
                       </h1>
                       {typeof post?.content === "string" && post.content.trim() ? (
                         <div
                           className={`${Styles.postText} ${Styles.postText_details}`}
-                          dangerouslySetInnerHTML={{ __html: post.content }}
+                          dangerouslySetInnerHTML={{ __html: formatPostContent(post.content) }}
+                          onClick={handleContentClick}
                         />
                       ) : (
                         <div className={`${Styles.postText} ${Styles.postText_details}`}>
@@ -856,7 +889,7 @@ const PostDetails = ({ slug, initialPost }) => {
                       <div
                         className={`${Styles.postImageWrapper} ${Styles.postImageWrapper_details}`}
                       >
-                        <ImageSlide images={post?.mediaUrl} title={post?.title} />
+                        <ImageSlide images={post?.mediaUrl} title={post?.title} isOpenPost={true} />
                       </div>
 
                       {(() => {
@@ -870,10 +903,28 @@ const PostDetails = ({ slug, initialPost }) => {
                             {tagsList.map((tag, idx) => {
                               const tagName = typeof tag === 'string' ? tag : (tag?.name || tag?.title || tag?.tag_name || '');
                               if (!tagName) return null;
+                              const cleanTag = tagName.replace(/^#/, '').trim();
                               return (
-                                <span key={idx} className={Styles.postTagItem} style={{ background: 'rgba(100, 116, 139, 0.12)', color: '#475569', padding: '4px 12px', borderRadius: '16px', fontSize: '13px', fontWeight: '500' }}>
-                                  #{tagName.replace(/^#/, '')}
-                                </span>
+                                <Link
+                                  key={idx}
+                                  href={`/community?tags=${encodeURIComponent(cleanTag)}`}
+                                  className={Styles.postTagItem}
+                                  style={{
+                                    background: 'rgba(100, 116, 139, 0.12)',
+                                    color: '#475569',
+                                    padding: '4px 12px',
+                                    borderRadius: '16px',
+                                    fontSize: '13px',
+                                    fontWeight: '500',
+                                    textDecoration: 'none',
+                                    cursor: 'pointer',
+                                    display: 'inline-block',
+                                    transition: 'all 0.2s ease'
+                                  }}
+                                  title={`View community posts tagged with ${cleanTag}`}
+                                >
+                                  #{cleanTag}
+                                </Link>
                               );
                             })}
                           </div>
@@ -1143,6 +1194,48 @@ const PostDetails = ({ slug, initialPost }) => {
         }}
         setSignupEmail={setSignupEmail}
       />
+
+      {/* Lightbox modal for inline content images in open post */}
+      {contentModalImage && (
+        <div
+          className={imageStyles.modalOverlay}
+          onClick={() => setContentModalImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Full-size content image view"
+        >
+          <div
+            className={imageStyles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={imageStyles.modalHeaderBar}>
+              <button
+                type="button"
+                className={imageStyles.iconBtn}
+                onClick={() => window.open(contentModalImage, "_blank")}
+                title="Open original image in new tab"
+                aria-label="Open original in new tab"
+              >
+                <ExternalLink size={18} />
+              </button>
+              <button
+                type="button"
+                className={imageStyles.iconBtn}
+                onClick={() => setContentModalImage(null)}
+                title="Close full view (Esc)"
+                aria-label="Close full view"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <img
+              src={contentModalImage}
+              alt="Full-size post content image"
+              className={imageStyles.fullImage}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

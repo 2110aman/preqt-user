@@ -4,13 +4,13 @@ import Loader from "@/app/components/Loader";
 import styles from "../../../components/home/DealsTalk/DealsTalk.module.css";
 import stylesdeals from "./AllDeals.module.css";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cookies from "js-cookie";
 
 import React from "react";
 import Image from "next/image";
-import { ArrowUpRight, Check, ChevronDown, ChevronLeft, ChevronRight, Lock, Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Lock, Search, SlidersHorizontal, X } from "lucide-react";
 import SignupFormPopup from "@/app/signup-form/SignupFormPopup";
 import SignupTypePopup from "@/app/signup/SignupTypePopup";
 import OtpPopup from "@/app/otp/OtpPopup";
@@ -57,19 +57,65 @@ function parseCloseDate(dateStr) {
     };
 }
 
+export const getResponsiveDealLimit = (windowWidth) => {
+    if (typeof windowWidth !== "number" || isNaN(windowWidth)) return 16;
+    if (windowWidth > 1450) return 16;  // 25% width (4 cols) -> 16
+    if (windowWidth > 1130) return 15;  // 33.33% width (3 cols) -> 15
+    if (windowWidth > 710) return 16;   // 50% width (2 cols) -> 16
+    return 15;                          // 100% width (1 col) -> 15
+};
+
 function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCategory = null, initialSort = "latest" }) {
-    const [localCategory, setLocalCategory] = useState(initialCategory || null);
+    const pathname = usePathname();
+    const router = useRouter();
+
+    // Map current pathname to category to ensure URL and active tab are always in sync
+    const categoryFromPath = useMemo(() => {
+        if (!pathname) return null;
+        const slug = pathname.replace(/^\/deals\/?/, "").split("/")[0];
+        if (!slug) return "All";
+        const aliasMap = {
+            "upcoming-ipo": "Upcoming",
+            "upcoming": "Upcoming",
+            "upcoming-ipos": "Upcoming",
+            "ipo": "Public",
+            "public": "Public",
+            "ipos": "Public",
+            "unlisted-shares": "Unlisted",
+            "unlisted": "Unlisted",
+            "private-deals": "Private",
+            "private": "Private",
+            "startup-deals": "Startup",
+            "startup": "Startup"
+        };
+        return aliasMap[slug] || null;
+    }, [pathname]);
+
+    // Initial category derived from URL pathname or initial server prop
+    const initialResolvedCategory = categoryFromPath || initialCategory || "All";
+    const [selectedDealType, setSelectedDealTypeState] = useState(initialResolvedCategory);
     const [loading, setLoading] = useState(!initialDeals || initialDeals.length === 0);
     const [allDeals, setAllDeals] = useState(initialDeals);
     const [pagination, setPagination] = useState(initialPagination);
     const [totalRecords, setTotalRecords] = useState(Number(initialPagination?.totalRecords || initialPagination?.total || 0));
     const [error, setError] = useState([]);
-    const { setSelectedDeal, appliedFilters, setAppliedFilters, selectedDealType: storeDealType, setSelectedDealType } = useDealStore();
-    
-    // Guarantee synchronous initial category on first render without flash of "All"
-    const selectedDealType = localCategory !== null ? localCategory : (initialCategory || storeDealType || "All");
+    const { setSelectedDeal, appliedFilters, setAppliedFilters, setSelectedDealType } = useDealStore();
 
-    const ITEMS_PER_PAGE = 15;
+    const isUserLimitManual = useRef(false);
+
+    const initialLimit = useMemo(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const l = parseInt(params.get("limit"), 10);
+            if (!isNaN(l) && l > 0) {
+                isUserLimitManual.current = true;
+                return l;
+            }
+            return getResponsiveDealLimit(window.innerWidth);
+        }
+        return Number(initialPagination?.limit) || 16;
+    }, [initialPagination?.limit]);
+    const [limit, setLimit] = useState(initialLimit);
     const initialPage = useMemo(() => {
         if (typeof window !== "undefined") {
             const params = new URLSearchParams(window.location.search);
@@ -82,7 +128,6 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     const dealsSectionRef = useRef(null);
 
     const authToken = Cookies.get('accessToken'); // or from cookies
-    const router = useRouter();
     const searchParams = useSearchParams();
 
     const [viewType, setViewType] = useState('list'); // 'grid' or 'list'
@@ -93,7 +138,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         return searchParams?.get("sort_by") || searchParams?.get("sortBy") || initialSort || "latest";
     });
 
-    const updatePageInUrl = (page, sort = sortBy) => {
+    const updatePageInUrl = (page, sort = sortBy, currentLimit = limit, tags = selectedTags, filters = appliedFilters) => {
         if (typeof window === "undefined") return;
         const url = new URL(window.location.href);
         if (page > 1) {
@@ -101,18 +146,42 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         } else {
             url.searchParams.delete("page");
         }
+        const currentResponsiveLimit = getResponsiveDealLimit(window.innerWidth);
+        if (currentLimit && isUserLimitManual.current && currentLimit !== currentResponsiveLimit) {
+            url.searchParams.set("limit", currentLimit);
+        } else {
+            url.searchParams.delete("limit");
+        }
         if (sort && sort !== "latest") {
             url.searchParams.set("sort_by", sort);
         } else {
             url.searchParams.delete("sort_by");
             url.searchParams.delete("sortBy");
         }
+        if (tags && tags.length > 0) {
+            url.searchParams.set("tag", tags.join(","));
+        } else {
+            url.searchParams.delete("tag");
+            url.searchParams.delete("tags");
+        }
+        if (filters?.sectors && filters.sectors.length > 0) {
+            url.searchParams.set("sector", filters.sectors.join(","));
+        } else {
+            url.searchParams.delete("sector");
+            url.searchParams.delete("sectors");
+        }
         window.history.pushState(null, "", url.toString());
     };
     const [showSortDropdown, setShowSortDropdown] = useState(false);
     const [tagSearch, setTagSearch] = useState("");
     const [showTagDropdown, setShowTagDropdown] = useState(false);
-    const [selectedTags, setSelectedTags] = useState([]);
+    const [selectedTags, setSelectedTags] = useState(() => {
+        const tagParam = searchParams?.get("tag") || searchParams?.get("tags");
+        if (tagParam) {
+            return [tagParam.trim()];
+        }
+        return [];
+    });
     const [fetchedTags, setFetchedTags] = useState([]);
     const [fetchedSectors, setFetchedSectors] = useState([]);
 
@@ -361,23 +430,25 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         }
     };
 
+    // Keep Zustand store and active category in sync when pathname/props change externally
     useEffect(() => {
-        if (initialCategory) {
-            setLocalCategory(initialCategory);
-            setSelectedDealType(initialCategory);
-        }
-    }, [initialCategory, setSelectedDealType]);
+        const cat = categoryFromPath || initialCategory || "All";
+        setSelectedDealTypeState(cat);
+        setSelectedDealType(cat);
+    }, [categoryFromPath, initialCategory, setSelectedDealType]);
 
-    const handleTabSelect = (tab) => {
-        setLocalCategory(tab.value);
+    // Handle tab clicks smoothly in-page without full page refresh
+    const handleTabClick = (e, tab) => {
+        if (e && e.preventDefault) e.preventDefault();
+        if (selectedDealType === tab.value) return;
+
+        setSelectedDealTypeState(tab.value);
         setSelectedDealType(tab.value);
         setCurrentPage(1);
-        if (typeof window !== "undefined") {
-            const url = new URL(window.location.href);
-            url.searchParams.delete("page");
-            const newPath = tab.slug ? `/deals/${tab.slug}` : "/deals";
-            url.pathname = newPath;
-            window.history.pushState(null, "", url.toString());
+
+        const newPath = tab.slug ? `/deals/${tab.slug}` : "/deals";
+        if (typeof window !== "undefined" && window.location.pathname !== newPath) {
+            window.history.pushState({ category: tab.value }, "", newPath);
         }
     };
 
@@ -559,37 +630,43 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
     const allAvailableTags = useMemo(() => {
         const tagSet = new Set();
+        const addCleanTag = (str) => {
+            if (!str || str === '[object Object]') return;
+            const clean = String(str).trim();
+            if (clean && clean !== '[object Object]') tagSet.add(clean);
+        };
+
         if (fetchedTags && Array.isArray(fetchedTags)) {
-            fetchedTags.forEach(t => t && tagSet.add(String(t).trim()));
+            fetchedTags.forEach(t => addCleanTag(t));
         }
         if (allDeals && Array.isArray(allDeals)) {
             allDeals.forEach(deal => {
                 if (Array.isArray(deal.tags)) {
                     deal.tags.forEach(t => {
                         const tagText = typeof t === 'string' ? t.trim() : (t && typeof t === 'object' ? (t.name || t.tag || t.label || t.title || '') : '');
-                        if (tagText && tagText !== '[object Object]') tagSet.add(tagText);
+                        addCleanTag(tagText);
                     });
                 }
                 if (Array.isArray(deal.key_highlights)) {
                     deal.key_highlights.forEach(h => {
                         const hText = typeof h === 'string' ? h.trim() : (h && typeof h === 'object' ? (h.name || h.tag || h.label || h.title || '') : '');
-                        if (hText && hText !== '[object Object]') tagSet.add(hText);
+                        addCleanTag(hText);
                     });
                 }
                 if (Array.isArray(deal.companies_sectors)) {
                     deal.companies_sectors.forEach(s => {
                         const secText = typeof s === 'string' ? s.trim() : (s?.name || s?.sector || '');
-                        if (secText) tagSet.add(secText);
+                        addCleanTag(secText);
                     });
                 }
                 if (deal.sector_industry) {
-                    tagSet.add(String(deal.sector_industry).trim());
+                    addCleanTag(deal.sector_industry);
                 }
                 if (deal.company_stage) {
-                    tagSet.add(String(deal.company_stage).trim());
+                    addCleanTag(deal.company_stage);
                 }
                 if (deal.stage) {
-                    tagSet.add(String(deal.stage).trim());
+                    addCleanTag(deal.stage);
                 }
             });
         }
@@ -619,11 +696,28 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     };
 
     useEffect(() => {
-        const tagParam = searchParams?.get("tag");
+        const tagParam = searchParams?.get("tag") || searchParams?.get("tags");
         if (tagParam) {
             handleAddTag(tagParam);
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        const sectorParam = searchParams?.get("sector") || searchParams?.get("sectors");
+        if (sectorParam) {
+            const splitSectors = sectorParam.split(",").map(s => s.trim()).filter(Boolean);
+            if (splitSectors.length > 0) {
+                setAppliedFilters(prev => {
+                    const currentSectors = Array.isArray(prev?.sectors) ? prev.sectors : [];
+                    const merged = Array.from(new Set([...currentSectors, ...splitSectors]));
+                    return {
+                        ...(prev || {}),
+                        sectors: merged
+                    };
+                });
+            }
+        }
+    }, [searchParams, setAppliedFilters]);
 
     const handleRemoveTag = (tagToRemove) => {
         setSelectedTags(prev => prev.filter(t => t.toLowerCase() !== tagToRemove.toLowerCase()));
@@ -655,6 +749,18 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             const secText = typeof s === 'string' ? s.toLowerCase() : (s?.name || s?.sector || '').toLowerCase();
             return secText && (secText === t || secText.includes(t) || t.includes(secText));
         })) return true;
+        if (deal.deal_setpData) {
+            const stepTags = Array.isArray(deal.deal_setpData.tags) ? deal.deal_setpData.tags : (deal.deal_setpData.tags?.data || []);
+            if (Array.isArray(stepTags) && stepTags.some(item => {
+                const str = typeof item === 'string' ? item : (item?.name || item?.tag || item?.label || item?.title || '');
+                return str && (str.toLowerCase() === t || str.toLowerCase().includes(t) || t.includes(str.toLowerCase()));
+            })) return true;
+            const stepSectors = Array.isArray(deal.deal_setpData.companies_sectors) ? deal.deal_setpData.companies_sectors : (deal.deal_setpData.companies_sectors?.data || []);
+            if (Array.isArray(stepSectors) && stepSectors.some(s => {
+                const secText = typeof s === 'string' ? s.toLowerCase() : (s?.name || s?.sector || s?.label || '').toLowerCase();
+                return secText && (secText === t || secText.includes(t) || t.includes(secText));
+            })) return true;
+        }
         if (deal.sector_industry && (deal.sector_industry.toLowerCase().includes(t) || t.includes(deal.sector_industry.toLowerCase()))) return true;
         if (deal.company_stage && (deal.company_stage.toLowerCase().includes(t) || t.includes(deal.company_stage.toLowerCase()))) return true;
         if (deal.stage && (deal.stage.toLowerCase().includes(t) || t.includes(deal.stage.toLowerCase()))) return true;
@@ -689,7 +795,20 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             deals = deals.filter(deal => (deal.deal_type || '').toLowerCase() === selectedDealType.toLowerCase());
         }
 
-        // 2. Applied Filters (Modal) - Handled server-side via admin/api/deals/all-deals query params
+        // 2. Applied Filters - Sectors
+        if (appliedFilters?.sectors && appliedFilters.sectors.length > 0) {
+            deals = deals.filter(deal => {
+                const sList = Array.isArray(deal.companies_sectors) ? deal.companies_sectors : (deal.companies_sectors?.data || []);
+                const stepSList = Array.isArray(deal.deal_setpData?.companies_sectors) ? deal.deal_setpData.companies_sectors : (deal.deal_setpData?.companies_sectors?.data || []);
+                const allSectors = [...sList, ...stepSList, deal.sector_industry].filter(Boolean).map(s => {
+                    return typeof s === 'string' ? s.toLowerCase().trim() : (s?.name || s?.sector || s?.label || '').toLowerCase().trim();
+                });
+                return appliedFilters.sectors.some(sec => {
+                    const targetSec = sec.toLowerCase().trim();
+                    return allSectors.some(s => s === targetSec || s.includes(targetSec) || targetSec.includes(s));
+                });
+            });
+        }
 
         // 3. Search Company Query
         if (companySearch && companySearch.trim()) {
@@ -835,76 +954,176 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
     // Handle browser back/forward buttons
     useEffect(() => {
-        const handlePopState = () => {
+        const handlePopState = (event) => {
+            const currentPath = window.location.pathname;
+            const slug = currentPath.replace(/^\/deals\/?/, "").split("/")[0];
+            const aliasMap = {
+                "upcoming-ipo": "Upcoming",
+                "upcoming": "Upcoming",
+                "upcoming-ipos": "Upcoming",
+                "ipo": "Public",
+                "public": "Public",
+                "ipos": "Public",
+                "unlisted-shares": "Unlisted",
+                "unlisted": "Unlisted",
+                "private-deals": "Private",
+                "private": "Private",
+                "startup-deals": "Startup",
+                "startup": "Startup"
+            };
+            const detectedCategory = event?.state?.category || (slug ? (aliasMap[slug] || "All") : "All");
+            setSelectedDealTypeState(detectedCategory);
+            setSelectedDealType(detectedCategory);
+
             const params = new URLSearchParams(window.location.search);
             const pageParam = parseInt(params.get("page"), 10);
             const targetPage = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
             const sortParam = params.get("sort_by") || params.get("sortBy") || "latest";
+            const limitParam = parseInt(params.get("limit"), 10);
+            const targetLimit = !isNaN(limitParam) && limitParam > 0 ? limitParam : getResponsiveDealLimit(window.innerWidth);
+            if (!isNaN(limitParam) && limitParam > 0) {
+                isUserLimitManual.current = true;
+            } else {
+                isUserLimitManual.current = false;
+            }
             setCurrentPage(targetPage);
+            if (targetLimit !== limit) {
+                setLimit(targetLimit);
+            }
             if (sortParam !== sortBy) {
                 setSortBy(sortParam);
             }
-            fetchDeals(targetPage, selectedDealType, companySearch, selectedTags, appliedFilters, sortParam);
+            const tagParam = params.get("tag") || params.get("tags");
+            const newTags = tagParam ? [tagParam.trim()] : [];
+            setSelectedTags(newTags);
+
+            const sectorParam = params.get("sector") || params.get("sectors");
+            const newSectors = sectorParam ? sectorParam.split(",").map(s => s.trim()).filter(Boolean) : [];
+            let updatedFilters = appliedFilters;
+            if (newSectors.length > 0) {
+                updatedFilters = { ...(appliedFilters || {}), sectors: newSectors };
+                setAppliedFilters(updatedFilters);
+            } else if (appliedFilters?.sectors) {
+                const copy = { ...appliedFilters };
+                delete copy.sectors;
+                updatedFilters = Object.keys(copy).length > 0 ? copy : null;
+                setAppliedFilters(updatedFilters);
+            }
+            fetchDeals(targetPage, detectedCategory, companySearch, newTags, updatedFilters, sortParam, targetLimit);
         };
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
+    }, [companySearch, selectedTags, appliedFilters, sortBy, limit, setSelectedDealType]);
+
+    // Mount check: ensure initial fetch matches client screen's responsive limit if no manual limit in URL
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const params = new URLSearchParams(window.location.search);
+        const manualLimit = parseInt(params.get("limit"), 10);
+        if (!isNaN(manualLimit) && manualLimit > 0) {
+            isUserLimitManual.current = true;
+            return;
+        }
+        const responsiveLimit = getResponsiveDealLimit(window.innerWidth);
+        setLimit(responsiveLimit);
+        const currentInitialLimit = Number(initialPagination?.limit) || 16;
+        if (responsiveLimit !== currentInitialLimit) {
+            fetchDeals(currentPage, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy, responsiveLimit);
+        }
+    }, []);
+
+    // Window resize listener: automatically adapt pagination limit when crossing breakpoints
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        let resizeTimer = null;
+        const handleResize = () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (isUserLimitManual.current) return;
+                const newLimit = getResponsiveDealLimit(window.innerWidth);
+                setLimit((prevLimit) => {
+                    if (newLimit !== prevLimit) {
+                        setCurrentPage((prevPage) => {
+                            const newPage = Math.max(1, Math.floor(((prevPage - 1) * prevLimit) / newLimit) + 1);
+                            fetchDeals(newPage, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy, newLimit);
+                            return newPage;
+                        });
+                        return newLimit;
+                    }
+                    return prevLimit;
+                });
+            }, 150);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => {
+            clearTimeout(resizeTimer);
+            window.removeEventListener("resize", handleResize);
+        };
     }, [selectedDealType, companySearch, selectedTags, appliedFilters, sortBy]);
 
     const totalCount = Number(
-        pagination?.totalRecords ||
-        pagination?.total ||
-        pagination?.total_records ||
-        pagination?.count ||
-        totalRecords ||
-        allDeals.length ||
+        pagination?.totalRecords ??
+        pagination?.total ??
+        pagination?.total_records ??
+        pagination?.count ??
+        totalRecords ??
+        allDeals.length ??
         0
     );
+    const effectiveLimit = Number(limit || pagination?.limit || 15);
     const totalPages = Math.max(
         1,
         Number(pagination?.totalPages || pagination?.total_pages || pagination?.pages) ||
-        Math.ceil(totalCount / ITEMS_PER_PAGE)
+        Math.ceil(totalCount / effectiveLimit)
     );
 
     const dealsToRender = useMemo(() => {
-        if (allDeals.length <= ITEMS_PER_PAGE) {
+        if (allDeals.length <= effectiveLimit) {
             return filteredDeals;
         }
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        return filteredDeals.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-    }, [filteredDeals, allDeals.length, currentPage]);
+        const startIndex = (currentPage - 1) * effectiveLimit;
+        return filteredDeals.slice(startIndex, startIndex + effectiveLimit);
+    }, [filteredDeals, allDeals.length, currentPage, effectiveLimit]);
 
-    const showUnlockTeaser = (selectedDealType || '').toLowerCase() === "all";
-
-    const teaserIndices = useMemo(() => {
-        if (!dealsToRender || dealsToRender.length === 0) return [];
-        const count = dealsToRender.length;
-        if (count < 10) {
-            // Less than 10 cards: show 1 private unlock teaser
-            if (count === 1) return [0];
-            const min = 1;
-            const max = Math.max(1, count - 1);
-            const idx = Math.floor(Math.random() * (max - min)) + min;
-            return [idx];
-        } else {
-            // 10 or more cards: show 2 private unlock teasers with at least 4 to 5 cards gap
-            const minGap = 5; // Minimum cards between teasers so they are never adjacent
-            const firstMin = 2;
-            const firstMax = Math.max(firstMin, Math.min(Math.floor(count / 2) - 1, count - minGap - 2));
-            const idx1 = Math.floor(Math.random() * (firstMax - firstMin + 1)) + firstMin;
-
-            const secondMin = Math.max(idx1 + minGap, Math.floor(count / 2) + 1);
-            const secondMax = Math.max(secondMin, count - 2);
-            const idx2 = Math.floor(Math.random() * (secondMax - secondMin + 1)) + secondMin;
-
-            return [idx1, idx2];
-        }
-    }, [dealsToRender?.length, currentPage, selectedDealType]);
+    const startRecord = totalCount === 0 ? 0 : (currentPage - 1) * effectiveLimit + 1;
+    const endRecord = totalCount === 0 ? 0 : Math.min(currentPage * effectiveLimit, totalCount);
 
     const handlePageChange = (page) => {
         if (page < 1 || page > totalPages || page === currentPage) return;
         setCurrentPage(page);
-        updatePageInUrl(page, sortBy);
-        fetchDeals(page, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy);
+        updatePageInUrl(page, sortBy, effectiveLimit);
+        fetchDeals(page, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy, effectiveLimit);
+        if (dealsSectionRef.current) {
+            dealsSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (typeof window !== "undefined") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+    };
+
+    const buildPageHref = useCallback((page) => {
+        const basePath = pathname || "/deals";
+        const params = new URLSearchParams();
+        if (page && page > 1) {
+            params.set("page", String(page));
+        }
+        if (sortBy && sortBy !== "latest") {
+            params.set("sort_by", sortBy);
+        }
+        if (limit && limit !== 16 && isUserLimitManual.current) {
+            params.set("limit", String(limit));
+        }
+        const qs = params.toString();
+        return qs ? `${basePath}?${qs}` : basePath;
+    }, [pathname, sortBy, limit]);
+
+    const handleLimitChange = (newLimit) => {
+        isUserLimitManual.current = true;
+        setLimit(newLimit);
+        setCurrentPage(1);
+        updatePageInUrl(1, sortBy, newLimit);
+        fetchDeals(1, selectedDealType, companySearch, selectedTags, appliedFilters, sortBy, newLimit);
         if (dealsSectionRef.current) {
             dealsSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         } else if (typeof window !== "undefined") {
@@ -913,16 +1132,33 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
     };
 
     const getPageNumbers = (current, total) => {
-        if (total <= 7) {
+        if (total <= 4) {
             return Array.from({ length: total }, (_, i) => i + 1);
         }
-        if (current <= 4) {
-            return [1, 2, 3, 4, 5, '...', total];
+
+        const pages = new Set();
+        // First 2 pages
+        pages.add(1);
+        pages.add(2);
+
+        // Active page if in middle
+        if (current > 2 && current < total - 1) {
+            pages.add(current);
         }
-        if (current >= total - 3) {
-            return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+
+        // Last 2 pages
+        pages.add(total - 1);
+        pages.add(total);
+
+        const sorted = Array.from(pages).sort((a, b) => a - b);
+        const result = [];
+        for (let i = 0; i < sorted.length; i++) {
+            if (i > 0 && sorted[i] - sorted[i - 1] > 1) {
+                result.push('...');
+            }
+            result.push(sorted[i]);
         }
-        return [1, '...', current - 1, current, current + 1, '...', total];
+        return result;
     };
 
     const formatDealType = (type) => {
@@ -1107,6 +1343,12 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         if (initialPagination && (initialPagination.totalRecords || initialPagination.total || initialPagination.total_records || initialPagination.count)) {
             setPagination(initialPagination);
             setTotalRecords(Number(initialPagination.totalRecords || initialPagination.total || initialPagination.total_records || initialPagination.count || 0));
+            if (isUserLimitManual.current && initialPagination.limit) {
+                setLimit(Number(initialPagination.limit));
+            }
+            if (initialPagination.page) {
+                setCurrentPage(Number(initialPagination.page));
+            }
         }
     }, [initialDeals, initialPagination]);
 
@@ -1116,7 +1358,8 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
         search = companySearch,
         tags = selectedTags,
         filters = appliedFilters,
-        sort = sortBy
+        sort = sortBy,
+        limitVal = limit
     ) => {
         try {
             setLoading(true);
@@ -1139,7 +1382,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                 dealTypeQuery = "deal_type=[unlisted,public]";
             }
 
-            let queryString = `?page=${page}&limit=15&${dealTypeQuery}`;
+            let queryString = `?page=${page}&limit=${limitVal}&${dealTypeQuery}`;
 
             if (sort) {
                 queryString += `&sort_by=${encodeURIComponent(sort)}`;
@@ -1282,7 +1525,13 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
             const pageData = responseData.pagination || {};
             setAllDeals(deals);
             setPagination(pageData);
-            const total = Number(pageData.totalRecords || pageData.total || pageData.total_records || pageData.count || responseData.total || deals.length || 0);
+            if (pageData.limit) {
+                setLimit(Number(pageData.limit));
+            }
+            if (pageData.page) {
+                setCurrentPage(Number(pageData.page));
+            }
+            const total = Number(pageData.totalRecords ?? pageData.total ?? pageData.total_records ?? pageData.count ?? responseData.total ?? deals.length ?? 0);
             setTotalRecords(total);
         } catch (err) {
             console.error("Fetch error in AllDeals:", err);
@@ -1343,21 +1592,24 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                     <SlidersHorizontal size={18} />
                                 </button>
 
-                                {/* Static Pill Tabs for Deal Types (Desktop only) */}
                                 <nav className={stylesdeals.dealTypeTabs} aria-label="Deal Categories">
-                                    {dealTypeTabs.map(tab => (
-                                        <Link
-                                            key={tab.value}
-                                            href={tab.slug ? `/deals/${tab.slug}` : "/deals"}
-                                            className={`${stylesdeals.tabItem} ${selectedDealType === tab.value ? stylesdeals.activeTab : ""}`}
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                handleTabSelect(tab);
-                                            }}
-                                        >
-                                            {tab.label}
-                                        </Link>
-                                    ))}
+                                    {dealTypeTabs.map(tab => {
+                                        const tabHref = tab.slug ? `/deals/${tab.slug}` : "/deals";
+                                        const isActive = selectedDealType === tab.value;
+                                        return (
+                                            <Link
+                                                key={tab.value}
+                                                href={tabHref}
+                                                prefetch={true}
+                                                scroll={false}
+                                                className={`${stylesdeals.tabItem} ${isActive ? stylesdeals.activeTab : ""}`}
+                                                onClick={(e) => handleTabClick(e, tab)}
+                                                aria-current={isActive ? "page" : undefined}
+                                            >
+                                                {tab.label}
+                                            </Link>
+                                        );
+                                    })}
                                 </nav>
 
                                 {/* Search Company Input (Desktop only) */}
@@ -1482,18 +1734,26 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                         </button>
 
                                         <div className={`${stylesdeals.dealTypeDropdownMenu} ${showDealTypeDropdown ? stylesdeals.dropdownOpen : ""}`}>
-                                            {dealTypeTabs.map(tab => (
-                                                <div
-                                                    key={tab.value}
-                                                    className={`${stylesdeals.dropdownItem} ${selectedDealType === tab.value ? stylesdeals.dropdownItemActive : ""}`}
-                                                    onClick={() => {
-                                                        handleTabSelect(tab);
-                                                        setShowDealTypeDropdown(false);
-                                                    }}
-                                                >
-                                                    {tab.label}
-                                                </div>
-                                            ))}
+                                            {dealTypeTabs.map(tab => {
+                                                const tabHref = tab.slug ? `/deals/${tab.slug}` : "/deals";
+                                                const isActive = selectedDealType === tab.value;
+                                                return (
+                                                    <Link
+                                                        key={tab.value}
+                                                        href={tabHref}
+                                                        prefetch={true}
+                                                        scroll={false}
+                                                        className={`${stylesdeals.dropdownItem} ${isActive ? stylesdeals.dropdownItemActive : ""}`}
+                                                        onClick={(e) => {
+                                                            handleTabClick(e, tab);
+                                                            setShowDealTypeDropdown(false);
+                                                        }}
+                                                        aria-current={isActive ? "page" : undefined}
+                                                    >
+                                                        {tab.label}
+                                                    </Link>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
@@ -1673,26 +1933,7 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                 ))
                             ) : ((selectedDealType || '').toLowerCase() === "private" || (selectedDealType || '').toLowerCase() === "startup") ? (
                                 <div style={{ width: "100%", marginTop: "10px" }}>
-                                    {viewType === 'list' ? (
-                                        <>
-                                            <div className={stylesdeals.desktopTableWrapper}>
-                                                <table className={stylesdeals.dealsTable}>
-                                                    <tbody className={stylesdeals.teaserTbody} role="rowgroup">
-                                                        <tr className={stylesdeals.teaserTr}>
-                                                            <td colSpan={9} className={stylesdeals.teaserTd}>
-                                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={true} />
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                            <div className={stylesdeals.mobileListWrapper}>
-                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={false} />
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={false} />
-                                    )}
+                                    <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={false} />
                                 </div>
                             ) : dealsToRender && dealsToRender.length > 0 ? (
                                 <>
@@ -1702,31 +1943,21 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                                             <div className={stylesdeals.desktopTableWrapper}>
                                                 <div className={stylesdeals.tableScrollWrapper}>
                                                     <table className={stylesdeals.dealsTable}>
-                                                        {dealsToRender.map((deal, index) => (
-                                                            <React.Fragment key={`table-${deal.id}`}>
-                                                                {showUnlockTeaser && teaserIndices.includes(index) && (
-                                                                    <tbody key={`unlock-teaser-group-${index}`} className={stylesdeals.teaserTbody} role="rowgroup">
-                                                                        <tr className={stylesdeals.teaserTr}>
-                                                                            <td colSpan={9} className={stylesdeals.teaserTd}>
-                                                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={true} />
-                                                                            </td>
-                                                                        </tr>
-                                                                    </tbody>
-                                                                )}
-                                                                <DealCard
-                                                                    deal={deal}
-                                                                    isAuthenticated={!!authToken}
-                                                                    onLoginClick={handleSigninOpen}
-                                                                    isListView={true}
-                                                                    isTableView={true}
-                                                                    ignoreFeatured={true}
-                                                                    onTagClick={handleAddTag}
-                                                                    isExpanded={activeDealId === deal.id}
-                                                                    isClosing={closingDealId === deal.id}
-                                                                    onHover={() => handleHoverDeal(deal.id)}
-                                                                    onHoverLeave={() => handleHoverLeave(deal.id)}
-                                                                />
-                                                            </React.Fragment>
+                                                        {dealsToRender.map((deal) => (
+                                                            <DealCard
+                                                                key={`table-${deal.id}`}
+                                                                deal={deal}
+                                                                isAuthenticated={!!authToken}
+                                                                onLoginClick={handleSigninOpen}
+                                                                isListView={true}
+                                                                isTableView={true}
+                                                                ignoreFeatured={true}
+                                                                onTagClick={handleAddTag}
+                                                                isExpanded={activeDealId === deal.id}
+                                                                isClosing={closingDealId === deal.id}
+                                                                onHover={() => handleHoverDeal(deal.id)}
+                                                                onHoverLeave={() => handleHoverLeave(deal.id)}
+                                                            />
                                                         ))}
                                                     </table>
                                                 </div>
@@ -1734,50 +1965,37 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
 
                                             {/* Mobile / Tablet Original List View (< 1024px) */}
                                             <div className={stylesdeals.mobileListWrapper}>
-                                                {dealsToRender.map((deal, index) => (
-                                                    <React.Fragment key={`list-${deal.id}`}>
-                                                        {showUnlockTeaser && teaserIndices.includes(index) && (
-                                                            <div key={`unlock-teaser-mobile-${index}`} className="col-12 px-0" style={{ width: "100%", marginBottom: "16px" }}>
-                                                                <UnlockTeaser className={stylesdeals.teaserNoMargin} isAllDeals={true} isListView={true} isCompactList={false} />
-                                                            </div>
-                                                        )}
-                                                        <div className={`col-12 ${stylesdeals.dealCardCol} ${stylesdeals.listViewCol}`}>
-                                                            <DealCard
-                                                                deal={deal}
-                                                                isAuthenticated={!!authToken}
-                                                                onLoginClick={handleSigninOpen}
-                                                                isListView={true}
-                                                                isTableView={false}
-                                                                ignoreFeatured={true}
-                                                                onTagClick={handleAddTag}
-                                                            />
-                                                        </div>
-                                                    </React.Fragment>
+                                                {dealsToRender.map((deal) => (
+                                                    <div key={`list-${deal.id}`} className={`col-12 ${stylesdeals.dealCardCol} ${stylesdeals.listViewCol}`}>
+                                                        <DealCard
+                                                            deal={deal}
+                                                            isAuthenticated={!!authToken}
+                                                            onLoginClick={handleSigninOpen}
+                                                            isListView={true}
+                                                            isTableView={false}
+                                                            ignoreFeatured={true}
+                                                            onTagClick={handleAddTag}
+                                                        />
+                                                    </div>
                                                 ))}
                                             </div>
                                         </>
                                     ) : (
                                         <>
-                                            {dealsToRender.map((deal, index) => (
-                                                <React.Fragment key={deal.id}>
-                                                    {showUnlockTeaser && teaserIndices.includes(index) && (
-                                                        <div key={`unlock-teaser-grid-${index}`} className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}>
-                                                            <UnlockTeaser isGridCard={true} isAllDeals={true} />
-                                                        </div>
-                                                    )}
-                                                    <div
-                                                        className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}
-                                                    >
-                                                        <DealCard
-                                                            deal={deal}
-                                                            isAuthenticated={!!authToken}
-                                                            onLoginClick={handleSigninOpen}
-                                                            isListView={false}
-                                                            ignoreFeatured={true}
-                                                            onTagClick={handleAddTag}
-                                                        />
-                                                    </div>
-                                                </React.Fragment>
+                                            {dealsToRender.map((deal) => (
+                                                <div
+                                                    key={deal.id}
+                                                    className={`col-lg-3 col-md-6 col-sm-12 ${stylesdeals.dealCardCol}`}
+                                                >
+                                                    <DealCard
+                                                        deal={deal}
+                                                        isAuthenticated={!!authToken}
+                                                        onLoginClick={handleSigninOpen}
+                                                        isListView={false}
+                                                        ignoreFeatured={true}
+                                                        onTagClick={handleAddTag}
+                                                    />
+                                                </div>
                                             ))}
                                         </>
                                     )}
@@ -1790,44 +2008,199 @@ function AllDealsContent({ initialDeals = [], initialPagination = {}, initialCat
                         </div>
                     </div>
 
-                    {((selectedDealType || '').toLowerCase() !== "private" && (selectedDealType || '').toLowerCase() !== "startup") && totalPages > 1 && (
+                    {((selectedDealType || '').toLowerCase() !== "private" && (selectedDealType || '').toLowerCase() !== "startup") && totalCount > 0 && (
                         <div className={stylesdeals.paginationContainer}>
-                            <button
-                                type="button"
-                                className={`${stylesdeals.paginationArrow} ${currentPage <= 1 ? stylesdeals.paginationArrowDisabled : ''}`}
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage <= 1}
-                                aria-label="Previous Page"
-                            >
-                                <ChevronLeft size={18} strokeWidth={2} />
-                            </button>
-                            {getPageNumbers(currentPage, totalPages).map((p, idx) =>
-                                p === '...' ? (
-                                    <span key={`dots-${idx}`} className={stylesdeals.paginationDots}>
-                                        ...
+                            {/* Left Side: Number of deals and out of total deals */}
+                            <div className={stylesdeals.paginationInfo}>
+                                Showing <span className={stylesdeals.paginationHighlight}>{startRecord === endRecord ? startRecord : `${startRecord}–${endRecord}`}</span> out of <span className={stylesdeals.paginationHighlight}>{totalCount}</span> deals
+                            </div>
+
+                            {/* Right Side: Change limit & Change page */}
+                            <div className={stylesdeals.paginationRightSection}>
+                                <div className={stylesdeals.limitSelectorWrapper}>
+                                    <span className={stylesdeals.limitLabel}>
+                                        <span className={stylesdeals.limitLabelPrefix}>Deals </span>per page:
                                     </span>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        key={`page-${p}`}
-                                        className={`${stylesdeals.paginationBtn} ${currentPage === p ? stylesdeals.paginationActive : ''}`}
-                                        onClick={() => handlePageChange(p)}
-                                        aria-label={`Page ${p}`}
-                                        aria-current={currentPage === p ? "page" : undefined}
+                                    <select
+                                        value={effectiveLimit}
+                                        onChange={(e) => handleLimitChange(Number(e.target.value))}
+                                        className={stylesdeals.limitSelect}
+                                        aria-label="Deals per page"
                                     >
-                                        {p}
-                                    </button>
-                                )
-                            )}
-                            <button
-                                type="button"
-                                className={`${stylesdeals.paginationArrow} ${currentPage >= totalPages ? stylesdeals.paginationArrowDisabled : ''}`}
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage >= totalPages}
-                                aria-label="Next Page"
-                            >
-                                <ChevronRight size={18} strokeWidth={2} />
-                            </button>
+                                        <option value={10}>10</option>
+                                        <option value={15}>15</option>
+                                        <option value={16}>16</option>
+                                        <option value={25}>25</option>
+                                        <option value={50}>50</option>
+                                    </select>
+                                </div>
+
+                                {totalPages > 1 && (
+                                    <div className={stylesdeals.pageNavWrapper}>
+                                        {/* Mobile / Tablet View (<= 920px): [<<] [<] [>] [>>] */}
+                                        <div className={stylesdeals.mobileNavControls}>
+                                            {currentPage > 1 ? (
+                                                <Link
+                                                    href={buildPageHref(1)}
+                                                    prefetch={false}
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn}`}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(1);
+                                                    }}
+                                                    aria-label="First Page"
+                                                >
+                                                    <ChevronsLeft size={16} strokeWidth={2} />
+                                                </Link>
+                                            ) : (
+                                                <span
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn} ${stylesdeals.paginationArrowDisabled}`}
+                                                    aria-label="First Page"
+                                                    aria-disabled="true"
+                                                >
+                                                    <ChevronsLeft size={16} strokeWidth={2} />
+                                                </span>
+                                            )}
+                                            {currentPage > 1 ? (
+                                                <Link
+                                                    href={buildPageHref(currentPage - 1)}
+                                                    prefetch={false}
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn}`}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(currentPage - 1);
+                                                    }}
+                                                    aria-label="Previous Page"
+                                                >
+                                                    <ChevronLeft size={16} strokeWidth={2} />
+                                                </Link>
+                                            ) : (
+                                                <span
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn} ${stylesdeals.paginationArrowDisabled}`}
+                                                    aria-label="Previous Page"
+                                                    aria-disabled="true"
+                                                >
+                                                    <ChevronLeft size={16} strokeWidth={2} />
+                                                </span>
+                                            )}
+                                            {currentPage < totalPages ? (
+                                                <Link
+                                                    href={buildPageHref(currentPage + 1)}
+                                                    prefetch={false}
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn}`}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(currentPage + 1);
+                                                    }}
+                                                    aria-label="Next Page"
+                                                >
+                                                    <ChevronRight size={16} strokeWidth={2} />
+                                                </Link>
+                                            ) : (
+                                                <span
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn} ${stylesdeals.paginationArrowDisabled}`}
+                                                    aria-label="Next Page"
+                                                    aria-disabled="true"
+                                                >
+                                                    <ChevronRight size={16} strokeWidth={2} />
+                                                </span>
+                                            )}
+                                            {currentPage < totalPages ? (
+                                                <Link
+                                                    href={buildPageHref(totalPages)}
+                                                    prefetch={false}
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn}`}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(totalPages);
+                                                    }}
+                                                    aria-label="Last Page"
+                                                >
+                                                    <ChevronsRight size={16} strokeWidth={2} />
+                                                </Link>
+                                            ) : (
+                                                <span
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.navSquareBtn} ${stylesdeals.paginationArrowDisabled}`}
+                                                    aria-label="Last Page"
+                                                    aria-disabled="true"
+                                                >
+                                                    <ChevronsRight size={16} strokeWidth={2} />
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {/* Desktop View (> 920px): 1 2 ... 5 6 */}
+                                        <div className={stylesdeals.desktopNavControls}>
+                                            {currentPage > 1 ? (
+                                                <Link
+                                                    href={buildPageHref(currentPage - 1)}
+                                                    prefetch={false}
+                                                    className={stylesdeals.paginationArrow}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(currentPage - 1);
+                                                    }}
+                                                    aria-label="Previous Page"
+                                                >
+                                                    <ChevronLeft size={18} strokeWidth={2} />
+                                                </Link>
+                                            ) : (
+                                                <span
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.paginationArrowDisabled}`}
+                                                    aria-label="Previous Page"
+                                                    aria-disabled="true"
+                                                >
+                                                    <ChevronLeft size={18} strokeWidth={2} />
+                                                </span>
+                                            )}
+                                            {getPageNumbers(currentPage, totalPages).map((p, idx) =>
+                                                p === '...' ? (
+                                                    <span key={`dots-${idx}`} className={stylesdeals.paginationDots}>
+                                                        ...
+                                                    </span>
+                                                ) : (
+                                                    <Link
+                                                        key={`page-${p}`}
+                                                        href={buildPageHref(p)}
+                                                        prefetch={false}
+                                                        className={`${stylesdeals.paginationBtn} ${currentPage === p ? stylesdeals.paginationActive : ''}`}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handlePageChange(p);
+                                                        }}
+                                                        aria-label={`Page ${p}`}
+                                                        aria-current={currentPage === p ? "page" : undefined}
+                                                    >
+                                                        {p}
+                                                    </Link>
+                                                )
+                                            )}
+                                            {currentPage < totalPages ? (
+                                                <Link
+                                                    href={buildPageHref(currentPage + 1)}
+                                                    prefetch={false}
+                                                    className={stylesdeals.paginationArrow}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(currentPage + 1);
+                                                    }}
+                                                    aria-label="Next Page"
+                                                >
+                                                    <ChevronRight size={18} strokeWidth={2} />
+                                                </Link>
+                                            ) : (
+                                                <span
+                                                    className={`${stylesdeals.paginationArrow} ${stylesdeals.paginationArrowDisabled}`}
+                                                    aria-label="Next Page"
+                                                    aria-disabled="true"
+                                                >
+                                                    <ChevronRight size={18} strokeWidth={2} />
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                     {((selectedDealType || '').toLowerCase() === "public" || (selectedDealType || '').toLowerCase() === "upcoming") && (

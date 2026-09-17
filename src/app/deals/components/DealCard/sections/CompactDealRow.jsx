@@ -137,14 +137,32 @@ export default function CompactDealRow({
     const plain1 = plain1Metric ? { metric: plain1Metric, ...getMetricDetail(deal, plain1Metric) } : null;
     const plain2 = plain2Metric ? { metric: plain2Metric, ...getMetricDetail(deal, plain2Metric) } : null;
 
-    // First tag text: ONLY the 1st tag from deal.tags and nothing else
-    const firstTag = deal?.tags?.[0];
-    let tagText = "";
-    if (typeof firstTag === 'string') {
-        tagText = firstTag.trim();
-    } else if (firstTag && typeof firstTag === 'object') {
-        tagText = (firstTag.name || firstTag.tag || firstTag.label || firstTag.title || "").trim();
-    }
+    // Tags extraction
+    const rawTags = deal?.tags || [];
+    const listTags = Array.isArray(rawTags) ? rawTags : [rawTags];
+    const compactTags = listTags.flatMap(item => {
+        if (!item) return [];
+        let str = "";
+        if (typeof item === 'string') {
+            str = item.trim();
+        } else if (typeof item === 'object') {
+            str = (item.name || item.tag || item.label || item.title || '').trim();
+        } else {
+            str = String(item || '').trim();
+        }
+        if (!str) return [];
+        if (str.startsWith('[') && str.endsWith(']')) {
+            try {
+                const parsed = JSON.parse(str);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(p => {
+                        return typeof p === 'string' ? p.trim() : (p?.name || p?.tag || p?.label || '').trim();
+                    }).filter(Boolean);
+                }
+            } catch (_) {}
+        }
+        return [str];
+    }).filter(Boolean);
 
     const ratingVal = deal?.ipo_review_rating?.data?.weighted_composite_score || deal?.ipo_review_rating?.weighted_composite_score;
     const isStatusActive = deal?.ipo_review_rating?.status === true || 
@@ -187,17 +205,19 @@ export default function CompactDealRow({
                     />
                     <div className={styles.companyTextGroup}>
                         <span className={styles.tableColHeader}>Company Name</span>
-                        {deal?.slug ? (
-                            <Link href={`/deals/${deal.slug}`} className={styles.compactCompanyLink}>
-                                <h2 className={styles.compactCompanyName} title={deal?.company_name}>
-                                    {deal?.company_name}
+                        {deal?.company_name ? (
+                            deal?.slug ? (
+                                <Link href={`/deals/${deal.slug}`} className={styles.compactCompanyLink}>
+                                    <h2 className={styles.compactCompanyName} title={deal.company_name}>
+                                        {deal.company_name}
+                                    </h2>
+                                </Link>
+                            ) : (
+                                <h2 className={styles.compactCompanyName} title={deal.company_name}>
+                                    {deal.company_name}
                                 </h2>
-                            </Link>
-                        ) : (
-                            <h2 className={styles.compactCompanyName} title={deal?.company_name}>
-                                {deal?.company_name}
-                            </h2>
-                        )}
+                            )
+                        ) : null}
                     </div>
                 </div>
             </div>
@@ -227,25 +247,29 @@ export default function CompactDealRow({
                 </div>
             )}
 
-            {/* 4. Tagline / 1st Tag Pill Column */}
+            {/* 4. Tagline / Tags Column */}
             <div className={styles.tdTagline}>
-                {tagText && (
-                    <div
-                        className={styles.taglinePill}
-                        title={tagText}
-                        data-no-navigate
-                        onClick={(e) => {
-                            if (onTagClick) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onTagClick(tagText);
-                            }
-                        }}
-                        style={onTagClick ? { cursor: 'pointer' } : undefined}
-                    >
-                        {tagText}
-                    </div>
-                )}
+                {compactTags.map((singleTag, idx) => {
+                    if (!singleTag || singleTag.length > 55) return null;
+                    return (
+                        <div
+                            key={idx}
+                            className={styles.taglinePill}
+                            title={singleTag}
+                            data-no-navigate
+                            onClick={(e) => {
+                                if (onTagClick) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onTagClick(singleTag);
+                                }
+                            }}
+                            style={onTagClick ? { cursor: 'pointer' } : undefined}
+                        >
+                            {singleTag}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* 5. Vertical Divider 2 */}

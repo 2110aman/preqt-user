@@ -74,7 +74,7 @@ export default function SignupTypePopup({ show, onHide, onProceed, onBack }) {
             ←
           </button>
           <div>
-            <h1 className={styles.title}>Help Us Get To Know You</h1>
+            <h2 className={styles.title}>Help Us Get To Know You</h2>
             <p className={styles.subtitle}>
               Tell us a little more about yourself so we can set up things for you.
             </p>

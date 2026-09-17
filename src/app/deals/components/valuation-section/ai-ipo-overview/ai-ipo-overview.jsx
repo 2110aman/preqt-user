@@ -90,10 +90,16 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
   const ipoDocUrl = dealData?.ipo_doc?.data?.file?.[0]?.path
     ? `${process.env.NEXT_PUBLIC_USER_BASE}admin/${dealData?.ipo_doc?.data?.file?.[0]?.path.replace("public/", "")}`
     : null;
-  const [imgSrc, setImgSrc] = useState(
-    dealData?.merchant_banker?.data?.logo?.[0]?.path ?
-      (`${process.env.NEXT_PUBLIC_USER_BASE}admin/${dealData?.merchant_banker?.data?.logo?.[0]?.path}`).replaceAll("/public", "") : "/logo-fallback.png"
-  )
+  const bankerLogoPath = dealData?.merchant_banker?.data?.logo?.[0]?.path;
+  const initialImgSrc = bankerLogoPath
+    ? (`${process.env.NEXT_PUBLIC_USER_BASE}admin/${bankerLogoPath}`).replaceAll("/public", "")
+    : "/logo-fallback.png";
+
+  const [imgSrc, setImgSrc] = useState(initialImgSrc);
+
+  useEffect(() => {
+    setImgSrc(initialImgSrc);
+  }, [initialImgSrc]);
 
   const _dealOverview = dealDetails?.data?.deal_overview || {};
   const _dealStepData = dealDetails?.data?.deal_setpData || {};
@@ -108,6 +114,29 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
   const handleImageError = () => {
     setImgSrc("/logo-fallback.png");
   };
+
+  const rawBankerNames = dealData?.merchant_banker?.data?.banker_name;
+  const bankerList = React.useMemo(() => {
+    if (!rawBankerNames) return [];
+    let raw = rawBankerNames;
+    if (typeof raw === "object") {
+      if (Array.isArray(raw)) {
+        return raw
+          .map((b) => (typeof b === "string" ? b : b?.banker_name || b?.name || ""))
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      if (raw.banker_name) raw = raw.banker_name;
+      else if (raw.data) raw = raw.data;
+    }
+    if (typeof raw !== "string") return [String(raw).trim()].filter(Boolean);
+    if (raw.includes(";")) {
+      return raw.split(";").map((s) => s.trim()).filter(Boolean);
+    }
+    return [raw.trim()].filter(Boolean);
+  }, [rawBankerNames]);
+
+  const commaSeparatedBankers = bankerList.join(", ");
 
   const formatNumber = (val) => {
     let value = val;
@@ -420,7 +449,7 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                     />
                     <div className="bank-info">
                       <div className="label-with-tooltip">
-                        <p>{"Merchant Banker"}</p>
+                        <p>{dealData?.merchant_banker?.label_name || "Merchant Banker"}</p>
                         {shouldShowTooltip(dealData?.merchant_banker?.tool_tip) && (
                           <div className="custom-tooltip-wrapper">
                             <span className="tooltip-icon">
@@ -430,7 +459,28 @@ const AiIpoOverview = ({ isPrivateDeal, isofs, isccps, dealDetails: dealDetailsP
                           </div>
                         )}
                       </div>
-                      <div className="mb-0">{dealData?.merchant_banker?.data?.banker_name || "-"}</div>
+                      <div className="banker-names-display mb-0">
+                        {/* 600px and above: in one line with comma */}
+                        <div
+                          className="banker-inline-view"
+                          title={commaSeparatedBankers || undefined}
+                        >
+                          {bankerList.length > 0 ? commaSeparatedBankers : "-"}
+                        </div>
+
+                        {/* Below 600px: list view */}
+                        <div className="banker-list-view">
+                          {bankerList.length > 0 ? (
+                            bankerList.map((name, idx) => (
+                              <div key={idx} className="banker-list-item" title={name}>
+                                {name}
+                              </div>
+                            ))
+                          ) : (
+                            "-"
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </section>

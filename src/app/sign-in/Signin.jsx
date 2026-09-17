@@ -185,7 +185,7 @@ const Signin = ({ onShowOtp, onShowSignUp, onEmailSubmit }) => {
     <section className={styles.pageWrapper}>
       <div className={styles.card}>
         <img src="/logo.png" alt="PrEqtLogo" className={styles.logo} />
-        <h1 className={styles.title}>Welcome Back</h1>
+        <h2 className={styles.title}>Welcome Back</h2>
         <p className={styles.subtitle}>Sign in to your PrEqt Account</p>
 
         <form className={styles.form} onSubmit={handleSubmit}>

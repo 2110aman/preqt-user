@@ -1,12 +1,11 @@
 "use client";
 import React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import styles from "./viewAll.module.css";
 import { useDeals } from "@/app/context/DealContext";
 import { formatDealCountText } from "@/app/utils/formatUtils";
 
 const ViewAllAnimation = () => {
-  const router = useRouter();
   const { totalDeals } = useDeals();
   console.log("ViewAllAnimation totalDeals:", totalDeals);
 
@@ -18,9 +17,9 @@ const ViewAllAnimation = () => {
           <div className={styles.plusDeals}>{formatDealCountText(totalDeals)}</div>
         </div>
 
-        <div
+        <Link
+          href="/deals"
           className={styles.viewAllBtnContainer}
-          onClick={() => router.push("/deals")}
         >
           <p className={styles.ViewAllText}>View All</p>
           <img
@@ -28,7 +27,7 @@ const ViewAllAnimation = () => {
             alt="redirect"
             className={styles.upperRightArrow}
           />
-        </div>
+        </Link>
       </div>
     </div>
   );

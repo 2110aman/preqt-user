@@ -2,14 +2,16 @@
 import { usePathname, useRouter } from "next/navigation";
 import NavBar from "./common/navBar/NavBar";
 import NewFooter from "./common/navBar/new-footer/NewFooter";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import LandingPageHeader from "./components/LandingPage/LandingPageHeader";
 import Cookies from "js-cookie";
-import SigninPopup from "./sign-in/SigninPopup";
-import SignupTypePopup from "./signup/SignupTypePopup";
-import SignupFormPopup from "./signup-form/SignupFormPopup";
-import OtpPopup from "./otp/OtpPopup";
+import dynamic from "next/dynamic";
 import { useDealType } from "@/app/utils/DealTypeContext";
+
+const SigninPopup = dynamic(() => import("./sign-in/SigninPopup"), { ssr: false });
+const SignupTypePopup = dynamic(() => import("./signup/SignupTypePopup"), { ssr: false });
+const SignupFormPopup = dynamic(() => import("./signup-form/SignupFormPopup"), { ssr: false });
+const OtpPopup = dynamic(() => import("./otp/OtpPopup"), { ssr: false });
 
 export default function ClientChrome({ children, initialHasToken }) {
   const pathname = usePathname();
@@ -60,18 +62,18 @@ export default function ClientChrome({ children, initialHasToken }) {
         router.refresh();
       }
     };
-    checkToken();
 
-    // Add an event listener to catch custom "tokenChanged" events
-    const handleTokenChange = () => checkToken();
-    window.addEventListener("tokenChanged", handleTokenChange);
+    window.addEventListener("focus", checkToken);
+    window.addEventListener("tokenChanged", checkToken);
 
-    return () => window.removeEventListener("tokenChanged", handleTokenChange);
-  }, [pathname, hasToken, router]);
+    return () => {
+      window.removeEventListener("focus", checkToken);
+      window.removeEventListener("tokenChanged", checkToken);
+    };
+  }, [hasToken, router]);
 
-  // whether we would have shown LandingPageHeader (only when no access token)
   const shouldShowLandingHeader =
-    !hasToken && (path === "/" || path === "/become-a-partner" || path == "/deal-sourcing");
+    !hasToken && (path === "/" || path === "/become-a-partner" || path.startsWith("/deal-sourcing"));
 
   const [showSignin, setShowSignin] = useState(false);
   const [showSignupType, setShowSignupType] = useState(false);
@@ -131,8 +133,15 @@ export default function ClientChrome({ children, initialHasToken }) {
         }}
       >
         {/* Hide both LandingPageHeader and NavBar on deal-sourcing paths */}
-        {!hideNavBar &&
-          (shouldShowLandingHeader ? <LandingPageHeader onSigninClick={handleSigninOpen} hasToken={hasToken} /> : <NavBar onSigninClick={handleSigninOpen} hasToken={hasToken} />)}
+        {!hideNavBar && (
+          <Suspense fallback={null}>
+            {shouldShowLandingHeader ? (
+              <LandingPageHeader onSigninClick={handleSigninOpen} hasToken={hasToken} />
+            ) : (
+              <NavBar onSigninClick={handleSigninOpen} hasToken={hasToken} />
+            )}
+          </Suspense>
+        )}
 
         <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", marginTop: (pathname == "/" || hasToken || pathname.includes("/deals") || pathname.includes("/community")) ? "0px" : '0px' }}>
           {children}
@@ -179,15 +188,17 @@ export default function ClientChrome({ children, initialHasToken }) {
 
       {/* SIGN UP FORM */}
       {showSignupForm && (
-        <SignupFormPopup
-          show
-          onHide={() => setShowSignupForm(false)}
-          onBack={() => {
-            setShowSignupForm(false);
-            setShowSignupType(true);
-          }}
-          onShowOtp={handleSignupShowOtp}
-        />
+        <Suspense fallback={null}>
+          <SignupFormPopup
+            show
+            onHide={() => setShowSignupForm(false)}
+            onBack={() => {
+              setShowSignupForm(false);
+              setShowSignupType(true);
+            }}
+            onShowOtp={handleSignupShowOtp}
+          />
+        </Suspense>
       )}
 
       {/* OTP POPUP (NO showOtp FLAG) */}

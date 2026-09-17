@@ -13,6 +13,7 @@
     padding: 1px 8px 1px 2px;
     gap: 8px;
     max-width: 128px;
+    flex-shrink: 0;
 }
 
 .ratingValueBox {

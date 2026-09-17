@@ -1,9 +1,29 @@
 import styles from "./page.module.css";
+import { getRobotsDirectives } from "../utils/seoUtils";
+
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
+
+export const metadata = {
+  title: "Privacy Policy | PrEqt",
+  description: "Learn how PrEqt collects, protects, and uses your personal and investment data.",
+  alternates: {
+    canonical: `${SITE_URL}/privacy-policy`,
+  },
+  openGraph: {
+    title: "Privacy Policy | PrEqt",
+    description: "Learn how PrEqt collects, protects, and uses your personal and investment data.",
+    url: `${SITE_URL}/privacy-policy`,
+    siteName: "PrEqt",
+    locale: "en_IN",
+    type: "website",
+  },
+  robots: getRobotsDirectives(),
+};
 
 export default function page() {
   return (
     <div className={styles.container}>
-      <h2 className={styles.heading}>Privacy Policy</h2>
+      <h1 className={styles.heading}>Privacy Policy</h1>
       <div className={styles.hr}></div>
 
       <section className={styles.section}>

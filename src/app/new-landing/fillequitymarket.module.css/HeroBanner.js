@@ -1,5 +1,6 @@
 "use client"
 import React, { useState } from 'react';
+import Link from 'next/link';
 import styles from './herobanner.module.css';
 import { useRouter } from 'next/navigation';
 import SignupFormPopup from '@/app/signup-form/SignupFormPopup';
@@ -76,6 +77,16 @@ export default function HeroBanner() {
   return (
     <>
       <section className={styles.heroBanner}>
+        {/* Mobile High-Priority Hero Background (48 KB, Zero Video Bandwidth Choke) */}
+        <img
+          src="/thumbnailhero.webp"
+          alt="PrEqt - Investment Bank for Private and Public Equity"
+          className={styles.heroImageMobile}
+          fetchPriority="high"
+          loading="eager"
+        />
+
+        {/* Desktop Background Video - De-prioritized so it never blocks initial paint */}
         <video
           src="/herovideo.mp4"
           autoPlay
@@ -83,8 +94,7 @@ export default function HeroBanner() {
           muted
           playsInline
           poster="/thumbnailhero.webp"
-          preload="auto"
-          fetchPriority="high"
+          preload="none"
           className={styles.heroVideo}
         />
 
@@ -101,8 +111,7 @@ export default function HeroBanner() {
             </p>
 
             <div className={styles.actions}>
-              <button className={styles.primaryCta} onClick={() => { router.push("/deals") }}>
-
+              <Link href="/deals" className={styles.primaryCta}>
                 <span>Explore Live Deals</span>
                 <span className={styles.ctaPlus}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -110,8 +119,8 @@ export default function HeroBanner() {
                     <path d="M15.2082 10H4.7915" stroke="#F7FCFF" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
-              </button>
-              <button className={styles.secondaryCta} onClick={() => { router.push("/deal-sourcing") }}>
+              </Link>
+              <Link href="/deal-sourcing" className={styles.secondaryCta}>
                 <span>Raise Capital Smarter</span>
                 <span className={styles.ctaPlus}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -119,7 +128,7 @@ export default function HeroBanner() {
                     <path d="M15.2082 10H4.7915" stroke="#F7FCFF" strokeWidth="1.66667" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
-              </button>
+              </Link>
 
 
             </div>
@@ -210,7 +219,7 @@ export default function HeroBanner() {
                 setIsMobileBarVisible(false);
                 setIsManuallyClosed(true);
               }}
-              aria-label="Close"
+              aria-label="Close mobile app banner"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>

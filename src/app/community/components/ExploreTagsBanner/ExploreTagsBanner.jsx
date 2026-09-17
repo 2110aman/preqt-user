@@ -170,9 +170,9 @@ export default function ExploreTagsBanner() {
         </div>
 
         {/* Main Heading: #IPO,  #High Conviction */}
-        <h1 className={Styles.mainHeading}>
+        <h2 className={Styles.mainHeading}>
           {selectedTags.map((t) => `#${t}`).join(",  ")}
-        </h1>
+        </h2>
 
         {/* Description */}
         <p className={Styles.description}>

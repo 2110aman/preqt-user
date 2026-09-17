@@ -122,12 +122,14 @@ const Fundamentals = ({ isPrivateDeal }) => {
   // Transform API data to fundamentals format with error handling
   const transformFundamentalsData = (apiData) => {
     try {
+      const ipoKeyHighlights = apiData?.fundraise_future_plans?.ipo_key_highlights;
       if (
         !apiData ||
-        !apiData.fundraise_future_plans?.ipo_key_highlights?.data ||
-        !Array.isArray(apiData.fundraise_future_plans.ipo_key_highlights.data)
+        !ipoKeyHighlights?.data ||
+        !Array.isArray(ipoKeyHighlights.data) ||
+        ipoKeyHighlights.status === false ||
+        ipoKeyHighlights.status === "false"
       ) {
-        console.warn("Fundamentals: No valid IPO key highlights data provided");
         return [];
       }
 
@@ -220,9 +222,9 @@ const Fundamentals = ({ isPrivateDeal }) => {
   // Get fundamentals data with fallback
   const getFundamentalsData = () => {
     try {
-      if (dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights) {
+      const ipoHighlights = dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights;
+      if (ipoHighlights && ipoHighlights.status !== false && ipoHighlights.status !== "false") {
         const transformed = transformFundamentalsData(dealDetails?.data);
-        console.log("transformed", transformed);
         return transformed.length > 0 ? transformed : [];
       }
       return [];
@@ -288,27 +290,19 @@ const Fundamentals = ({ isPrivateDeal }) => {
     <div
       className={`fundamentals-container ${isPrivateDeal ? "privateDeal" : ""}`}
     >
-      {dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights?.data && (
+      {fundamentalsData && fundamentalsData.length > 0 && (
         <>
           <hr className="hr" />
           <Dropdown title={dealDetails?.data?.fundraise_future_plans?.ipo_key_highlights?.label_name || (isUnlisted ? "Key Highlights" : "IPO key Highlights")}>
             {" "}
             <div className="Fundamentals-body-div">
-              {fundamentalsData.length > 0 ? (
-                visibleCards.map((item, index) => (
-                  <div className="Fundamentals-body-section1-item" key={index}>
-                    <p>{item.title}</p>
-                    <div className="item-value">{item.value}</div>
-                    <div className="item-desc">{item.description}</div>
-                  </div>
-                ))
-              ) : (
-                <div className="Fundamentals-body-section1-item">
-                  <p>No IPO key highlights data available</p>
-                  <div className="item-value">-</div>
-                  <div className="item-desc">Data will be displayed when available</div>
+              {visibleCards.map((item, index) => (
+                <div className="Fundamentals-body-section1-item" key={index}>
+                  <p>{item.title}</p>
+                  <div className="item-value">{item.value}</div>
+                  <div className="item-desc">{item.description}</div>
                 </div>
-              )}
+              ))}
             </div>
             {fundamentalsData.length > 4 && (
               <div className="show-more-btn-div">
@@ -623,7 +617,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                 fill="#E2E2EA"
               />{" "}
             </svg>
-            <h1>Risk Factors </h1>
+            <h4>Risk Factors </h4>
             <div>
               <p>
                 <svg
@@ -766,7 +760,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
                 </clipPath>{" "}
               </defs>{" "}
             </svg>
-            <h1>Allocation Available</h1>
+            <h4>Allocation Available</h4>
             <ul>
               <li>
                 The IPO complies with SEBI ICDR Regulations, offering not less
@@ -784,7 +778,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
           </section>
           <section className="ipo-objective-container-section">
             <img src="/deals/important-dates.svg" alt="" />
-            <h1>Important Dates</h1>
+            <h4>Important Dates</h4>
             <p>Dates will be announced soon</p>
           </section>
           <section className="ipo-objective-container-section">
@@ -852,7 +846,7 @@ const Fundamentals = ({ isPrivateDeal }) => {
               />{" "}
             </svg>
 
-            <h1>Additional Notes</h1>
+            <h4>Additional Notes</h4>
             <ul>
               <li>
                 The issue has been authorized by the Board (Dec 10, 2024) and by

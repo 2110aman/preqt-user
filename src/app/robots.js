@@ -32,6 +32,11 @@ export default async function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
+      disallow: [
+        '/account/',
+        '/account',
+        '/app-redirect',
+      ],
     },
     sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.preqt.club'}/sitemap.xml`,
   };

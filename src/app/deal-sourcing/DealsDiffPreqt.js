@@ -10,7 +10,7 @@ const DealsDiffPreqt = () => {
                         <div className={styles.glowContainer}>
                             <div className={styles.glowLine}></div>
                         </div>
-                        <h1>How <span>PrEqt</span> does things differently</h1>
+                        <h2>How <span>PrEqt</span> does things differently</h2>
                         <img src="/diffprqt.svg" alt="diffprqt" />
                     </div>
                 </div>

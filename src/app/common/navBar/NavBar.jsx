@@ -21,11 +21,12 @@ export default function NavBar({ onSigninClick, hasToken }) {
   const pathname = usePathname();
   const router = useRouter();
   const { dealType } = useDealType();
-  const { clearAllFilters } = useDealStore();
+  const { clearAllFilters, setSelectedDealType } = useDealStore();
 
   const handleDealsClick = () => {
-    if (pathname === "/deals") {
-      clearAllFilters();
+    clearAllFilters();
+    if (setSelectedDealType) {
+      setSelectedDealType("All");
     }
   };
 
@@ -219,15 +220,22 @@ export default function NavBar({ onSigninClick, hasToken }) {
               )}
           </div>
           {/* logo */}
-          <Link href='/'>  <img
-            src={
-              isDarkTheme
-                ? "/private-logo.png"
-                : "/logo.svg"
-            }
-            alt="logo"
-            className={styles.logoImg}
-          /></Link>
+          <Link 
+            href='/' 
+            prefetch={true}
+            onMouseEnter={() => router.prefetch('/')}
+            onTouchStart={() => router.prefetch('/')}
+          >  
+            <img
+              src={
+                isDarkTheme
+                  ? "/private-logo.png"
+                  : "/logo.svg"
+              }
+              alt="logo"
+              className={styles.logoImg}
+            />
+          </Link>
 
 
           {/* bell icon */}
@@ -309,7 +317,15 @@ export default function NavBar({ onSigninClick, hasToken }) {
                 <img src="/assets/pictures/home.svg" alt="home" />
                 <div className={styles.homebtn}>Home</div>
               </Link> */}
-                <Link className={styles.homeNavButton} href="/deals" onClick={() => { setMenuOpen(false); handleDealsClick(); }} title="View all private equity deals and investment opportunities on PrEqt">
+                <Link 
+                  className={styles.homeNavButton} 
+                  href="/deals" 
+                  prefetch={true}
+                  onMouseEnter={() => router.prefetch('/deals')}
+                  onTouchStart={() => router.prefetch('/deals')}
+                  onClick={() => { setMenuOpen(false); handleDealsClick(); }} 
+                  title="View all private equity deals and investment opportunities on PrEqt"
+                >
                   <div className={styles.homebtn}>Deals</div>
                   <div className={styles.arrow}>
                     <svg
@@ -332,6 +348,9 @@ export default function NavBar({ onSigninClick, hasToken }) {
                 <Link
                   className={styles.homeNavButton}
                   href="/community"
+                  prefetch={true}
+                  onMouseEnter={() => router.prefetch('/community')}
+                  onTouchStart={() => router.prefetch('/community')}
                   onClick={() => setMenuOpen(false)}
                   title="Join PrEqt community for exclusive market discussions and investor insights"
                 >
@@ -456,7 +475,12 @@ export default function NavBar({ onSigninClick, hasToken }) {
           }`}
       >
         <div className={styles.navLeftSection}>
-          <Link href="/">
+          <Link 
+            href="/"
+            prefetch={true}
+            onMouseEnter={() => router.prefetch('/')}
+            onTouchStart={() => router.prefetch('/')}
+          >
             {" "}
             <img
               src={
@@ -480,6 +504,9 @@ export default function NavBar({ onSigninClick, hasToken }) {
               </Link>} */}
               <Link
                 href="/deals"
+                prefetch={true}
+                onMouseEnter={() => router.prefetch('/deals')}
+                onTouchStart={() => router.prefetch('/deals')}
                 className={`${styles.HomeNavButton} ${pathname.includes("/deals") ? styles.activeLink : ""
                   }`}
                 title="View all private equity deals and investment opportunities on PrEqt"
@@ -490,6 +517,9 @@ export default function NavBar({ onSigninClick, hasToken }) {
               </Link>
               <Link
                 href="/community"
+                prefetch={true}
+                onMouseEnter={() => router.prefetch('/community')}
+                onTouchStart={() => router.prefetch('/community')}
                 className={`${styles.HomeNavButton} ${pathname.includes("/community")
                   ? styles.activeLink
                   : ""

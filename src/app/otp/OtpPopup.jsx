@@ -294,7 +294,7 @@ useEffect(() => {
             ←
           </button>
           <div>
-            <h1 className={styles.title}>Enter OTP To Verify </h1>
+            <h2 className={styles.title}>Enter OTP To Verify </h2>
             <p className={styles.subtitle}>
               {flow === "signup" ? (
                 <>

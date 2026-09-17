@@ -1,9 +1,10 @@
 import Namedetailsection from "../components/name-section/Namesection";
 import AllDeals from "../components/AllDeals/AllDeals";
 import { cookies } from "next/headers";
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getRobotsDirectives, getDealCategoryInfo } from "../../utils/seoUtils";
+import { pruneDealForListing } from "../../utils/dealUtils";
 
 export const DEAL_CATEGORIES = {
   "upcoming-ipo": {
@@ -92,7 +93,7 @@ export const DEAL_CATEGORIES = {
   },
 };
 
-const getInitialDeals = cache(async (categoryType = "", page = 1) => {
+const getInitialDeals = cache(async (categoryType = "", page = 1, limit = 16) => {
   try {
     const rawBaseUrl = process.env.NEXT_PUBLIC_USER_BASE || "https://api.preqt.club/";
     const baseUrl = rawBaseUrl.replace(/\/$/, "");
@@ -113,7 +114,7 @@ const getInitialDeals = cache(async (categoryType = "", page = 1) => {
       dealTypeQuery = "deal_type=[unlisted,public]";
     }
 
-    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=${page}&limit=15&${dealTypeQuery}`, {
+    const res = await fetch(`${baseUrl}/admin/api/deals/all-deals/?page=${page}&limit=${limit}&${dealTypeQuery}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       next: { revalidate: 60 },
@@ -205,8 +206,12 @@ export async function generateMetadata({ params, searchParams }) {
     const deal = await getDealData(slug, token);
     if (!deal) {
       return {
-        title: "Deal Details",
-        description: "Explore detailed deal information.",
+        title: "Deal Details | PrEqt",
+        description: "Explore detailed deal information on PrEqt.",
+        alternates: {
+          canonical: `${siteUrl}/deals/${encodeURIComponent((slug || "").toLowerCase().trim())}`,
+        },
+        robots: getRobotsDirectives(),
       };
     }
 
@@ -516,9 +521,13 @@ export async function generateMetadata({ params, searchParams }) {
   } catch (error) {
     console.error("Error fetching metadata:", error);
     return {
-      title: "Deal Details",
-      description: "Explore detailed deal information.",
+      title: "Deal Details | PrEqt",
+      description: "Explore detailed deal information on PrEqt.",
       keywords: "Deals, Investments, Opportunities",
+      alternates: {
+        canonical: `${siteUrl}/deals/${encodeURIComponent((slug || "").toLowerCase().trim())}`,
+      },
+      robots: getRobotsDirectives(),
     };
   }
 }
@@ -528,13 +537,16 @@ export default async function DealPage({ params, searchParams }) {
   const resolvedSearchParams = await searchParams;
   const pageParam = parseInt(resolvedSearchParams?.page, 10);
   const page = !isNaN(pageParam) && pageParam > 0 ? pageParam : 1;
+  const limitParam = parseInt(resolvedSearchParams?.limit, 10);
+  const limit = !isNaN(limitParam) && limitParam > 0 ? limitParam : 16;
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.preqt.club").replace(/\/$/, "");
 
   // 1. Check if slug is a Deal Category (e.g. /deals/upcoming-ipo, /deals/unlisted-shares, /deals/ipo)
   const categoryConfig = DEAL_CATEGORIES[slug?.toLowerCase()];
   if (categoryConfig) {
-    const initialDealsData = await getInitialDeals(categoryConfig.type, page);
-    const deals = initialDealsData?.data || [];
+    const initialDealsData = await getInitialDeals(categoryConfig.type, page, limit);
+    const rawDeals = initialDealsData?.data || [];
+    const deals = rawDeals.map(pruneDealForListing);
     const pagination = initialDealsData?.pagination || {};
 
     const itemListSchema = {
@@ -604,7 +616,9 @@ export default async function DealPage({ params, searchParams }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
         />
-        <AllDeals initialDeals={deals} initialPagination={pagination} initialCategory={categoryConfig.type} />
+        <Suspense fallback={null}>
+          <AllDeals initialDeals={deals} initialPagination={pagination} initialCategory={categoryConfig.type} />
+        </Suspense>
       </div>
     );
   }
@@ -775,7 +789,9 @@ export default async function DealPage({ params, searchParams }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(corporationSchema) }}
       />
-      <Namedetailsection slug={slug} initialDealData={initialDealData} />
+      <Suspense fallback={null}>
+        <Namedetailsection slug={slug} initialDealData={initialDealData} />
+      </Suspense>
     </div>
   );
 }

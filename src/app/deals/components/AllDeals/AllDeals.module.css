@@ -46,14 +46,14 @@
 .dealCardCol {
     flex: 0 0 auto;
     width: 25%;
-    padding: 0 10px 32px 10px !important;
+    padding: 0 8px 16px 10px !important;
     margin-top: 0 !important;
 }
 
 .dealsRow,
 .listView {
     --bs-gutter-y: 0 !important;
-    margin-top: 0 !important;
+    margin-top: 10px !important;
 }
 
 .listView .dealCardCol,
@@ -67,7 +67,7 @@
 .allDealsHeaderRow {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 12px;
 }
 
 .backButtonHeader {
@@ -96,14 +96,14 @@
 }
 
 .pageHeader {
-    margin-bottom: 10px;
+    margin-bottom: 0px;
 }
 
 .desktopTitle {
     font-size: 32px;
     font-weight: 700;
     color: #1F2937;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .desktopSubtitle {
@@ -144,7 +144,7 @@
 .DealsTalkMainContainer.filtersActive {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0px;
 }
 
 .allDealsFilterActions {
@@ -215,6 +215,8 @@
     cursor: pointer;
     transition: background 0.2s;
     text-align: left;
+    text-decoration: none;
+    display: block;
 }
 
 .dropdownItem:hover,
@@ -529,8 +531,15 @@
     align-items: center;
     justify-content: flex-start;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
     flex: 1;
+}
+
+.selectedTagsContainer::-webkit-scrollbar {
+    display: none;
 }
 
 .selectedTagPill {
@@ -545,6 +554,8 @@
     font-weight: 500;
     color: #A87E0E;
     line-height: 1;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all 0.2s ease;
 }
 
@@ -680,7 +691,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-top: 10px;
 }
 
 .filterTag {
@@ -1156,7 +1167,7 @@
     }
 
     .allDealsHeaderRow {
-        gap: 20px;
+        gap: 12px;
     }
 
     .dropdownWrapper {
@@ -1223,8 +1234,8 @@
     }
 
     .allDealsHeaderRow {
-        margin-top: 16px;
-        margin-bottom: 8px;
+        margin-top: 8px;
+        margin-bottom: 4px;
     }
 
     .mobileOnly {
@@ -1338,7 +1349,7 @@
 
     .allDealsHeaderRow {
         gap: 10px;
-        margin-bottom: 20px;
+        margin-bottom: 4px;
     }
 }
 
@@ -1401,7 +1412,7 @@
 .tableScrollWrapper {
     width: 100%;
     overflow-x: auto;
-    padding: 4px 0 16px 0;
+    padding: 0px 0 5px 0;
 }
 
 .dealsTable {
@@ -1417,27 +1428,136 @@
 .paginationContainer {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 16px;
     margin: 0px auto 0px auto;
     width: 100%;
     user-select: none;
+    flex-wrap: wrap;
+}
+
+.paginationInfo {
+    font-size: 12px;
+    color: #6B7280;
+    line-height: 140%;
+}
+
+.paginationHighlight {
+    font-weight: 500;
+    color: #111827;
+}
+
+.paginationRightSection {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.limitSelectorWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.limitLabel {
+    font-size: 12px;
+    font-weight: 400;
+    color: #6B7280;
+    white-space: nowrap;
+}
+
+.limitSelect {
+    height: 30px;
+    padding: 0 25px 0 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #111827;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%234B5563' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.limitSelect:hover {
+    border-color: #B59131;
+}
+
+.limitSelect:focus {
+    border-color: #B59131;
+    box-shadow: 0 0 0 2px rgba(181, 145, 49, 0.15);
+}
+
+.pageNavWrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.desktopNavControls {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.mobileNavControls {
+    display: none;
+    align-items: center;
+    gap: 8px;
+}
+
+.navSquareBtn {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #475569 !important;
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease !important;
+    cursor: pointer;
+}
+
+.navSquareBtn:hover:not(:disabled) {
+    background: #F8FAFC !important;
+    border-color: #CBD5E1 !important;
+    color: #0F172A !important;
+}
+
+.navSquareBtn:disabled,
+.navSquareBtn.paginationArrowDisabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    border-color: #E2E8F0 !important;
 }
 
 .paginationBtn {
-    min-width: 42px;
-    height: 42px;
-    padding: 0 8px;
+    min-width: 28px;
+    height: 30px;
+    padding: 0 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: transparent;
     border: none;
     border-radius: 12px;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 400;
     color: #4B5563;
     cursor: pointer;
+    text-decoration: none;
     transition: all 0.2s ease;
 }
 
@@ -1454,8 +1574,8 @@
 }
 
 .paginationArrow {
-    width: 42px;
-    height: 42px;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1464,12 +1584,14 @@
     border-radius: 12px;
     color: #4B5563;
     cursor: pointer;
+    text-decoration: none;
     transition: all 0.2s ease;
 }
 
 .paginationArrow:hover:not(:disabled) {
     background: #F3F4F6;
     color: #111827;
+    width: 10px;
 }
 
 .paginationArrowDisabled,
@@ -1492,6 +1614,29 @@
 }
 
 /* Dark theme support for pagination */
+.privateDealTheme .paginationInfo {
+    color: #9CA3AF;
+}
+
+.privateDealTheme .paginationHighlight {
+    color: #FFFFFF;
+}
+
+.privateDealTheme .limitLabel {
+    color: #9CA3AF;
+}
+
+.privateDealTheme .limitSelect {
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    border-color: rgba(255, 255, 255, 0.15);
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.privateDealTheme .limitSelect:hover {
+    border-color: #B59131;
+}
+
 .privateDealTheme .paginationBtn {
     color: #9CA3AF;
 }
@@ -1519,17 +1664,72 @@
     color: #6B7280;
 }
 
-@media (max-width: 640px) {
-    .paginationContainer {
-        gap: 4px;
-        margin: 30px auto 16px auto;
+.privateDealTheme .navSquareBtn {
+    background: #1E1E1E !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #94A3B8 !important;
+}
+
+.privateDealTheme .navSquareBtn:hover:not(:disabled) {
+    background: #262626 !important;
+    border-color: #B59131 !important;
+    color: #FFFFFF !important;
+}
+
+@media (max-width: 920px) {
+    .desktopNavControls {
+        display: none !important;
     }
 
+    .mobileNavControls {
+        display: flex !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .paginationContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin: 16px auto 4px auto;
+        width: 100%;
+        padding: 0 4px;
+    }
+
+    .paginationInfo {
+        text-align: center;
+        font-size: 13px;
+        color: #6B7280;
+        width: 100%;
+    }
+
+    .paginationRightSection {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 6px;
+    }
+
+    .pageNavWrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .limitSelectorWrapper {
+        gap: 8px;
+    }
+}
+
+@media (max-width: 640px) {
     .paginationBtn,
     .paginationArrow {
-        min-width: 36px;
-        height: 36px;
-        font-size: 14px;
+        min-width: 28px;
+        height: 28px;
+        font-size: 12px;
         border-radius: 8px;
     }
 
@@ -1537,5 +1737,34 @@
         min-width: 24px;
         height: 36px;
         font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .limitLabelPrefix {
+        display: none;
+    }
+
+    .limitSelect {
+        height: 36px;
+        padding: 0 24px 0 10px;
+        font-size: 13px;
+    }
+
+    .navSquareBtn {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        border-radius: 8px !important;
+    }
+
+    .mobileNavControls {
+        gap: 6px;
+    }
+}
+
+@media (max-width: 360px) {
+    .limitLabel {
+        display: none;
     }
 }
